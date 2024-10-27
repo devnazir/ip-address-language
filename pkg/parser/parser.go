@@ -2,7 +2,9 @@ package parser
 
 import (
 	"fmt"
+	"reflect"
 	"strconv"
+	"strings"
 
 	lx "github.com/devnazir/gosh-script/pkg/lexer"
 	"github.com/devnazir/gosh-script/pkg/oops"
@@ -68,7 +70,7 @@ func (p *Parser) ParseProgram() Program {
 		case EOF:
 			return program
 		default:
-			oops.UnexpectedToken(p.peek())
+			oops.UnexpectedToken(p.peek(), "")
 		}
 	}
 
@@ -120,11 +122,19 @@ func (p *Parser) ParseVariableDeclaration() VariableDeclaration {
 	endOfCursorLen += len(p.peek().Value)
 
 	p.next()
-	operator := p.peek().Value
+
+	// check if the next token has primitive type
+	if p.peek().Type == PRIMITIVE_TYPE {
+		primitiveType := p.peek().Value
+		node.TypeAnnotation = primitiveType
+		endOfCursorLen += len(p.peek().Value)
+		p.next()
+	}
 
 	// expect assignment operator
+	operator := p.peek().Value
 	if operator != "=" {
-		oops.ExpectedOperator(p.peek(), "=")
+		oops.UnexpectedToken(p.peek(), "=")
 	}
 
 	endOfCursorLen += len(p.peek().Value)
@@ -138,13 +148,31 @@ func (p *Parser) ParseVariableDeclaration() VariableDeclaration {
 
 	p.next()
 
+	if node.TypeAnnotation != "" {
+		valueType := reflect.TypeOf(node.Declarations[0].(*VariableDeclarator).Init.(Literal).Value).String()
+
+		if valueType != node.TypeAnnotation {
+			oops.TypeMismatch(p.peek(), node.TypeAnnotation, valueType)
+		}
+
+	}
+
 	return node
 }
 
 func (p *Parser) ParseAssignmentExpression(endOfCursorLen int) ASTNode {
 	switch p.peek().Type {
 	case NUMBER:
-		value, _ := strconv.Atoi(p.peek().Value)
+
+		hasDecimal := strings.Contains(p.peek().Value, ".")
+		var value interface{} = p.peek().Value
+
+		// Currently, only support int and float64
+		if hasDecimal {
+			value, _ = strconv.ParseFloat(p.peek().Value, 64)
+		} else {
+			value, _ = strconv.Atoi(p.peek().Value)
+		}
 
 		return Literal{
 			BaseNode: BaseNode{
@@ -157,8 +185,15 @@ func (p *Parser) ParseAssignmentExpression(endOfCursorLen int) ASTNode {
 		}
 
 	case STRING:
-		// TODO: Implement string parsing
-		return nil
+		return Literal{
+			BaseNode: BaseNode{
+				Type:  "Literal",
+				Start: p.pos + endOfCursorLen,
+				End:   p.pos + len(p.peek().Value) + endOfCursorLen,
+			},
+			Value: p.peek().Value,
+			Raw:   p.peek().Value,
+		}
 	case IDENTIFIER:
 		// TODO: Implement identifier parsing
 		return nil

@@ -3,12 +3,13 @@ package parser
 import lx "github.com/devnazir/gosh-script/pkg/lexer"
 
 const (
-	KEYWORD    = lx.KEYWORD
-	IDENTIFIER = lx.IDENTIFIER
-	NUMBER     = lx.NUMBER
-	STRING     = lx.STRING
-	ILLEGAL    = lx.ILLEGAL
-	EOF        = lx.EOF
+	KEYWORD        = lx.KEYWORD
+	IDENTIFIER     = lx.IDENTIFIER
+	NUMBER         = lx.NUMBER
+	STRING         = lx.STRING
+	ILLEGAL        = lx.ILLEGAL
+	EOF            = lx.EOF
+	PRIMITIVE_TYPE = lx.PRIMITIVE_TYPE
 )
 
 type BaseNode struct {
@@ -32,8 +33,9 @@ type Program struct {
 
 type VariableDeclaration struct {
 	BaseNode
-	Declarations []ASTNode
-	Kind         string
+	Declarations   []ASTNode
+	Kind           string
+	TypeAnnotation string
 }
 
 type VariableDeclarator struct {

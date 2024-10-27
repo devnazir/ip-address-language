@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	lexer := lexer.NewLexer(`@`)
+	lexer := lexer.NewLexerFromFilename(`./examples/variable.gsh`)
 	tokens := lexer.Tokenize()
 	parser := parser.NewParser(tokens, *lexer)
 

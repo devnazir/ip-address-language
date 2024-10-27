@@ -15,6 +15,8 @@ type TokenSpec struct {
 
 const (
 	IDENTIFIER     TokenType = "IDENTIFIER"
+	PRIMITIVE_TYPE TokenType = "PRIMITIVE_TYPE"
+	COMPOSITE_TYPE TokenType = "COMPOSITE_TYPE"
 	KEYWORD        TokenType = "KEYWORD"
 	NUMBER         TokenType = "NUMBER"
 	OPERATOR       TokenType = "OPERATOR"
@@ -31,8 +33,19 @@ const (
 )
 
 var keywords = Keywords{"if", "else", "func", "return", "var", "source"}
+var primitiveTypes = Keywords{
+	// Boolean types
+	"bool",
 
-func generateKeywordPattern(keywords Keywords) string {
+	// Numeric types
+	"int",
+	"float64",
+
+	// String type
+	"string",
+}
+
+func generatePattern(keywords []string) string {
 	return `\b(` + strings.Join(keywords, "|") + `)\b`
 }
 
@@ -41,7 +54,8 @@ func compilePattern(pattern string) *regexp.Regexp {
 }
 
 var TokenSpecs = []TokenSpec{
-	{KEYWORD, compilePattern(generateKeywordPattern(keywords))},
+	{KEYWORD, compilePattern(generatePattern(keywords))},
+	{PRIMITIVE_TYPE, compilePattern(generatePattern(primitiveTypes))},
 	{IDENTIFIER, compilePattern(`[a-zA-Z_]\w*`)},
 	{NUMBER, compilePattern(`\b\d+(\.\d+)?\b`)},
 	{OPERATOR, compilePattern(`[+\-*/=]`)},
