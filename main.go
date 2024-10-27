@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/devnazir/gosh-script/pkg"
+	"github.com/devnazir/gosh-script/pkg/lexer"
+	"github.com/devnazir/gosh-script/pkg/parser"
 )
 
 func main() {
-	lexer := pkg.NewLexer(`var test = 10`)
+	lexer := lexer.NewLexer(`@`)
 	tokens := lexer.Tokenize()
-	parser := pkg.NewParser(tokens, *lexer)
+	parser := parser.NewParser(tokens, *lexer)
 
 	jsonData, err := json.MarshalIndent(parser.Parse(), "", "  ")
 	if err != nil {

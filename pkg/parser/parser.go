@@ -1,55 +1,14 @@
-package pkg
+package parser
 
 import (
 	"fmt"
 	"strconv"
+
+	lx "github.com/devnazir/gosh-script/pkg/lexer"
+	"github.com/devnazir/gosh-script/pkg/oops"
 )
 
-type BaseNode struct {
-	Type  string
-	Start int
-	End   int
-}
-
-type ASTNode interface{}
-
-type Parser struct {
-	tokens []Token
-	lexer  Lexer
-	pos    int
-}
-
-type Program struct {
-	BaseNode
-	Body []ASTNode
-}
-
-type VariableDeclaration struct {
-	BaseNode
-	Declarations []ASTNode
-	Kind         string
-}
-
-type VariableDeclarator struct {
-	BaseNode
-	Id   ASTNode
-	Init ASTNode
-}
-
-type Identifier struct {
-	BaseNode
-	Name string
-}
-
-type Literal struct {
-	BaseNode
-	Value interface{}
-	Raw   string
-}
-
-var tokenMap = TokenMap()
-
-func NewParser(tokens []Token, lexer Lexer) *Parser {
+func NewParser(tokens []lx.Token, lexer lx.Lexer) *Parser {
 	return &Parser{
 		tokens: tokens,
 		lexer:  lexer,
@@ -57,7 +16,7 @@ func NewParser(tokens []Token, lexer Lexer) *Parser {
 	}
 }
 
-func (p *Parser) peek() Token {
+func (p *Parser) peek() lx.Token {
 	if p.pos >= len(p.tokens) {
 		return p.tokens[len(p.tokens)-1]
 	}
@@ -65,7 +24,7 @@ func (p *Parser) peek() Token {
 	return p.tokens[p.pos]
 }
 
-func (p *Parser) next() Token {
+func (p *Parser) next() lx.Token {
 	if p.pos >= len(p.tokens) {
 		return p.tokens[len(p.tokens)-1]
 	}
@@ -91,7 +50,7 @@ func (p *Parser) ParseProgram() Program {
 		BaseNode: BaseNode{
 			Type:  "Program",
 			Start: 0,
-			End:   len(p.lexer.source),
+			End:   len(p.lexer.Source),
 		},
 		Body: []ASTNode{},
 	}
@@ -102,14 +61,14 @@ func (p *Parser) ParseProgram() Program {
 			if p.peek().Value == "var" {
 				program.Body = append(program.Body, p.ParseVariableDeclaration())
 			} else {
-				panic("Unexpected keyword: " + p.peek().Value)
+				oops.UnexpectedKeyword(p.peek())
 			}
 		case ILLEGAL:
-			IllegalTokenError(p.peek())
+			oops.IllegalToken(p.peek())
 		case EOF:
 			return program
 		default:
-			panic("Unexpected token: " + p.peek().Value)
+			oops.UnexpectedToken(p.peek())
 		}
 	}
 
@@ -133,7 +92,12 @@ func (p *Parser) ParseVariableDeclaration() VariableDeclaration {
 
 	// expect identifier
 	if p.peek().Type != IDENTIFIER {
-		panic("Expected identifider")
+
+		if p.peek().Value != "var" {
+			oops.IllegalIdentifier(p.peek())
+		}
+
+		oops.ExpectedIdentifier(p.peek())
 	}
 
 	node.Declarations = append(node.Declarations, &VariableDeclarator{
@@ -160,7 +124,7 @@ func (p *Parser) ParseVariableDeclaration() VariableDeclaration {
 
 	// expect assignment operator
 	if operator != "=" {
-		panic("Expected = operator")
+		oops.ExpectedOperator(p.peek(), "=")
 	}
 
 	endOfCursorLen += len(p.peek().Value)
@@ -173,6 +137,7 @@ func (p *Parser) ParseVariableDeclaration() VariableDeclaration {
 	node.BaseNode.End = endOfCursorLen + p.pos
 
 	p.next()
+
 	return node
 }
 

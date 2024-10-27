@@ -1,0 +1,11 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "go build -o tmp/main ./main.go"
+bin = "./tmp/main"
+watch_dir = ["."]
+watch_ext = ["main.go"]
+
+[log]
+log_level = "info"
