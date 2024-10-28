@@ -33,6 +33,7 @@ func (l *Lexer) matchToken(chunk string, token *Token) bool {
 		if match := spec.pattern.FindString(chunk); match != "" {
 			// Ensure the match occurs at the beginning of the chunk
 			if strings.HasPrefix(chunk, match) {
+				token.Start = l.Pos
 				token.End = l.Pos + len(match)
 				token.Value = match
 				token.Type = spec.tokenType

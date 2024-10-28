@@ -32,7 +32,24 @@ const (
 	ILLEGAL        TokenType = "ILLEGAL"
 )
 
-var keywords = Keywords{"if", "else", "func", "return", "var", "source"}
+const (
+	VAR   = "var"
+	CONST = "const"
+)
+
+var variableKeywords = Keywords{
+	VAR,
+	CONST,
+}
+
+var keywords = append(variableKeywords, Keywords{
+	"if",
+	"else",
+	"func",
+	"return",
+	"source",
+}...)
+
 var primitiveTypes = Keywords{
 	// Boolean types
 	"bool",

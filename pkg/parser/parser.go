@@ -60,7 +60,7 @@ func (p *Parser) ParseProgram() Program {
 	for p.pos < len(p.tokens) {
 		switch p.peek().Type {
 		case KEYWORD:
-			if p.peek().Value == "var" {
+			if p.peek().Value == lx.VAR {
 				program.Body = append(program.Body, p.ParseVariableDeclaration())
 			} else {
 				oops.UnexpectedKeyword(p.peek())
@@ -78,7 +78,6 @@ func (p *Parser) ParseProgram() Program {
 }
 
 func (p *Parser) ParseVariableDeclaration() VariableDeclaration {
-	endOfCursorLen := len(p.peek().Value)
 
 	node := VariableDeclaration{
 		BaseNode: BaseNode{
@@ -90,12 +89,12 @@ func (p *Parser) ParseVariableDeclaration() VariableDeclaration {
 		Kind:         p.peek().Value,
 	}
 
-	p.next()
+	p.next() // skip "var"
 
 	// expect identifier
 	if p.peek().Type != IDENTIFIER {
 
-		if p.peek().Value != "var" {
+		if p.peek().Value != lx.VAR {
 			oops.IllegalIdentifier(p.peek())
 		}
 
@@ -105,29 +104,26 @@ func (p *Parser) ParseVariableDeclaration() VariableDeclaration {
 	node.Declarations = append(node.Declarations, &VariableDeclarator{
 		BaseNode: BaseNode{
 			Type:  "VariableDeclarator",
-			Start: p.pos + endOfCursorLen,
+			Start: p.peek().Start,
 			End:   0,
 		},
 		Id: Identifier{
 			Name: p.peek().Value,
 			BaseNode: BaseNode{
 				Type:  "Identifier",
-				Start: p.pos + endOfCursorLen,
-				End:   p.pos + endOfCursorLen + len(p.peek().Value),
+				Start: p.peek().Start,
+				End:   p.peek().End,
 			},
 		},
 		Init: nil,
 	})
 
-	endOfCursorLen += len(p.peek().Value)
-
-	p.next()
+	p.next() // skip identifier, next to assignment operator
 
 	// check if the next token has primitive type
 	if p.peek().Type == PRIMITIVE_TYPE {
 		primitiveType := p.peek().Value
 		node.TypeAnnotation = primitiveType
-		endOfCursorLen += len(p.peek().Value)
 		p.next()
 	}
 
@@ -137,14 +133,11 @@ func (p *Parser) ParseVariableDeclaration() VariableDeclaration {
 		oops.UnexpectedToken(p.peek(), "=")
 	}
 
-	endOfCursorLen += len(p.peek().Value)
-	p.next()
+	p.next() // next to assignment expression
 
-	node.Declarations[0].(*VariableDeclarator).Init = p.ParseAssignmentExpression(endOfCursorLen)
-	endOfCursorLen += len(p.peek().Value)
-
-	node.Declarations[0].(*VariableDeclarator).End = endOfCursorLen + p.pos
-	node.BaseNode.End = endOfCursorLen + p.pos
+	node.Declarations[0].(*VariableDeclarator).Init = p.ParseAssignmentExpression()
+	node.Declarations[0].(*VariableDeclarator).End = p.peek().End
+	node.BaseNode.End = p.peek().End
 
 	p.next()
 
@@ -155,12 +148,16 @@ func (p *Parser) ParseVariableDeclaration() VariableDeclaration {
 			oops.TypeMismatch(p.peek(), node.TypeAnnotation, valueType)
 		}
 
+	} else {
+		// infer type
+		valueType := reflect.TypeOf(node.Declarations[0].(*VariableDeclarator).Init.(Literal).Value).String()
+		node.TypeAnnotation = valueType
 	}
 
 	return node
 }
 
-func (p *Parser) ParseAssignmentExpression(endOfCursorLen int) ASTNode {
+func (p *Parser) ParseAssignmentExpression() ASTNode {
 	switch p.peek().Type {
 	case NUMBER:
 
@@ -177,8 +174,8 @@ func (p *Parser) ParseAssignmentExpression(endOfCursorLen int) ASTNode {
 		return Literal{
 			BaseNode: BaseNode{
 				Type:  "Literal",
-				Start: p.pos + endOfCursorLen,
-				End:   p.pos + len(p.peek().Value) + endOfCursorLen,
+				Start: p.peek().Start,
+				End:   p.peek().End,
 			},
 			Value: value,
 			Raw:   p.peek().Value,
@@ -188,8 +185,8 @@ func (p *Parser) ParseAssignmentExpression(endOfCursorLen int) ASTNode {
 		return Literal{
 			BaseNode: BaseNode{
 				Type:  "Literal",
-				Start: p.pos + endOfCursorLen,
-				End:   p.pos + len(p.peek().Value) + endOfCursorLen,
+				Start: p.peek().Start,
+				End:   p.peek().End,
 			},
 			Value: p.peek().Value,
 			Raw:   p.peek().Value,
