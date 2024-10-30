@@ -4,9 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"log"
+
 	"github.com/devnazir/gosh-script/pkg/lexer"
 	"github.com/devnazir/gosh-script/pkg/parser"
 )
+
+func init() { log.SetFlags(log.Lshortfile | log.LstdFlags) }
 
 func main() {
 	lexer := lexer.NewLexerFromFilename(`./examples/variable.gsh`)

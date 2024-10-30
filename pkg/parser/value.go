@@ -10,6 +10,9 @@ const (
 	ILLEGAL        = lx.ILLEGAL
 	EOF            = lx.EOF
 	PRIMITIVE_TYPE = lx.PRIMITIVE_TYPE
+	LEFT_PAREN     = lx.LPAREN
+	RIGHT_PAREN    = lx.RPAREN
+	OPERATOR       = lx.OPERATOR
 )
 
 type BaseNode struct {
@@ -33,7 +36,7 @@ type Program struct {
 
 type VariableDeclaration struct {
 	BaseNode
-	Declarations   []ASTNode
+	Declarations   []VariableDeclarator
 	Kind           string
 	TypeAnnotation string
 }
@@ -55,4 +58,18 @@ type Literal struct {
 	Raw   string
 }
 
+type BinaryExpression struct {
+	BaseNode
+	Left     ASTNode
+	Operator string
+	Right    ASTNode
+}
+
 var TokenMap = lx.TokenMap()
+
+var Precedence = map[string]int{
+	"+": 1,
+	"-": 1,
+	"*": 2,
+	"/": 2,
+}
