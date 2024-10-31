@@ -30,6 +30,7 @@ const (
 	FUNC           TokenType = "FUNC"
 	RETURN         TokenType = "RETURN"
 	ILLEGAL        TokenType = "ILLEGAL"
+	COMMENT        TokenType = "COMMENT"
 )
 
 const (
@@ -63,7 +64,7 @@ var primitiveTypes = Keywords{
 }
 
 func generatePattern(keywords []string) string {
-	return `\b(` + strings.Join(keywords, "|") + `)\b`
+	return `(\s*|^)` + `\b(` + strings.Join(keywords, "|") + `)\b(\s*|$)`
 }
 
 func compilePattern(pattern string) *regexp.Regexp {
@@ -71,6 +72,7 @@ func compilePattern(pattern string) *regexp.Regexp {
 }
 
 var TokenSpecs = []TokenSpec{
+	{COMMENT, compilePattern(`(//.*)|(/\*[\s\S]*?\*/)`)},
 	{KEYWORD, compilePattern(generatePattern(keywords))},
 	{PRIMITIVE_TYPE, compilePattern(generatePattern(primitiveTypes))},
 	{IDENTIFIER, compilePattern(`[a-zA-Z_]\w*`)},

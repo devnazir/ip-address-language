@@ -35,7 +35,7 @@ func (l *Lexer) matchToken(chunk string, token *Token) bool {
 			if strings.HasPrefix(chunk, match) {
 				token.Start = l.Pos
 				token.End = l.Pos + len(match)
-				token.Value = match
+				token.Value = strings.TrimSpace(match)
 				token.Type = spec.tokenType
 				l.Tokens = append(l.Tokens, *token)
 				l.Pos += len(match)

@@ -23,7 +23,6 @@ func (p *Parser) ParseVariableDeclaration() VariableDeclaration {
 	p.next() // skip "var"
 	// expect identifier
 	if p.peek().Type != IDENTIFIER {
-
 		if p.peek().Value != lx.VAR && p.peek().Value != lx.CONST {
 			oops.IllegalIdentifier(p.peek())
 		}

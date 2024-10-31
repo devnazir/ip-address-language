@@ -1,3 +1,15 @@
-var count int = 3
-var count2 = 2
-var count3 = 1.2 + 2 * (1 + 1)
+var count = 10 + 1.2
+var str string = "Hello, Gosh"
+var intValue int = 10
+
+// Single line comment
+
+/* Comment */
+
+/* 
+Comment 
+*/
+
+/**
+* Comment
+*/

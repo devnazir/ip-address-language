@@ -35,4 +35,8 @@ var (
 	TypeMismatch = func(token lx.Token, expected string, got string) error {
 		panic(New(createErrorMessage(token, "Type mismatch: Expected type: %s, Got type: %s", expected, got)))
 	}
+
+	InvalidConcatenation = func(token lx.Token, operator string) error {
+		panic(New(createErrorMessage(token, "Invalid concatenation %s", operator)))
+	}
 )

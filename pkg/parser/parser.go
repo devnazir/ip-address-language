@@ -63,6 +63,7 @@ func (p *Parser) ParseProgram() Program {
 				oops.UnexpectedKeyword(p.peek())
 			}
 		case lx.SEMICOLON:
+		case lx.COMMENT:
 			p.next()
 		case ILLEGAL:
 			oops.IllegalToken(p.peek())
