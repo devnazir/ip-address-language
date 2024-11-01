@@ -25,7 +25,7 @@ func (p *Parser) peek() lx.Token {
 
 func (p *Parser) next() lx.Token {
 	if p.pos >= len(p.tokens) {
-		return p.tokens[len(p.tokens)-1]
+		return lx.Token{Type: lx.EOF}
 	}
 
 	token := p.tokens[p.pos]
@@ -62,11 +62,18 @@ func (p *Parser) ParseProgram() Program {
 			} else {
 				oops.UnexpectedKeyword(p.peek())
 			}
-		case lx.SEMICOLON:
-		case lx.COMMENT:
+		case lx.SEMICOLON, lx.COMMENT:
 			p.next()
 		case ILLEGAL:
 			oops.IllegalToken(p.peek())
+		case IDENTIFIER:
+			p.next()
+
+			if p.peek().Type == OPERATOR && p.peek().Value == "=" {
+				p.next()
+				// TODO: fix this
+				program.Body = append(program.Body, p.ParseAssignmentExpression())
+			}
 		case EOF:
 			return program
 		default:

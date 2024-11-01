@@ -1,15 +1,5 @@
-var count = 10 + 1.2
-var str string = "Hello, Gosh"
-var intValue int = 10
+var count string
+var count2 int
+var str = "Hello World!"
 
-// Single line comment
-
-/* Comment */
-
-/* 
-Comment 
-*/
-
-/**
-* Comment
-*/
+str = "Hello Again" 

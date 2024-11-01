@@ -17,13 +17,13 @@ func main() {
 	tokens := lexer.Tokenize()
 	parser := parser.NewParser(tokens, *lexer)
 
-	jsonDataTokens, err := json.MarshalIndent(tokens, "", "  ")
-	if err != nil {
-		fmt.Println("Error marshalling to JSON:", err)
-		return
-	}
+	// jsonDataTokens, err := json.MarshalIndent(tokens, "", "  ")
+	// if err != nil {
+	// 	fmt.Println("Error marshalling to JSON:", err)
+	// 	return
+	// }
 
-	fmt.Printf("%s\n", jsonDataTokens)
+	// fmt.Printf("%s\n", jsonDataTokens)
 
 	jsonData, err := json.MarshalIndent(parser.Parse(), "", "  ")
 	if err != nil {

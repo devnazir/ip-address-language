@@ -20,7 +20,7 @@ func (p *Parser) ParseVariableDeclaration() VariableDeclaration {
 		Kind:         p.peek().Value,
 	}
 
-	p.next() // skip "var"
+	identToken := p.next() // skip "var"
 	// expect identifier
 	if p.peek().Type != IDENTIFIER {
 		if p.peek().Value != lx.VAR && p.peek().Value != lx.CONST {
@@ -42,7 +42,14 @@ func (p *Parser) ParseVariableDeclaration() VariableDeclaration {
 
 	// expect assignment operator
 	operator := p.peek().Value
-	if operator != "=" {
+
+	if p.peek().Type != OPERATOR && operator != "=" {
+
+		// var can be used to declare a variable without assignment
+		if identToken.Value == lx.VAR {
+			return node
+		}
+
 		oops.UnexpectedToken(p.peek(), "=")
 	}
 

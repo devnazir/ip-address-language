@@ -39,4 +39,7 @@ var (
 	InvalidConcatenation = func(token lx.Token, operator string) error {
 		panic(New(createErrorMessage(token, "Invalid concatenation %s", operator)))
 	}
+	ExpectedTypeAnnotation = func(token lx.Token) error {
+		panic(New(createErrorMessage(token, "Expected type annotation %v", token.Value)))
+	}
 )
