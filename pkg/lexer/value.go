@@ -18,6 +18,7 @@ const (
 	PRIMITIVE_TYPE TokenType = "PRIMITIVE_TYPE"
 	COMPOSITE_TYPE TokenType = "COMPOSITE_TYPE"
 	KEYWORD        TokenType = "KEYWORD"
+	SHELL_KEYWORD  TokenType = "SHELL_KEYWORD"
 	NUMBER         TokenType = "NUMBER"
 	OPERATOR       TokenType = "OPERATOR"
 	LPAREN         TokenType = "LPAREN"
@@ -31,11 +32,14 @@ const (
 	RETURN         TokenType = "RETURN"
 	ILLEGAL        TokenType = "ILLEGAL"
 	COMMENT        TokenType = "COMMENT"
+	DOLLAR_SIGN    TokenType = "DOLLAR_SIGN"
+	FLAG           TokenType = "FLAG"
 )
 
 const (
 	VAR   = "var"
 	CONST = "const"
+	ECHO  = "echo"
 )
 
 var variableKeywords = Keywords{
@@ -50,6 +54,10 @@ var keywords = append(variableKeywords, Keywords{
 	"return",
 	"source",
 }...)
+
+var shellKeywords = Keywords{
+	ECHO,
+}
 
 var primitiveTypes = Keywords{
 	// Boolean types
@@ -74,16 +82,21 @@ func compilePattern(pattern string) *regexp.Regexp {
 var TokenSpecs = []TokenSpec{
 	{COMMENT, compilePattern(`(//.*)|(/\*[\s\S]*?\*/)`)},
 	{KEYWORD, compilePattern(generatePattern(keywords))},
+	{SHELL_KEYWORD, compilePattern(generatePattern(shellKeywords))},
 	{PRIMITIVE_TYPE, compilePattern(generatePattern(primitiveTypes))},
-	{IDENTIFIER, compilePattern(`[a-zA-Z_]\w*`)},
+
+	{IDENTIFIER, compilePattern(`\b[a-zA-Z_][a-zA-Z0-9_]*\b`)},
+	{FLAG, compilePattern(`-\w+`)},
 	{NUMBER, compilePattern(`\b\d+(\.\d+)?\b`)},
 	{OPERATOR, compilePattern(`[+\-*/=]`)},
+	{STRING, compilePattern(`"[^"]*"`)},
+
+	{DOLLAR_SIGN, compilePattern(`\$\w+`)},
 	{LPAREN, compilePattern(`\(`)},
 	{RPAREN, compilePattern(`\)`)},
 	{LCURLY_BRACKET, compilePattern(`\{`)},
 	{RCURLY_BRACKET, compilePattern(`\}`)},
 	{SEMICOLON, compilePattern(`;`)},
-	{STRING, compilePattern(`"[^"]*"`)},
 }
 
 func TokenMap() map[TokenType]*regexp.Regexp {

@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -65,6 +66,9 @@ func (p *Parser) ParseProgram() Program {
 			} else {
 				oops.UnexpectedKeyword(p.peek())
 			}
+		case lx.SHELL_KEYWORD:
+			program.Body = append(program.Body, p.ParseShellExpression())
+
 		case lx.SEMICOLON, lx.COMMENT:
 			p.next()
 		case ILLEGAL:
@@ -103,8 +107,10 @@ func (p *Parser) ParseAssignmentExpression(identToken lx.Token) ASTNode {
 }
 
 func (p *Parser) ParseIdentifier() Identifier {
+	trimmedName := strings.Trim(p.peek().Value, "$;")
+
 	node := Identifier{
-		Name: p.peek().Value,
+		Name: trimmedName,
 		BaseNode: BaseNode{
 			Type:  reflect.TypeOf(Identifier{}).Name(),
 			Start: p.peek().Start,
@@ -353,4 +359,65 @@ func (p *Parser) ParsePrimaryExpression() ASTNode {
 	default:
 		panic("Expected a primary expression (number, string, or identifier)")
 	}
+}
+
+func (p *Parser) ParseShellExpression() ASTNode {
+	keyword := p.next()
+
+	switch keyword.Value {
+	case lx.ECHO:
+		return p.ParseEchoStatement()
+	default:
+		oops.UnexpectedKeyword(keyword)
+	}
+
+	return ShellExpression{}
+}
+
+func (p *Parser) ParseEchoStatement() ASTNode {
+	startStmtToken := p.peek()
+	arguments := []ASTNode{}
+	flags := []string{}
+
+	for p.peek().Type != lx.SEMICOLON && p.peek().Type != lx.EOF {
+		switch p.peek().Type {
+		case STRING, lx.IDENTIFIER:
+			arguments = append(arguments, p.ParseLiteral())
+		case lx.DOLLAR_SIGN:
+			arguments = append(arguments, p.ParseIdentifier())
+		case lx.FLAG:
+			flags = append(flags, p.peek().Value)
+			p.next()
+		default:
+			p.next()
+		}
+	}
+
+	return ShellExpression{
+		BaseNode: BaseNode{
+			Type:  reflect.TypeOf(ShellExpression{}).Name(),
+			Start: startStmtToken.Start,
+			End:   startStmtToken.End,
+		},
+		Expression: EchoStatement{
+			BaseNode: BaseNode{
+				Type:  reflect.TypeOf(EchoStatement{}).Name(),
+				Start: startStmtToken.Start,
+				End:   startStmtToken.End,
+			},
+			Arguments: arguments,
+			Flags:     flags,
+		},
+	}
+}
+
+func ParseToJson(data interface{}) {
+	jsonData, err := json.MarshalIndent(data, "", "  ")
+
+	if err != nil {
+		fmt.Println("Error marshalling to JSON:", err)
+		return
+	}
+
+	fmt.Printf("%s\n", jsonData)
 }

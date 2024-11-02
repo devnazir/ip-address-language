@@ -65,6 +65,17 @@ type BinaryExpression struct {
 	Right    ASTNode
 }
 
+type ShellExpression struct {
+	BaseNode
+	Expression ASTNode
+}
+
+type EchoStatement struct {
+	BaseNode
+	Arguments []ASTNode
+	Flags     []string
+}
+
 type AssignmentExpression struct {
 	Identifier
 	Expression ASTNode
