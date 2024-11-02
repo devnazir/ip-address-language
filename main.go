@@ -13,7 +13,7 @@ import (
 func init() { log.SetFlags(log.Lshortfile | log.LstdFlags) }
 
 func main() {
-	lexer := lexer.NewLexerFromFilename(`./examples/math.gsh`)
+	lexer := lexer.NewLexerFromFilename(`./examples/variable.gsh`)
 	tokens := lexer.Tokenize()
 	parser := parser.NewParser(tokens, *lexer)
 

@@ -134,7 +134,9 @@ func (p *Parser) ParseVariableDeclaration() VariableDeclaration {
 		Kind:         p.peek().Value,
 	}
 
-	identToken := p.next() // skip "var"
+	varTypeToken := p.next() // skip "var"
+	identToken := p.peek()
+
 	// expect identifier
 	if p.peek().Type != IDENTIFIER {
 		if p.peek().Value != lx.VAR && p.peek().Value != lx.CONST {
@@ -145,7 +147,14 @@ func (p *Parser) ParseVariableDeclaration() VariableDeclaration {
 	}
 
 	node.Declarations = append(node.Declarations, p.ParseVariableDeclarator())
-	p.next() // skip identifier, next to assignment operator
+
+	p.next() // skip identifier, next to assignment operator or type annotation
+
+	if p.peek().Type != PRIMITIVE_TYPE && varTypeToken.Value == lx.VAR {
+		if p.peek().Type != OPERATOR && p.peek().Value != "=" {
+			oops.ExpectedTypeAnnotation(identToken)
+		}
+	}
 
 	// check if the next token has primitive type
 	if p.peek().Type == PRIMITIVE_TYPE {
@@ -160,7 +169,7 @@ func (p *Parser) ParseVariableDeclaration() VariableDeclaration {
 	if p.peek().Type != OPERATOR && operator != "=" {
 
 		// var can be used to declare a variable without assignment
-		if identToken.Value == lx.VAR {
+		if varTypeToken.Value == lx.VAR {
 			return node
 		}
 
