@@ -1,10 +1,13 @@
 package parser
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/devnazir/gosh-script/pkg/oops"
 )
+
+// TODO: Implement type annotation parsing
 
 func (p *Parser) ParseTypeAnnotation(v ASTNode) string {
 	result := ""
@@ -76,6 +79,7 @@ func (p *Parser) ReflectInitVariableDeclaratorType(v VariableDeclaration) (refle
 
 func (p *Parser) IsConcatenation(b ASTNode) bool {
 	if reflect.TypeOf(b) == reflect.TypeOf(Literal{}) {
+		fmt.Printf("Tokens %+v", p.tokens)
 		return reflect.TypeOf(b.(Literal).Value) == reflect.TypeOf("")
 	}
 

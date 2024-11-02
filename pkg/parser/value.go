@@ -65,6 +65,11 @@ type BinaryExpression struct {
 	Right    ASTNode
 }
 
+type AssignmentExpression struct {
+	Identifier
+	Expression ASTNode
+}
+
 var TokenMap = lx.TokenMap()
 
 var Precedence = map[string]int{

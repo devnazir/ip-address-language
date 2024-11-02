@@ -33,6 +33,8 @@ func (l *Lexer) matchToken(chunk string, token *Token) bool {
 		if match := spec.pattern.FindString(chunk); match != "" {
 			// Ensure the match occurs at the beginning of the chunk
 			if strings.HasPrefix(chunk, match) {
+				line := strings.Count(l.Source[:l.Pos], "\n") + 1
+				token.Line = line
 				token.Start = l.Pos
 				token.End = l.Pos + len(match)
 				token.Value = strings.TrimSpace(match)
@@ -47,9 +49,10 @@ func (l *Lexer) matchToken(chunk string, token *Token) bool {
 	return false
 }
 
-func (l *Lexer) skipWhitespace(chunk string) {
-	for _, char := range chunk {
-		// check whitespace character
+func (l *Lexer) skipWhitespace() {
+	for l.Pos < len(l.Source) {
+		char := l.Source[l.Pos]
+		// Check for whitespace and newline characters
 		if char == ' ' || char == '\n' || char == '\t' || char == '\r' {
 			l.Pos++
 		} else {
@@ -61,16 +64,14 @@ func (l *Lexer) skipWhitespace(chunk string) {
 func (l *Lexer) Tokenize() []Token {
 	for l.Pos < len(l.Source) {
 		// Skip any whitespace characters first
-		l.skipWhitespace(l.Source[l.Pos:])
-
-		chunk := l.Source[l.Pos:]
+		l.skipWhitespace()
 
 		token := &Token{}
 		token.Start = l.Pos
 		foundMatch := false
 
 		// Try to match a valid token
-		if l.matchToken(chunk, token) {
+		if l.matchToken(l.Source[l.Pos:], token) {
 			foundMatch = true
 		}
 
