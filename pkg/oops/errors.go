@@ -42,4 +42,10 @@ var (
 	ExpectedTypeAnnotation = func(identToken lx.Token) error {
 		panic(New(createErrorMessage(identToken, "Expected type annotation %v", identToken.Value)))
 	}
+	ExpectedEntrypointFile = func() error {
+		panic(New("Expected filename as main entrypoint, e.g. gsh main.gsh"))
+	}
+	ExpectedToken = func(token lx.Token, expected string) error {
+		panic(New(createErrorMessage(token, "Expected %s", expected)))
+	}
 )

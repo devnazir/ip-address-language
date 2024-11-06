@@ -1,31 +1,31 @@
 package lexer
 
 import (
+	"fmt"
+	"io"
 	"os"
 	"strings"
 )
 
-func NewLexer(source string) *Lexer {
-	return &Lexer{Source: source, Tokens: []Token{}, Pos: 0}
+func NewLexer(source, filename string) *Lexer {
+	return &Lexer{Source: source, Tokens: []Token{}, Pos: 0, Filename: filename}
 }
 
 func NewLexerFromFilename(filename string) *Lexer {
 	file, err := os.Open(filename)
 	if err != nil {
+		fmt.Println("Error opening file:", filename, err)
 		panic(err)
 	}
 	defer file.Close()
 
-	stat, _ := file.Stat()
-	fileSize := stat.Size()
-	buffer := make([]byte, fileSize)
-
-	_, err = file.Read(buffer)
+	content, err := io.ReadAll(file)
 	if err != nil {
+		fmt.Println("Error reading file:", filename, err)
 		panic(err)
 	}
 
-	return NewLexer(string(buffer))
+	return NewLexer(string(content), filename)
 }
 
 func (l *Lexer) matchToken(chunk string, token *Token) bool {

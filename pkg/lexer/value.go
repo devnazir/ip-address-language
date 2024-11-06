@@ -34,12 +34,14 @@ const (
 	COMMENT        TokenType = "COMMENT"
 	DOLLAR_SIGN    TokenType = "DOLLAR_SIGN"
 	FLAG           TokenType = "FLAG"
+	COMMA          TokenType = "COMMA"
 )
 
 const (
-	VAR   = "var"
-	CONST = "const"
-	ECHO  = "echo"
+	VAR    = "var"
+	CONST  = "const"
+	ECHO   = "echo"
+	SOURCE = "source"
 )
 
 var variableKeywords = Keywords{
@@ -97,6 +99,7 @@ var TokenSpecs = []TokenSpec{
 	{LCURLY_BRACKET, compilePattern(`\{`)},
 	{RCURLY_BRACKET, compilePattern(`\}`)},
 	{SEMICOLON, compilePattern(`;`)},
+	{COMMA, compilePattern(`,`)},
 }
 
 func TokenMap() map[TokenType]*regexp.Regexp {
@@ -116,7 +119,8 @@ type Token struct {
 }
 
 type Lexer struct {
-	Source string
-	Tokens []Token
-	Pos    int
+	Source   string
+	Tokens   []Token
+	Pos      int
+	Filename string
 }

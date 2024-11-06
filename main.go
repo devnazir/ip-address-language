@@ -1,23 +1,38 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
+	"os"
 
-	"log"
-
+	"github.com/devnazir/gosh-script/pkg/interpreter"
 	"github.com/devnazir/gosh-script/pkg/lexer"
+	"github.com/devnazir/gosh-script/pkg/oops"
 	"github.com/devnazir/gosh-script/pkg/parser"
 )
 
-func init() { log.SetFlags(log.Lshortfile | log.LstdFlags) }
-
 func main() {
-	lexer := lexer.NewLexerFromFilename(`./examples/echo.gsh`)
-	tokens := lexer.Tokenize()
-	parser := parser.NewParser(tokens, *lexer)
+	if len(os.Args) < 2 {
+		recovery := func() {
+			if r := recover(); r != nil {
+				fmt.Println(r)
+			}
+		}
 
-	// jsonDataTokens, err := json.MarshalIndent(tokens, "", "  ")
+		defer recovery()
+		oops.ExpectedEntrypointFile()
+	}
+
+	filename := os.Args[1]
+
+	lexer := lexer.NewLexerFromFilename(filename)
+	tokens := lexer.Tokenize()
+	parser := parser.NewParser(tokens, lexer)
+
+	ast := parser.Parse()
+	interpreter := interpreter.NewInterpreter()
+	interpreter.Interpret(ast)
+
+	// jsonDataTokens, err := json.MarshalIndent(ast, "", "  ")
 	// if err != nil {
 	// 	fmt.Println("Error marshalling to JSON:", err)
 	// 	return
@@ -25,11 +40,4 @@ func main() {
 
 	// fmt.Printf("%s\n", jsonDataTokens)
 
-	jsonData, err := json.MarshalIndent(parser.Parse(), "", "  ")
-	if err != nil {
-		fmt.Println("Error marshalling to JSON:", err)
-		return
-	}
-
-	fmt.Printf("%s\n", jsonData)
 }

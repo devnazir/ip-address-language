@@ -11,10 +11,10 @@ import (
 	"github.com/devnazir/gosh-script/pkg/oops"
 )
 
-func NewParser(tokens []lx.Token, lexer lx.Lexer) *Parser {
+func NewParser(tokens []lx.Token, lexer *lx.Lexer) *Parser {
 	return &Parser{
 		tokens: tokens,
-		lexer:  lexer,
+		lexer:  *lexer,
 		pos:    0,
 	}
 }
@@ -49,6 +49,8 @@ func (p *Parser) Parse() ASTNode {
 }
 
 func (p *Parser) ParseProgram() Program {
+	// mainDir := path.Dir(p.lexer.Filename)
+
 	program := Program{
 		BaseNode: BaseNode{
 			Type:  reflect.TypeOf(Program{}).Name(),
@@ -59,12 +61,15 @@ func (p *Parser) ParseProgram() Program {
 	}
 
 	for p.pos < len(p.tokens) {
+
 		switch p.peek().Type {
 		case KEYWORD:
+			if p.peek().Value == lx.SOURCE {
+				program.Body = append(program.Body, p.ParseSourceDeclaration())
+			}
+
 			if p.peek().Value == lx.VAR || p.peek().Value == lx.CONST {
 				program.Body = append(program.Body, p.ParseVariableDeclaration())
-			} else {
-				oops.UnexpectedKeyword(p.peek())
 			}
 		case lx.SHELL_KEYWORD:
 			program.Body = append(program.Body, p.ParseShellExpression())
@@ -389,7 +394,7 @@ func (p *Parser) ParseEchoStatement() ASTNode {
 			flags = append(flags, p.peek().Value)
 			p.next()
 		default:
-			p.next()
+			arguments = append(arguments, p.ParseLiteral())
 		}
 	}
 
@@ -408,6 +413,44 @@ func (p *Parser) ParseEchoStatement() ASTNode {
 			Arguments: arguments,
 			Flags:     flags,
 		},
+	}
+}
+
+func (p *Parser) ParseSourceDeclaration() ASTNode {
+	token := p.next()
+	sources := []ASTNode{}
+
+	switch p.peek().Type {
+	case STRING:
+		sources = append(sources, p.ParseLiteral())
+
+	case lx.LPAREN:
+		p.next()
+		endLoop := false
+
+		for !endLoop {
+			switch p.peek().Type {
+			case STRING:
+				sources = append(sources, p.ParseLiteral())
+			case lx.RPAREN:
+				endLoop = true
+				p.next()
+			default:
+				oops.ExpectedToken(p.peek(), ")")
+				p.next()
+			}
+		}
+	default:
+		oops.UnexpectedToken(p.peek(), "")
+	}
+
+	return SourceDeclaration{
+		BaseNode: BaseNode{
+			Type:  reflect.TypeOf(SourceDeclaration{}).Name(),
+			Start: token.Start,
+			End:   p.peek().End,
+		},
+		Sources: sources,
 	}
 }
 

@@ -81,6 +81,11 @@ type AssignmentExpression struct {
 	Expression ASTNode
 }
 
+type SourceDeclaration struct { 
+	BaseNode
+	Sources []ASTNode
+}
+
 var TokenMap = lx.TokenMap()
 
 var Precedence = map[string]int{
