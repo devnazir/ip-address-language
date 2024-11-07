@@ -15,75 +15,10 @@ const (
 	OPERATOR       = lx.OPERATOR
 )
 
-type BaseNode struct {
-	Type  string
-	Start int
-	End   int
-}
-
-type ASTNode interface{}
-
 type Parser struct {
 	tokens []lx.Token
 	lexer  lx.Lexer
 	pos    int
-}
-
-type Program struct {
-	BaseNode
-	Body []ASTNode
-}
-
-type VariableDeclaration struct {
-	BaseNode
-	Declarations   []VariableDeclarator
-	Kind           string
-	TypeAnnotation string
-}
-
-type VariableDeclarator struct {
-	BaseNode
-	Id   ASTNode
-	Init ASTNode
-}
-
-type Identifier struct {
-	BaseNode
-	Name string
-}
-
-type Literal struct {
-	BaseNode
-	Value interface{}
-	Raw   string
-}
-
-type BinaryExpression struct {
-	BaseNode
-	Left     ASTNode
-	Operator string
-	Right    ASTNode
-}
-
-type ShellExpression struct {
-	BaseNode
-	Expression ASTNode
-}
-
-type EchoStatement struct {
-	BaseNode
-	Arguments []ASTNode
-	Flags     []string
-}
-
-type AssignmentExpression struct {
-	Identifier
-	Expression ASTNode
-}
-
-type SourceDeclaration struct { 
-	BaseNode
-	Sources []ASTNode
 }
 
 var TokenMap = lx.TokenMap()

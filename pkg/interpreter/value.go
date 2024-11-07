@@ -4,23 +4,46 @@ type Interpreter struct {
 	Environment *Environment
 }
 
+type Variables []map[string]interface{}
+
 type Environment struct {
-	Variables map[string]interface{}
+	Variables Variables
 }
 
 func NewEnvironment() *Environment {
-	return &Environment{Variables: make(map[string]interface{})}
+	return &Environment{Variables: []map[string]interface{}{
+		make(map[string]interface{}),
+	}}
 }
 
 func (e *Environment) SetVariable(name string, value interface{}) {
-	e.Variables[name] = value
+	e.Variables[0][name] = value
 }
 
 func (e *Environment) GetVariable(name string) interface{} {
-	return e.Variables[name]
+	for _, variable := range e.Variables {
+		if val, ok := variable[name]; ok {
+			return val
+		}
+	}
+
+	return nil
 }
 
 func (e *Environment) HasVariable(name string) bool {
-	_, ok := e.Variables[name]
-	return ok
+	for _, variable := range e.Variables {
+		if _, ok := variable[name]; ok {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (e *Environment) AddScope() {
+	e.Variables = append([]map[string]interface{}{{}}, e.Variables...)
+}
+
+func (e *Environment) CloseScope() {
+	e.Variables = e.Variables[1:]
 }

@@ -118,6 +118,10 @@ type Token struct {
 	Line  int
 }
 
+func (t Token) GetLine() int {
+	return t.Line
+}
+
 type Lexer struct {
 	Source   string
 	Tokens   []Token

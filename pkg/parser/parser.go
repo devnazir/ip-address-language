@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	lx "github.com/devnazir/gosh-script/pkg/lexer"
+	"github.com/devnazir/gosh-script/pkg/node"
 	"github.com/devnazir/gosh-script/pkg/oops"
 )
 
@@ -37,27 +38,28 @@ func (p *Parser) next() lx.Token {
 	return token
 }
 
-func (p *Parser) Parse() ASTNode {
-	// recover from panic
+func (p *Parser) Parse() node.Program {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println(r)
 		}
 	}()
 
-	return p.ParseProgram()
+	program := p.ParseProgram()
+
+	return program
 }
 
-func (p *Parser) ParseProgram() Program {
+func (p *Parser) ParseProgram() node.Program {
 	// mainDir := path.Dir(p.lexer.Filename)
 
-	program := Program{
-		BaseNode: BaseNode{
-			Type:  reflect.TypeOf(Program{}).Name(),
+	program := node.Program{
+		BaseNode: node.BaseNode{
+			Type:  reflect.TypeOf(node.Program{}).Name(),
 			Start: 0,
 			End:   len(p.lexer.Source),
 		},
-		Body: []ASTNode{},
+		Body: []node.ASTNode{},
 	}
 
 	for p.pos < len(p.tokens) {
@@ -77,49 +79,55 @@ func (p *Parser) ParseProgram() Program {
 		case lx.SEMICOLON, lx.COMMENT:
 			p.next()
 		case ILLEGAL:
-			oops.IllegalToken(p.peek())
+			oops.IllegalTokenError(p.peek())
 		case IDENTIFIER:
 			identToken := p.next()
+
+			fmt.Println(identToken)
 
 			if p.peek().Type == OPERATOR && p.peek().Value == "=" {
 				p.next()
 				program.Body = append(program.Body, p.ParseAssignmentExpression(identToken))
+			} else {
+				oops.UnexpectedTokenError(p.peek(), "")
 			}
 		case EOF:
 			return program
 		default:
-			oops.UnexpectedToken(p.peek(), "")
+			oops.UnexpectedTokenError(p.peek(), "")
 		}
 	}
 
 	return program
 }
 
-func (p *Parser) ParseAssignmentExpression(identToken lx.Token) ASTNode {
+func (p *Parser) ParseAssignmentExpression(identToken lx.Token) node.ASTNode {
 	expression := p.EvaluateAssignmentExpression()
 
-	return AssignmentExpression{
-		Identifier: Identifier{
+	return node.AssignmentExpression{
+		Identifier: node.Identifier{
 			Name: identToken.Value,
-			BaseNode: BaseNode{
-				Type:  reflect.TypeOf(AssignmentExpression{}).Name(),
+			BaseNode: node.BaseNode{
+				Type:  reflect.TypeOf(node.AssignmentExpression{}).Name(),
 				Start: identToken.Start,
 				End:   identToken.End,
+				Line:  identToken.Line,
 			},
 		},
 		Expression: expression,
 	}
 }
 
-func (p *Parser) ParseIdentifier() Identifier {
+func (p *Parser) ParseIdentifier() node.Identifier {
 	trimmedName := strings.Trim(p.peek().Value, "$;")
 
-	node := Identifier{
+	node := node.Identifier{
 		Name: trimmedName,
-		BaseNode: BaseNode{
-			Type:  reflect.TypeOf(Identifier{}).Name(),
+		BaseNode: node.BaseNode{
+			Type:  reflect.TypeOf(node.Identifier{}).Name(),
 			Start: p.peek().Start,
 			End:   p.peek().End,
+			Line:  p.peek().Line,
 		},
 	}
 	p.next()
@@ -134,14 +142,15 @@ Example:
 	var x = 10;
 	var y = 20;
 */
-func (p *Parser) ParseVariableDeclaration() VariableDeclaration {
-	node := VariableDeclaration{
-		BaseNode: BaseNode{
+func (p *Parser) ParseVariableDeclaration() node.VariableDeclaration {
+	node := node.VariableDeclaration{
+		BaseNode: node.BaseNode{
 			Type:  "VariableDeclaration",
 			Start: p.pos,
 			End:   0,
+			Line:  p.peek().Line,
 		},
-		Declarations: []VariableDeclarator{},
+		Declarations: []node.VariableDeclarator{},
 		Kind:         p.peek().Value,
 	}
 
@@ -151,10 +160,10 @@ func (p *Parser) ParseVariableDeclaration() VariableDeclaration {
 	// expect identifier
 	if p.peek().Type != IDENTIFIER {
 		if p.peek().Value != lx.VAR && p.peek().Value != lx.CONST {
-			oops.IllegalIdentifier(p.peek())
+			oops.IllegalIdentifierError(p.peek())
 		}
 
-		oops.ExpectedIdentifier(p.peek())
+		oops.ExpectedIdentifierError(p.peek())
 	}
 
 	node.Declarations = append(node.Declarations, p.ParseVariableDeclarator())
@@ -163,7 +172,7 @@ func (p *Parser) ParseVariableDeclaration() VariableDeclaration {
 
 	if p.peek().Type != PRIMITIVE_TYPE && varTypeToken.Value == lx.VAR {
 		if p.peek().Type != OPERATOR && p.peek().Value != "=" {
-			oops.ExpectedTypeAnnotation(identToken)
+			oops.ExpectedTypeAnnotationError(identToken)
 		}
 	}
 
@@ -184,7 +193,7 @@ func (p *Parser) ParseVariableDeclaration() VariableDeclaration {
 			return node
 		}
 
-		oops.UnexpectedToken(p.peek(), "=")
+		oops.UnexpectedTokenError(p.peek(), "=")
 	}
 
 	p.next() // next to assignment expression
@@ -204,7 +213,7 @@ Example:
 	2 -> Literal{Value: 2}
 	"hello" -> Literal{Value: "hello"}
 */
-func (p *Parser) ParseLiteral() Literal {
+func (p *Parser) ParseLiteral() node.Literal {
 	value := p.peek().Value
 	var literalValue interface{}
 
@@ -219,11 +228,12 @@ func (p *Parser) ParseLiteral() Literal {
 		literalValue = value
 	}
 
-	node := Literal{
-		BaseNode: BaseNode{
-			Type:  reflect.TypeOf(Literal{}).Name(),
+	node := node.Literal{
+		BaseNode: node.BaseNode{
+			Type:  reflect.TypeOf(node.Literal{}).Name(),
 			Start: p.peek().Start,
 			End:   p.peek().End,
+			Line:  p.peek().Line,
 		},
 		Value: literalValue,
 		Raw:   value,
@@ -235,19 +245,21 @@ func (p *Parser) ParseLiteral() Literal {
 /*
 ParseVariableDeclarator parses a variable declarator and returns a VariableDeclarator node.
 */
-func (p *Parser) ParseVariableDeclarator() VariableDeclarator {
-	node := VariableDeclarator{
-		BaseNode: BaseNode{
-			Type:  reflect.TypeOf(VariableDeclarator{}).Name(),
+func (p *Parser) ParseVariableDeclarator() node.VariableDeclarator {
+	node := node.VariableDeclarator{
+		BaseNode: node.BaseNode{
+			Type:  reflect.TypeOf(node.VariableDeclarator{}).Name(),
 			Start: p.peek().Start,
 			End:   0,
+			Line:  p.peek().Line,
 		},
-		Id: Identifier{
+		Id: node.Identifier{
 			Name: p.peek().Value,
-			BaseNode: BaseNode{
-				Type:  reflect.TypeOf(Identifier{}).Name(),
+			BaseNode: node.BaseNode{
+				Type:  reflect.TypeOf(node.Identifier{}).Name(),
 				Start: p.peek().Start,
 				End:   p.peek().End,
+				Line:  p.peek().Line,
 			},
 		},
 		Init: nil,
@@ -256,8 +268,8 @@ func (p *Parser) ParseVariableDeclarator() VariableDeclarator {
 	return node
 }
 
-func (p *Parser) EvaluateAssignmentExpression() ASTNode {
-	var output []ASTNode
+func (p *Parser) EvaluateAssignmentExpression() node.ASTNode {
+	var output []node.ASTNode
 	var operators []lx.Token
 	endLoop := false
 
@@ -323,14 +335,14 @@ Example:
 	2 + 3 -> BinaryExpression{Operator: "+", Left: Literal{Value: 2}, Right: Literal{Value: 3}}
 	2 + 3 * 4 -> BinaryExpression{Operator: "+", Left: Literal{Value: 2}, Right: BinaryExpression{Operator: "*", Left: Literal{Value: 3}, Right: Literal{Value: 4}}}
 */
-func (p *Parser) ParseBinaryExpression(output []ASTNode) ASTNode {
-	stack := []ASTNode{}
+func (p *Parser) ParseBinaryExpression(output []node.ASTNode) node.ASTNode {
+	stack := []node.ASTNode{}
 
-	for _, node := range output {
-		nodeType := reflect.TypeOf(node)
+	for _, nodeItem := range output {
+		nodeType := reflect.TypeOf(nodeItem)
 
 		if nodeType != reflect.TypeOf(lx.Token{}) {
-			stack = append(stack, node)
+			stack = append(stack, nodeItem)
 			continue
 		}
 
@@ -338,13 +350,14 @@ func (p *Parser) ParseBinaryExpression(output []ASTNode) ASTNode {
 		left := stack[len(stack)-2]
 		stack = stack[:len(stack)-2]
 
-		stack = append(stack, BinaryExpression{
-			BaseNode: BaseNode{
-				Type:  reflect.TypeOf(BinaryExpression{}).Name(),
-				Start: node.(lx.Token).Start,
-				End:   node.(lx.Token).End,
+		stack = append(stack, node.BinaryExpression{
+			BaseNode: node.BaseNode{
+				Type:  reflect.TypeOf(node.BinaryExpression{}).Name(),
+				Start: nodeItem.(lx.Token).Start,
+				End:   nodeItem.(lx.Token).End,
+				Line:  nodeItem.(lx.Token).Line,
 			},
-			Operator: node.(lx.Token).Value,
+			Operator: nodeItem.(lx.Token).Value,
 			Left:     left,
 			Right:    right,
 		})
@@ -353,7 +366,7 @@ func (p *Parser) ParseBinaryExpression(output []ASTNode) ASTNode {
 	return stack[0]
 }
 
-func (p *Parser) ParsePrimaryExpression() ASTNode {
+func (p *Parser) ParsePrimaryExpression() node.ASTNode {
 	switch p.peek().Type {
 	case NUMBER:
 		return p.ParseLiteral()
@@ -366,22 +379,22 @@ func (p *Parser) ParsePrimaryExpression() ASTNode {
 	}
 }
 
-func (p *Parser) ParseShellExpression() ASTNode {
+func (p *Parser) ParseShellExpression() node.ASTNode {
 	keyword := p.next()
 
 	switch keyword.Value {
 	case lx.ECHO:
 		return p.ParseEchoStatement()
 	default:
-		oops.UnexpectedKeyword(keyword)
+		oops.UnexpectedKeywordError(keyword)
 	}
 
-	return ShellExpression{}
+	return node.ShellExpression{}
 }
 
-func (p *Parser) ParseEchoStatement() ASTNode {
+func (p *Parser) ParseEchoStatement() node.ASTNode {
 	startStmtToken := p.peek()
-	arguments := []ASTNode{}
+	arguments := []node.ASTNode{}
 	flags := []string{}
 
 	for p.peek().Type != lx.SEMICOLON && p.peek().Type != lx.EOF {
@@ -398,17 +411,19 @@ func (p *Parser) ParseEchoStatement() ASTNode {
 		}
 	}
 
-	return ShellExpression{
-		BaseNode: BaseNode{
-			Type:  reflect.TypeOf(ShellExpression{}).Name(),
+	return node.ShellExpression{
+		BaseNode: node.BaseNode{
+			Type:  reflect.TypeOf(node.ShellExpression{}).Name(),
 			Start: startStmtToken.Start,
 			End:   startStmtToken.End,
+			Line:  startStmtToken.Line,
 		},
-		Expression: EchoStatement{
-			BaseNode: BaseNode{
-				Type:  reflect.TypeOf(EchoStatement{}).Name(),
+		Expression: node.EchoStatement{
+			BaseNode: node.BaseNode{
+				Type:  reflect.TypeOf(node.EchoStatement{}).Name(),
 				Start: startStmtToken.Start,
 				End:   startStmtToken.End,
+				Line:  startStmtToken.Line,
 			},
 			Arguments: arguments,
 			Flags:     flags,
@@ -416,9 +431,9 @@ func (p *Parser) ParseEchoStatement() ASTNode {
 	}
 }
 
-func (p *Parser) ParseSourceDeclaration() ASTNode {
+func (p *Parser) ParseSourceDeclaration() node.ASTNode {
 	token := p.next()
-	sources := []ASTNode{}
+	sources := []node.ASTNode{}
 
 	switch p.peek().Type {
 	case STRING:
@@ -436,19 +451,20 @@ func (p *Parser) ParseSourceDeclaration() ASTNode {
 				endLoop = true
 				p.next()
 			default:
-				oops.ExpectedToken(p.peek(), ")")
+				oops.ExpectedTokenError(p.peek(), ")")
 				p.next()
 			}
 		}
 	default:
-		oops.UnexpectedToken(p.peek(), "")
+		oops.UnexpectedTokenError(p.peek(), "")
 	}
 
-	return SourceDeclaration{
-		BaseNode: BaseNode{
-			Type:  reflect.TypeOf(SourceDeclaration{}).Name(),
+	return node.SourceDeclaration{
+		BaseNode: node.BaseNode{
+			Type:  reflect.TypeOf(node.SourceDeclaration{}).Name(),
 			Start: token.Start,
 			End:   p.peek().End,
+			Line:  p.peek().Line,
 		},
 		Sources: sources,
 	}

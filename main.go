@@ -19,7 +19,7 @@ func main() {
 		}
 
 		defer recovery()
-		oops.ExpectedEntrypointFile()
+		oops.ExpectedEntrypointFileError()
 	}
 
 	filename := os.Args[1]

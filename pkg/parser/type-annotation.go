@@ -1,156 +1,92 @@
 package parser
 
-import (
-	"fmt"
-	"reflect"
-
-	"github.com/devnazir/gosh-script/pkg/oops"
-)
-
 // TODO: Implement type annotation parsing
 
-func (p *Parser) ParseTypeAnnotation(v ASTNode) string {
-	result := ""
-	vType := reflect.TypeOf(v)
+// func (p *Parser) ParseTypeAnnotation(v node.ASTNode) string {
+// 	result := ""
+// 	vType := reflect.TypeOf(v)
 
-	switch vType {
-	case reflect.TypeOf(VariableDeclaration{}):
-		node := v.(VariableDeclaration)
-		_, valueType := p.ReflectInitVariableDeclaratorType(node)
+// 	switch vType {
+// 	case reflect.TypeOf(node.VariableDeclaration{}):
+// 		node := v.(node.VariableDeclaration)
+// 		_, valueType := p.ReflectInitVariableDeclaratorType(node)
 
-		if node.TypeAnnotation != "" {
-			if valueType != node.TypeAnnotation {
-				oops.TypeMismatch(p.peek(), node.TypeAnnotation, valueType)
-			}
+// 		if node.TypeAnnotation != "" {
+// 			if valueType != node.TypeAnnotation {
+// 				oops.TypeMismatchError(p.peek(), node.TypeAnnotation, valueType)
+// 			}
 
-			result = node.TypeAnnotation
-		} else {
-			result = p.InferType(v)
-		}
-	default:
-		break
-	}
+// 			result = node.TypeAnnotation
+// 		} else {
+// 			result = p.InferType(v)
+// 		}
+// 	default:
+// 		break
+// 	}
 
-	return result
-}
+// 	return result
+// }
 
-func (p *Parser) InferType(v ASTNode) string {
-	result := ""
-	vType := reflect.TypeOf(v)
+// func (p *Parser) InferType(v node.ASTNode) string {
+// 	result := ""
+// 	vType := reflect.TypeOf(v)
 
-	switch vType {
-	case reflect.TypeOf(VariableDeclaration{}):
-		node := v.(VariableDeclaration)
-		_, valueType := p.ReflectInitVariableDeclaratorType(node)
-		result = valueType
-	default:
-		result = ""
-	}
+// 	switch vType {
+// 	case reflect.TypeOf(node.VariableDeclaration{}):
+// 		node := v.(node.VariableDeclaration)
+// 		_, valueType := p.ReflectInitVariableDeclaratorType(node)
+// 		result = valueType
+// 	default:
+// 		result = ""
+// 	}
 
-	return result
-}
+// 	return result
+// }
 
-func (p *Parser) ReflectInitVariableDeclaratorType(v VariableDeclaration) (reflect.Type, string) {
-	initType := reflect.TypeOf(v.Declarations[0].Init)
-	valueType := ""
+// func (p *Parser) ReflectInitVariableDeclaratorType(v node.VariableDeclaration) (reflect.Type, string) {
+// 	initType := reflect.TypeOf(v.Declarations[0].Init)
+// 	valueType := ""
 
-	if initType.Kind() == reflect.Struct {
-		switch initType {
-		case reflect.TypeOf(Literal{}):
-			valueType = reflect.TypeOf(v.Declarations[0].Init.(Literal).Value).String()
-		case reflect.TypeOf(BinaryExpression{}):
-			isConcat := p.IsConcatenation(v.Declarations[0].Init.(BinaryExpression))
+// 	if initType.Kind() == reflect.Struct {
+// 		switch initType {
+// 		case reflect.TypeOf(node.Literal{}):
+// 			valueType = reflect.TypeOf(v.Declarations[0].Init.(node.Literal).Value).String()
+// 		case reflect.TypeOf(node.BinaryExpression{}):
+// 			isConcat := p.IsConcatenation(v.Declarations[0].Init.(node.BinaryExpression))
 
-			if isConcat {
-				valueType = "string"
-				break
-			}
+// 			if isConcat {
+// 				valueType = "string"
+// 				break
+// 			}
 
-			result := p.EvaluateBinaryExpr(v.Declarations[0].Init.(BinaryExpression))
-			valueType = reflect.TypeOf(result).String()
-			break
-		default:
-			valueType = ""
-		}
-	}
+// 			result := interpreterEvaluateBinaryExpr(v.Declarations[0].Init.(node.BinaryExpression))
+// 			valueType = reflect.TypeOf(result).String()
+// 			break
+// 		default:
+// 			valueType = ""
+// 		}
+// 	}
 
-	return initType, valueType
-}
+// 	return initType, valueType
+// }
 
-func (p *Parser) IsConcatenation(b ASTNode) bool {
-	if reflect.TypeOf(b) == reflect.TypeOf(Literal{}) {
-		fmt.Printf("Tokens %+v", p.tokens)
-		return reflect.TypeOf(b.(Literal).Value) == reflect.TypeOf("")
-	}
+// func (p *Parser) IsConcatenation(b node.ASTNode) bool {
+// 	if reflect.TypeOf(b) == reflect.TypeOf(node.Literal{}) {
+// 		fmt.Printf("Tokens %+v", p.tokens)
+// 		return reflect.TypeOf(b.(node.Literal).Value) == reflect.TypeOf("")
+// 	}
 
-	if reflect.TypeOf(b) == reflect.TypeOf(BinaryExpression{}) {
-		leftTypeIsString := p.IsConcatenation(b.(BinaryExpression).Left)
-		rightTypeIsString := p.IsConcatenation(b.(BinaryExpression).Right)
-		isPlusSign := b.(BinaryExpression).Operator == "+"
+// 	if reflect.TypeOf(b) == reflect.TypeOf(node.BinaryExpression{}) {
+// 		leftTypeIsString := p.IsConcatenation(b.(node.BinaryExpression).Left)
+// 		rightTypeIsString := p.IsConcatenation(b.(node.BinaryExpression).Right)
+// 		isPlusSign := b.(node.BinaryExpression).Operator == "+"
 
-		if (leftTypeIsString || rightTypeIsString) && !isPlusSign {
-			oops.InvalidConcatenation(p.peek(), ""+b.(BinaryExpression).Operator+" operator"+" is not allowed")
-		}
+// 		if (leftTypeIsString || rightTypeIsString) && !isPlusSign {
+// 			oops.InvalidConcatenationError(p.peek(), ""+b.(node.BinaryExpression).Operator+" operator"+" is not allowed")
+// 		}
 
-		return (leftTypeIsString || rightTypeIsString) && isPlusSign
-	}
+// 		return (leftTypeIsString || rightTypeIsString) && isPlusSign
+// 	}
 
-	return false
-}
-
-func (p *Parser) EvaluateBinaryExpr(b ASTNode) interface{} {
-	if reflect.TypeOf(b) == reflect.TypeOf(Literal{}) {
-		return b.(Literal).Value
-	}
-
-	if reflect.TypeOf(b) == reflect.TypeOf(BinaryExpression{}) {
-		leftValue := p.EvaluateBinaryExpr(b.(BinaryExpression).Left)
-		rightValue := p.EvaluateBinaryExpr(b.(BinaryExpression).Right)
-		operator := b.(BinaryExpression).Operator
-
-		var leftFloat, rightFloat float64
-		var isLeftFloat, isRightFloat bool
-
-		switch v := leftValue.(type) {
-		case int:
-			leftFloat = float64(v)
-		case float64:
-			leftFloat = v
-			isLeftFloat = true
-		default:
-			return 0
-		}
-
-		switch v := rightValue.(type) {
-		case int:
-			rightFloat = float64(v)
-		case float64:
-			rightFloat = v
-			isRightFloat = true
-		default:
-			return 0
-		}
-
-		var result interface{}
-		switch operator {
-		case "+":
-			result = leftFloat + rightFloat
-		case "-":
-			result = leftFloat - rightFloat
-		case "*":
-			result = leftFloat * rightFloat
-		case "/":
-			if rightFloat == 0 {
-				return 0
-			}
-			result = leftFloat / rightFloat
-		}
-
-		if isLeftFloat || isRightFloat {
-			return result
-		}
-		return int(result.(float64))
-	}
-
-	return 0
-}
+// 	return false
+// }
