@@ -1,8 +1,8 @@
 package oops
 
 import (
-	lx "github.com/devnazir/gosh-script/pkg/lexer"
-	"github.com/devnazir/gosh-script/pkg/node"
+	lx "github.com/devnazir/gosh-script/internal/lexer"
+	"github.com/devnazir/gosh-script/pkg/ast"
 )
 
 var (
@@ -53,11 +53,11 @@ var (
 		panic(New(CreateErrorMessage(currentToken, "Expected token: %s", expectedToken)))
 	}
 
-	DuplicateIdentifierError = func(variableDecl node.VariableDeclaration) error {
-		panic(New(CreateErrorMessage(variableDecl, "Identifier '%s' has already been declared", variableDecl.Declarations[0].Id.(node.Identifier).Name)))
+	DuplicateIdentifierError = func(variableDecl ast.VariableDeclaration) error {
+		panic(New(CreateErrorMessage(variableDecl, "Identifier '%s' has already been declared", variableDecl.Declarations[0].Id.(ast.Identifier).Name)))
 	}
 
-	IdentifierNotFoundError = func(identifierToken node.Identifier) error {
+	IdentifierNotFoundError = func(identifierToken ast.Identifier) error {
 		panic(New(CreateErrorMessage(identifierToken, "Identifier '%s' not found", identifierToken.Name)))
 	}
 )

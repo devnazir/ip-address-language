@@ -2,7 +2,7 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-cmd = "go build -o tmp/main ./main.go"
+cmd = "go build -o tmp/main ./cmd/gosh/main.go"
 bin = "./tmp/main"
 watch_dir = ["."]
 watch_ext = ["main.go"]

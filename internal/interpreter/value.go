@@ -1,5 +1,7 @@
 package interpreter
 
+import "github.com/devnazir/gosh-script/pkg/ast"
+
 type Interpreter struct {
 	Environment *Environment
 }
@@ -46,4 +48,19 @@ func (e *Environment) AddScope() {
 
 func (e *Environment) CloseScope() {
 	e.Variables = e.Variables[1:]
+}
+
+type IntrepretEchoStmt struct {
+	expression    ast.EchoStatement
+	captureOutput bool
+}
+
+type InterpretShellExpression struct {
+	expression    ast.ShellExpression
+	captureOutput bool
+}
+
+type InterpretLsStmt struct {
+	expression    ast.LsStatement
+	captureOutput bool
 }
