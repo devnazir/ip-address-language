@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/devnazir/gosh-script/pkg/ast"
+	"github.com/devnazir/gosh-script/pkg/utils"
 )
 
 func (i *Interpreter) IntrepretEchoStmt(params IntrepretEchoStmt) string {
@@ -34,24 +35,39 @@ func (i *Interpreter) IntrepretEchoStmt(params IntrepretEchoStmt) string {
 			}
 
 			cmdArgs += fmt.Sprintf("%v", value) + " "
-
-		case ast.Literal:
-			literal := argument.(ast.Literal)
+		case ast.NumberLiteral:
+			literal := argument.(ast.NumberLiteral)
 
 			if reflect.TypeOf(literal.Value).Kind() == reflect.Int {
 				literal.Value = strconv.Itoa(literal.Value.(int))
 			}
 
-			cmdArgs += fmt.Sprintf("%v", literal.Value) + " "
+			cmdArgs += fmt.Sprintf("%v", literal.Raw)
+		case ast.StringLiteral:
+			literal := argument.(ast.StringLiteral)
+
+			if literal.Value == "echo" {
+				cmdArgs += fmt.Sprintf("%v", literal.Value) + " -e '\n'"
+				break
+			}
+
+			cmdArgs += fmt.Sprintf("%v", literal.Raw)
+
+		case ast.Illegal:
+			illegal := argument.(ast.Illegal)
+			cmdArgs += fmt.Sprintf("%v", illegal.Value) + " "
+
+		default:
+			panic("Invalid argument type")
 		}
 	}
 
-	command := "echo " + cmdFlags + "'" + cmdArgs + "'"
-	cmd := exec.Command("bash", "-c", command)
+	command, _ := utils.RemoveDoubleQuotes(cmdFlags + "'" + cmdArgs + "'")
+	cmd := exec.Command("bash", "-c", "echo "+command)
 	out, err := cmd.CombinedOutput()
 
 	if err != nil {
-		panic("Error executing command:" + err.Error())
+		panic(string(out))
 	}
 
 	if captureOutput {

@@ -25,15 +25,25 @@ func (p *Parser) ParseAssignmentExpression(identToken lx.Token) ast.ASTNode {
 }
 
 func (p *Parser) EvaluateAssignmentExpression() ast.ASTNode {
-	var output []ast.ASTNode
-	var operators []lx.Token
+	var output []ast.ASTNode = []ast.ASTNode{}
+	var operators []lx.Token = []lx.Token{}
 	endLoop := false
+	isBinaryExpression := false
 
-	for !endLoop {
+	token := p.peek()
+	startLine := token.Line
+
+	for !endLoop && token.Type != lx.SHELL_KEYWORD {
 		token := p.peek()
 
+		if startLine != token.Line {
+			// stop the loop
+			endLoop = true
+			break
+		}
+
 		switch token.Type {
-		case NUMBER, STRING:
+		case NUMBER, STRING, IDENTIFIER:
 			output = append(output, p.ParsePrimaryExpression())
 		case OPERATOR:
 			for len(operators) > 0 && Precedence[operators[len(operators)-1].Value] >= Precedence[token.Value] {
@@ -55,10 +65,6 @@ func (p *Parser) EvaluateAssignmentExpression() ast.ASTNode {
 
 			operators = operators[:len(operators)-1]
 			p.next()
-		case IDENTIFIER:
-			output = append(output, p.ParsePrimaryExpression())
-		case lx.SHELL_KEYWORD:
-			output = append(output, p.ParseShellExpression())
 		default:
 			endLoop = true
 			break
@@ -66,18 +72,12 @@ func (p *Parser) EvaluateAssignmentExpression() ast.ASTNode {
 	}
 
 	for len(operators) > 0 {
+		isBinaryExpression = true
 		output = append(output, operators[len(operators)-1])
 		operators = operators[:len(operators)-1]
 	}
 
-	isBinaryExpression := false
-	reflectLastOutput := reflect.TypeOf(output[len(output)-1])
-
-	if reflectLastOutput == reflect.TypeOf(lx.Token{}) {
-		if lx.TokenType(output[len(output)-1].(lx.Token).Type) == OPERATOR {
-			isBinaryExpression = true
-		}
-	}
+	// utils.ParseToJson(output)
 
 	if isBinaryExpression {
 		return p.ParseBinaryExpression(output)
@@ -89,9 +89,9 @@ func (p *Parser) EvaluateAssignmentExpression() ast.ASTNode {
 func (p *Parser) ParsePrimaryExpression() ast.ASTNode {
 	switch p.peek().Type {
 	case NUMBER:
-		return p.ParseLiteral()
+		return p.ParseNumberLiteral()
 	case STRING:
-		return p.ParseLiteral()
+		return p.ParseStringLiteral(nil)
 	case IDENTIFIER:
 		return p.ParseIdentifier()
 	default:

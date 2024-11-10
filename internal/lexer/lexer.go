@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -28,25 +29,41 @@ func NewLexerFromFilename(filename string) *Lexer {
 	return NewLexer(string(content), filename)
 }
 
+var TokensWithWhiteSpace []string = []string{
+	ECHO,
+}
+
+func isTokenWithWhiteSpace(tokenValue string) bool {
+	for _, token := range TokensWithWhiteSpace {
+		if tokenValue == token {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (l *Lexer) matchToken(chunk string, token *Token) bool {
 	for _, spec := range TokenSpecs {
 		if match := spec.pattern.FindString(chunk); match != "" {
-
-			// if spec.tokenType == STRING {
-			// 	matchContent := match[1 : len(match)-1]
-			// 	fmt.Println(matchContent)
-			// }
-
+			// fmt.Println("chunk", chunk, "match", match, "type", spec.tokenType)
 			// Ensure the match occurs at the beginning of the chunk
 			if strings.HasPrefix(chunk, match) {
+				matchedValue := strings.TrimSpace(match)
 				line := strings.Count(l.Source[:l.Pos], "\n") + 1
-				token.Line = line
-				token.Start = l.Pos
-				token.End = l.Pos + len(match)
-				token.Value = strings.TrimSpace(match)
-				token.Type = spec.tokenType
+
+				token = &Token{
+					Line:     line,
+					Start:    l.Pos,
+					End:      l.Pos + len(match),
+					Value:    matchedValue,
+					RawValue: match,
+					Type:     spec.tokenType,
+				}
+
 				l.Tokens = append(l.Tokens, *token)
 				l.Pos += len(match)
+
 				return true
 			}
 		}
@@ -55,21 +72,16 @@ func (l *Lexer) matchToken(chunk string, token *Token) bool {
 	return false
 }
 
+var whitespaceRegex = regexp.MustCompile(`\s`)
+
 func (l *Lexer) skipWhitespace() {
-	for l.Pos < len(l.Source) {
-		char := l.Source[l.Pos]
-		// Check for whitespace and newline characters
-		if char == ' ' || char == '\n' || char == '\t' || char == '\r' {
-			l.Pos++
-		} else {
-			break
-		}
+	for l.Pos < len(l.Source) && whitespaceRegex.MatchString(string(l.Source[l.Pos])) {
+		l.Pos++
 	}
 }
 
 func (l *Lexer) Tokenize() []Token {
 	for l.Pos < len(l.Source) {
-		// Skip any whitespace characters first
 		l.skipWhitespace()
 
 		token := &Token{}
@@ -99,7 +111,9 @@ func (l *Lexer) Tokenize() []Token {
 		}
 	}
 
-	// Append EOF token at the end
-	l.Tokens = append(l.Tokens, Token{Type: EOF, Start: l.Pos, End: l.Pos})
+	if len(l.Tokens) == 0 || l.Tokens[len(l.Tokens)-1].Type != EOF {
+		l.Tokens = append(l.Tokens, Token{Type: EOF, Start: l.Pos, End: l.Pos})
+	}
+
 	return l.Tokens
 }

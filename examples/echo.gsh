@@ -1,1 +1,9 @@
-echo "Hello World Gdas $hello1$hello2$hello3 $hello4 asdasdas"
+var name = "nazir"
+var age = 100
+
+echo my name is $name and my age is $age
+
+age = 200
+name = "ulum"
+
+echo -e my name is \n $name and my age is $age

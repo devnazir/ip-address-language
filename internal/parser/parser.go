@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"runtime/debug"
 
 	lx "github.com/devnazir/gosh-script/internal/lexer"
 	"github.com/devnazir/gosh-script/pkg/ast"
@@ -37,6 +38,7 @@ func (p *Parser) Parse() ast.Program {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println(r)
+			debug.PrintStack()
 		}
 	}()
 

@@ -35,5 +35,7 @@ func (p *Parser) ParseBinaryExpression(output []ast.ASTNode) ast.ASTNode {
 		})
 	}
 
+	// utils.ParseToJson(stack[0])
+
 	return stack[0]
 }

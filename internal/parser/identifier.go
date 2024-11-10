@@ -5,13 +5,15 @@ import (
 	"strings"
 
 	"github.com/devnazir/gosh-script/pkg/ast"
+	"github.com/devnazir/gosh-script/pkg/utils"
 )
 
 func (p *Parser) ParseIdentifier() ast.Identifier {
-	trimmedName := strings.Trim(p.peek().Value, "$;")
+	v, _ := utils.RemoveDoubleQuotes(p.peek().Value)
+	trimmedName := strings.Trim(v, "$")
 
 	ast := ast.Identifier{
-		Name: trimmedName,
+		Name: strings.TrimSpace(trimmedName),
 		BaseNode: ast.BaseNode{
 			Type:  reflect.TypeOf(ast.Identifier{}).Name(),
 			Start: p.peek().Start,

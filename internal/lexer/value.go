@@ -34,8 +34,8 @@ const (
 	COMMENT        TokenType = "COMMENT"
 	DOLLAR_SIGN    TokenType = "DOLLAR_SIGN"
 	FLAG           TokenType = "FLAG"
-	COMMA          TokenType = "COMMA"
-	NEWLINE        TokenType = "NEWLINE"
+	WHITESPACE     TokenType = "WHITESPACE"
+	NEWLINESTRING  TokenType = "NEWLINESTRING"
 )
 
 const (
@@ -77,7 +77,7 @@ var primitiveTypes = Keywords{
 }
 
 func generatePattern(keywords []string) string {
-	return `(\s*|^)` + `\b(` + strings.Join(keywords, "|") + `)\b(\s*|$)`
+	return `(\s*|^)\b(` + strings.Join(keywords, "|") + `)\b(\s*|$)`
 }
 
 func compilePattern(pattern string) *regexp.Regexp {
@@ -90,19 +90,19 @@ var TokenSpecs = []TokenSpec{
 	{SHELL_KEYWORD, compilePattern(generatePattern(shellKeywords))},
 	{PRIMITIVE_TYPE, compilePattern(generatePattern(primitiveTypes))},
 
-	{IDENTIFIER, compilePattern(`\b[a-zA-Z_][a-zA-Z0-9_]*\b`)},
+	{IDENTIFIER, compilePattern(`(\s*|^)\b[a-zA-Z_][a-zA-Z0-9_]*\b(\s*|$)`)},
 	{FLAG, compilePattern(`-\w+`)},
 	{NUMBER, compilePattern(`\b\d+(\.\d+)?\b`)},
 	{OPERATOR, compilePattern(`[+\-*/=]`)},
-	{STRING, compilePattern(`"[^"]*"`)},
+	{STRING, compilePattern(`"([^\n"$])*"`)},
 
-	{DOLLAR_SIGN, compilePattern(`\$\w+`)},
+	{DOLLAR_SIGN, compilePattern(`(\s*|^|)\$\w+(\s*|$)`)},
 	{LPAREN, compilePattern(`\(`)},
 	{RPAREN, compilePattern(`\)`)},
 	{LCURLY_BRACKET, compilePattern(`\{`)},
 	{RCURLY_BRACKET, compilePattern(`\}`)},
 	{SEMICOLON, compilePattern(`;`)},
-	{COMMA, compilePattern(`,`)},
+	{NEWLINESTRING, compilePattern(`\\n`)},
 }
 
 func TokenMap() map[TokenType]*regexp.Regexp {
@@ -113,12 +113,15 @@ func TokenMap() map[TokenType]*regexp.Regexp {
 	return tokenMap
 }
 
+var TokenSpecsMap = TokenMap()
+
 type Token struct {
-	Type  TokenType
-	Start int
-	End   int
-	Value string
-	Line  int
+	Type     TokenType
+	Start    int
+	End      int
+	Value    string
+	RawValue string
+	Line     int
 }
 
 func (t Token) GetLine() int {
@@ -130,4 +133,8 @@ type Lexer struct {
 	Tokens   []Token
 	Pos      int
 	Filename string
+}
+
+type TokenizeStruct struct {
+	AddWhiteSpaceToken bool
 }

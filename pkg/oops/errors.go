@@ -1,6 +1,8 @@
 package oops
 
 import (
+	"fmt"
+
 	lx "github.com/devnazir/gosh-script/internal/lexer"
 	"github.com/devnazir/gosh-script/pkg/ast"
 )
@@ -59,5 +61,9 @@ var (
 
 	IdentifierNotFoundError = func(identifierToken ast.Identifier) error {
 		panic(New(CreateErrorMessage(identifierToken, "Identifier '%s' not found", identifierToken.Name)))
+	}
+
+	InvalidFileExtensionError = func(filename string) error {
+		panic(fmt.Errorf("Invalid file extension: %s, expected .gsh or .gosh or .gs", filename))
 	}
 )

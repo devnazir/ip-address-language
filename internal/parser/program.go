@@ -21,7 +21,7 @@ func (p *Parser) ParseProgram() ast.Program {
 	}
 
 	for p.pos < len(p.tokens) {
-
+		// fmt.Println(p.peek())
 		switch p.peek().Type {
 		case KEYWORD:
 			if p.peek().Value == lx.SOURCE {
@@ -31,6 +31,7 @@ func (p *Parser) ParseProgram() ast.Program {
 			if p.peek().Value == lx.VAR || p.peek().Value == lx.CONST {
 				program.Body = append(program.Body, p.ParseVariableDeclaration())
 			}
+
 		case lx.SHELL_KEYWORD:
 			program.Body = append(program.Body, p.ParseShellExpression())
 
@@ -40,19 +41,18 @@ func (p *Parser) ParseProgram() ast.Program {
 			if p.peek().Type == OPERATOR && p.peek().Value == "=" {
 				p.next()
 				program.Body = append(program.Body, p.ParseAssignmentExpression(identToken))
-			} else {
-				p.next()
-				oops.UnexpectedTokenError(p.peek(), "")
 			}
+
 		case EOF:
 			return program
-		case lx.SEMICOLON, lx.COMMENT, lx.NEWLINE:
+		case lx.SEMICOLON, lx.COMMENT, lx.WHITESPACE:
 			p.next()
 		case ILLEGAL:
 			oops.IllegalTokenError(p.peek())
 			p.next()
 		default:
 			oops.UnexpectedTokenError(p.peek(), "")
+			break
 		}
 	}
 

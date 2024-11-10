@@ -2,6 +2,7 @@ package interpreter
 
 import (
 	"fmt"
+	"runtime/debug"
 
 	"github.com/devnazir/gosh-script/pkg/ast"
 )
@@ -17,6 +18,7 @@ func (i *Interpreter) Interpret(p ast.ASTNode) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println(r)
+			debug.PrintStack()
 		}
 	}()
 
@@ -32,6 +34,9 @@ func (i *Interpreter) Interpret(p ast.ASTNode) {
 				expression:    nodeItem.(ast.ShellExpression),
 				captureOutput: false,
 			})
+
+		case ast.AssignmentExpression:
+			i.InterpretAssigmentExpression(nodeItem.(ast.AssignmentExpression))
 		}
 	}
 }

@@ -1,24 +1,24 @@
 package interpreter
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/devnazir/gosh-script/pkg/ast"
-	"github.com/devnazir/gosh-script/pkg/oops"
 )
 
 func (i *Interpreter) InterpretBinaryExpr(b ast.ASTNode) interface{} {
-	if reflect.TypeOf(b) == reflect.TypeOf(ast.Literal{}) {
-		return b.(ast.Literal).Value
+	if reflect.TypeOf(b) == reflect.TypeOf(ast.StringLiteral{}) {
+		return b.(ast.StringLiteral).Value
+	}
+
+	if reflect.TypeOf(b) == reflect.TypeOf(ast.NumberLiteral{}) {
+		return b.(ast.NumberLiteral).Value
 	}
 
 	if reflect.TypeOf(b) == reflect.TypeOf(ast.Identifier{}) {
 		name := b.(ast.Identifier).Name
 		value := env.GetVariable(name)
-
-		if value == nil {
-			oops.IdentifierNotFoundError(b.(ast.Identifier))
-		}
 
 		return value
 	}
@@ -27,9 +27,14 @@ func (i *Interpreter) InterpretBinaryExpr(b ast.ASTNode) interface{} {
 		leftValue := i.InterpretBinaryExpr(b.(ast.BinaryExpression).Left)
 		rightValue := i.InterpretBinaryExpr(b.(ast.BinaryExpression).Right)
 		operator := b.(ast.BinaryExpression).Operator
+		isConcat := false
 
 		var leftFloat, rightFloat float64
 		var isLeftFloat, isRightFloat bool
+
+		if reflect.TypeOf(leftValue) == reflect.TypeOf("") || reflect.TypeOf(rightValue) == reflect.TypeOf("") {
+			isConcat = true
+		}
 
 		switch v := leftValue.(type) {
 		case int:
@@ -37,8 +42,10 @@ func (i *Interpreter) InterpretBinaryExpr(b ast.ASTNode) interface{} {
 		case float64:
 			leftFloat = v
 			isLeftFloat = true
+		case string:
+			leftValue = string(v)
 		default:
-			return 0
+			return v
 		}
 
 		switch v := rightValue.(type) {
@@ -47,8 +54,19 @@ func (i *Interpreter) InterpretBinaryExpr(b ast.ASTNode) interface{} {
 		case float64:
 			rightFloat = v
 			isRightFloat = true
+		case string:
+			rightValue = string(v)
 		default:
-			return 0
+			return v
+		}
+
+		if isConcat {
+
+			if operator != "+" {
+				panic(fmt.Sprintf("%v operator is not allowed", operator))
+			}
+
+			return fmt.Sprintf("%v", leftValue) + fmt.Sprintf("%v", rightValue)
 		}
 
 		var result interface{}

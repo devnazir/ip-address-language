@@ -1,6 +1,9 @@
 package utils
 
-import "regexp"
+import (
+	"regexp"
+	"strings"
+)
 
 func ExtractNonVarAndVars(text string) (string, string) {
 	// Match all text that does not start with `$`
@@ -23,4 +26,14 @@ func ExtractNonVarAndVars(text string) (string, string) {
 	}
 
 	return nonVarText, varText
+}
+
+func RemoveDoubleQuotes(text string) (string, int) {
+	if len(text) < 2 {
+		return text, 0
+	}
+
+	text = strings.ReplaceAll(text, "\"", "")
+	doubleQuotesCount := strings.Count(text, "\"")
+	return text, doubleQuotesCount
 }

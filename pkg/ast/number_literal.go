@@ -1,6 +1,6 @@
 package ast
 
-type Literal struct {
+type NumberLiteral struct {
 	BaseNode
 	Value interface{}
 	Raw   string

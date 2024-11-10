@@ -9,3 +9,13 @@ var b = (1 + 1) * 2
 var c = 1 + (1 * 2)
 var d = 1 + 1 * (2 / 2)
 
+echo $sum
+echo $multiplySum
+echo $divideSum
+echo $subtractSum
+echo $addSum
+
+echo $a
+echo $b
+echo $c
+echo $d

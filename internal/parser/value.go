@@ -21,8 +21,6 @@ type Parser struct {
 	pos    int
 }
 
-var TokenMap = lx.TokenMap()
-
 var Precedence = map[string]int{
 	"+": 1,
 	"-": 1,

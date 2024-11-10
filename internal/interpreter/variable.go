@@ -1,12 +1,14 @@
 package interpreter
 
 import (
+	"strings"
+
 	"github.com/devnazir/gosh-script/pkg/ast"
 	"github.com/devnazir/gosh-script/pkg/oops"
 )
 
 func (i *Interpreter) InterpretVariableDeclaration(nodeVar ast.VariableDeclaration) {
-	name := nodeVar.Declarations[0].Id.(ast.Identifier).Name
+	name := strings.TrimSpace(nodeVar.Declarations[0].Id.(ast.Identifier).Name)
 
 	if env.HasVariable(name) {
 		oops.DuplicateIdentifierError(nodeVar)

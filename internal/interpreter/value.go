@@ -1,6 +1,9 @@
 package interpreter
 
-import "github.com/devnazir/gosh-script/pkg/ast"
+import (
+	"github.com/devnazir/gosh-script/pkg/ast"
+	"github.com/devnazir/gosh-script/pkg/oops"
+)
 
 type Interpreter struct {
 	Environment *Environment
@@ -29,7 +32,7 @@ func (e *Environment) GetVariable(name string) interface{} {
 		}
 	}
 
-	return nil
+	panic(oops.IdentifierNotFoundError(ast.Identifier{Name: name}))
 }
 
 func (e *Environment) HasVariable(name string) bool {

@@ -14,7 +14,7 @@ func (p *Parser) ParseSourceDeclaration() ast.ASTNode {
 
 	switch p.peek().Type {
 	case STRING:
-		sources = append(sources, p.ParseLiteral())
+		sources = append(sources, p.ParseStringLiteral(nil))
 
 	case lx.LPAREN:
 		p.next()
@@ -23,7 +23,7 @@ func (p *Parser) ParseSourceDeclaration() ast.ASTNode {
 		for !endLoop {
 			switch p.peek().Type {
 			case STRING:
-				sources = append(sources, p.ParseLiteral())
+				sources = append(sources, p.ParseStringLiteral(nil))
 			case lx.RPAREN:
 				endLoop = true
 				p.next()
