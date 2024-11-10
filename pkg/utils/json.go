@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func ParseToJson(data interface{}) {
+func PrintJson(data interface{}) {
 	jsonData, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
 		fmt.Println("Error marshalling to JSON:", err)

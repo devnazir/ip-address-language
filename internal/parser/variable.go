@@ -24,8 +24,8 @@ func (p *Parser) ParseVariableDeclaration() ast.VariableDeclaration {
 	identToken := p.peek()
 
 	// expect identifier
-	if p.peek().Type != IDENTIFIER {
-		if p.peek().Value != lx.VAR && p.peek().Value != lx.CONST {
+	if p.peek().Type != lx.TokenIdentifier {
+		if p.peek().Value != lx.KeywordVar && p.peek().Value != lx.KeywordConst {
 			oops.IllegalIdentifierError(p.peek())
 		}
 
@@ -36,14 +36,14 @@ func (p *Parser) ParseVariableDeclaration() ast.VariableDeclaration {
 
 	p.next() // skip identifier, next to assignment operator or type annotation
 
-	if p.peek().Type != PRIMITIVE_TYPE && varTypeToken.Value == lx.VAR {
-		if p.peek().Type != OPERATOR && p.peek().Value != "=" {
+	if p.peek().Type != lx.TokenPrimitiveType && varTypeToken.Value == lx.KeywordVar {
+		if p.peek().Type != lx.TokenOperator && p.peek().Value != "=" {
 			oops.ExpectedTypeAnnotationError(identToken)
 		}
 	}
 
 	// check if the next token has primitive type
-	if p.peek().Type == PRIMITIVE_TYPE {
+	if p.peek().Type == lx.TokenPrimitiveType {
 		// primitiveType := p.peek().Value
 		// ast.TypeAnnotation = primitiveType
 		p.next()
@@ -52,10 +52,10 @@ func (p *Parser) ParseVariableDeclaration() ast.VariableDeclaration {
 	// expect assignment operator
 	operator := p.peek().Value
 
-	if p.peek().Type != OPERATOR && operator != "=" {
+	if p.peek().Type != lx.TokenOperator && operator != "=" {
 
 		// var can be used to declare a variable without assignment
-		if varTypeToken.Value == lx.VAR {
+		if varTypeToken.Value == lx.KeywordVar {
 			return ast
 		}
 

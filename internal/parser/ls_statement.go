@@ -9,6 +9,7 @@ import (
 func (p *Parser) ParseLsStatement() ast.ASTNode {
 	startStmtToken := p.peek()
 
+	p.next()
 	return ast.ShellExpression{
 		BaseNode: ast.BaseNode{
 			Type:  reflect.TypeOf(ast.ShellExpression{}).Name(),

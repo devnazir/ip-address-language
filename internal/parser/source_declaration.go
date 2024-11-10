@@ -13,18 +13,18 @@ func (p *Parser) ParseSourceDeclaration() ast.ASTNode {
 	sources := []ast.ASTNode{}
 
 	switch p.peek().Type {
-	case STRING:
+	case lx.TokenString:
 		sources = append(sources, p.ParseStringLiteral(nil))
 
-	case lx.LPAREN:
+	case lx.TokenLeftParen:
 		p.next()
 		endLoop := false
 
 		for !endLoop {
 			switch p.peek().Type {
-			case STRING:
+			case lx.TokenString:
 				sources = append(sources, p.ParseStringLiteral(nil))
-			case lx.RPAREN:
+			case lx.TokenRightParen:
 				endLoop = true
 				p.next()
 			default:

@@ -6,74 +6,63 @@ import (
 )
 
 type TokenType string
-type Keywords []string
+type KeywordList []string
 
 type TokenSpec struct {
-	tokenType TokenType
-	pattern   *regexp.Regexp
+	Type    TokenType
+	Pattern *regexp.Regexp
 }
 
 const (
-	IDENTIFIER     TokenType = "IDENTIFIER"
-	PRIMITIVE_TYPE TokenType = "PRIMITIVE_TYPE"
-	COMPOSITE_TYPE TokenType = "COMPOSITE_TYPE"
-	KEYWORD        TokenType = "KEYWORD"
-	SHELL_KEYWORD  TokenType = "SHELL_KEYWORD"
-	NUMBER         TokenType = "NUMBER"
-	OPERATOR       TokenType = "OPERATOR"
-	LPAREN         TokenType = "LPAREN"
-	RPAREN         TokenType = "RPAREN"
-	LCURLY_BRACKET TokenType = "LCURLY_BRACKET"
-	RCURLY_BRACKET TokenType = "RCURLY_BRACKET"
-	SEMICOLON      TokenType = "SEMICOLON"
-	EOF            TokenType = "EOF"
-	STRING         TokenType = "STRING"
-	FUNC           TokenType = "FUNC"
-	RETURN         TokenType = "RETURN"
-	ILLEGAL        TokenType = "ILLEGAL"
-	COMMENT        TokenType = "COMMENT"
-	DOLLAR_SIGN    TokenType = "DOLLAR_SIGN"
-	FLAG           TokenType = "FLAG"
-	WHITESPACE     TokenType = "WHITESPACE"
-	NEWLINESTRING  TokenType = "NEWLINESTRING"
+	TokenIdentifier    TokenType = "IDENTIFIER"
+	TokenPrimitiveType TokenType = "PRIMITIVE_TYPE"
+	TokenCompositeType TokenType = "COMPOSITE_TYPE"
+	TokenKeyword       TokenType = "KEYWORD"
+	TokenShellKeyword  TokenType = "SHELL_KEYWORD"
+	TokenNumber        TokenType = "TokenNumber"
+	TokenOperator      TokenType = "OPERATOR"
+	TokenLeftParen     TokenType = "LEFT_PAREN"
+	TokenRightParen    TokenType = "RIGHT_PAREN"
+	TokenLeftCurly     TokenType = "LEFT_CURLY_BRACKET"
+	TokenRightCurly    TokenType = "RIGHT_CURLY_BRACKET"
+	TokenSemicolon     TokenType = "SEMICOLON"
+	TokenEOF           TokenType = "EOF"
+	TokenString        TokenType = "STRING"
+	TokenFunction      TokenType = "FUNCTION"
+	TokenReturn        TokenType = "RETURN"
+	TokenIllegal       TokenType = "ILLEGAL"
+	TokenComment       TokenType = "COMMENT"
+	TokenDollarSign    TokenType = "DOLLAR_SIGN"
+	TokenFlag          TokenType = "FLAG"
+	TokenWhitespace    TokenType = "WHITESPACE"
+	TokenNewline       TokenType = "NEWLINE"
+	TokenSubshell      TokenType = "SUBSHELL"
 )
 
 const (
-	VAR    = "var"
-	CONST  = "const"
-	ECHO   = "echo"
-	LS     = "ls"
-	SOURCE = "source"
+	KeywordVar      = "var"
+	KeywordConst    = "const"
+	KeywordEcho     = "echo"
+	KeywordLs       = "ls"
+	KeywordSource   = "source"
+	KeywordIf       = "if"
+	KeywordElse     = "else"
+	KeywordFunc     = "func"
+	KeywordReturn   = "return"
+	KeywordFor      = "for"
+	KeywordWhile    = "while"
+	KeywordDo       = "do"
+	KeywordBreak    = "break"
+	KeywordContinue = "continue"
 )
 
-var variableKeywords = Keywords{
-	VAR,
-	CONST,
-}
+var variableKeywords = KeywordList{KeywordVar, KeywordConst}
+var controlFlowKeywords = KeywordList{KeywordIf, KeywordElse, KeywordFor, KeywordWhile, KeywordDo, KeywordBreak, KeywordContinue}
+var shellKeywords = KeywordList{KeywordEcho, KeywordLs}
+var primitiveTypes = KeywordList{"bool", "int", "float64", "string"}
 
-var keywords = append(variableKeywords, Keywords{
-	"if",
-	"else",
-	"func",
-	"return",
-	"source",
-}...)
-
-var shellKeywords = Keywords{
-	ECHO,
-	LS,
-}
-
-var primitiveTypes = Keywords{
-	// Boolean types
-	"bool",
-
-	// Numeric types
-	"int",
-	"float64",
-
-	// String type
-	"string",
+func getKeywords() KeywordList {
+	return append(variableKeywords, controlFlowKeywords...)
 }
 
 func generatePattern(keywords []string) string {
@@ -84,36 +73,37 @@ func compilePattern(pattern string) *regexp.Regexp {
 	return regexp.MustCompile(pattern)
 }
 
-var TokenSpecs = []TokenSpec{
-	{COMMENT, compilePattern(`(//.*)|(/\*[\s\S]*?\*/)`)},
-	{KEYWORD, compilePattern(generatePattern(keywords))},
-	{SHELL_KEYWORD, compilePattern(generatePattern(shellKeywords))},
-	{PRIMITIVE_TYPE, compilePattern(generatePattern(primitiveTypes))},
+var tokenSpecs = []TokenSpec{
+	{Type: TokenComment, Pattern: compilePattern(`(//.*)|(/\*[\s\S]*?\*/)`)},
+	{Type: TokenKeyword, Pattern: compilePattern(generatePattern(getKeywords()))},
+	{Type: TokenShellKeyword, Pattern: compilePattern(generatePattern(shellKeywords))},
+	{Type: TokenPrimitiveType, Pattern: compilePattern(generatePattern(primitiveTypes))},
 
-	{IDENTIFIER, compilePattern(`(\s*|^)\b[a-zA-Z_][a-zA-Z0-9_]*\b(\s*|$)`)},
-	{FLAG, compilePattern(`-\w+`)},
-	{NUMBER, compilePattern(`\b\d+(\.\d+)?\b`)},
-	{OPERATOR, compilePattern(`[+\-*/=]`)},
-	{STRING, compilePattern(`"([^\n"$])*"`)},
+	{Type: TokenIdentifier, Pattern: compilePattern(`(\s*|^)\b[a-zA-Z_][a-zA-Z0-9_]*\b(\s*|$)`)},
+	{Type: TokenFlag, Pattern: compilePattern(`-\w+`)},
+	{Type: TokenNumber, Pattern: compilePattern(`\b\d+(\.\d+)?\b`)},
+	{Type: TokenOperator, Pattern: compilePattern(`[+\-*/=]`)},
+	{Type: TokenString, Pattern: compilePattern(`"([^\n"$])*"`)},
 
-	{DOLLAR_SIGN, compilePattern(`(\s*|^|)\$\w+(\s*|$)`)},
-	{LPAREN, compilePattern(`\(`)},
-	{RPAREN, compilePattern(`\)`)},
-	{LCURLY_BRACKET, compilePattern(`\{`)},
-	{RCURLY_BRACKET, compilePattern(`\}`)},
-	{SEMICOLON, compilePattern(`;`)},
-	{NEWLINESTRING, compilePattern(`\\n`)},
+	{Type: TokenDollarSign, Pattern: compilePattern(`(\s*|^|)\$\w+(\s*|$)`)},
+	{Type: TokenLeftParen, Pattern: compilePattern(`\(`)},
+	{Type: TokenRightParen, Pattern: compilePattern(`\)`)},
+	{Type: TokenLeftCurly, Pattern: compilePattern(`\{`)},
+	{Type: TokenRightCurly, Pattern: compilePattern(`\}`)},
+	{Type: TokenSemicolon, Pattern: compilePattern(`;`)},
+	{Type: TokenNewline, Pattern: compilePattern(`\\n`)},
+	{Type: TokenSubshell, Pattern: compilePattern(`(?:.*)\$\(.*\)`)},
 }
 
-func TokenMap() map[TokenType]*regexp.Regexp {
+func generateTokenMap() map[TokenType]*regexp.Regexp {
 	tokenMap := make(map[TokenType]*regexp.Regexp)
-	for _, spec := range TokenSpecs {
-		tokenMap[spec.tokenType] = spec.pattern
+	for _, spec := range tokenSpecs {
+		tokenMap[spec.Type] = spec.Pattern
 	}
 	return tokenMap
 }
 
-var TokenSpecsMap = TokenMap()
+var tokenMap = generateTokenMap()
 
 type Token struct {
 	Type     TokenType
@@ -133,8 +123,5 @@ type Lexer struct {
 	Tokens   []Token
 	Pos      int
 	Filename string
-}
-
-type TokenizeStruct struct {
-	AddWhiteSpaceToken bool
+	Line     int
 }

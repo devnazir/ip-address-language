@@ -22,7 +22,7 @@ func (i *Interpreter) Interpret(p ast.ASTNode) {
 		}
 	}()
 
-	program := p.(ast.Program)
+	program := p.(*ast.Program)
 
 	for _, nodeItem := range program.Body {
 		switch nodeItem.(type) {

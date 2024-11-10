@@ -7,7 +7,7 @@ import (
 	"github.com/devnazir/gosh-script/pkg/ast"
 )
 
-func (p *Parser) ParseAssignmentExpression(identToken lx.Token) ast.ASTNode {
+func (p *Parser) ParseAssignmentExpression(identToken *lx.Token) ast.ASTNode {
 	expression := p.EvaluateAssignmentExpression()
 
 	return ast.AssignmentExpression{
@@ -33,7 +33,7 @@ func (p *Parser) EvaluateAssignmentExpression() ast.ASTNode {
 	token := p.peek()
 	startLine := token.Line
 
-	for !endLoop && token.Type != lx.SHELL_KEYWORD {
+	for !endLoop && token.Type != lx.TokenShellKeyword {
 		token := p.peek()
 
 		if startLine != token.Line {
@@ -43,9 +43,9 @@ func (p *Parser) EvaluateAssignmentExpression() ast.ASTNode {
 		}
 
 		switch token.Type {
-		case NUMBER, STRING, IDENTIFIER:
+		case lx.TokenNumber, lx.TokenString, lx.TokenIdentifier:
 			output = append(output, p.ParsePrimaryExpression())
-		case OPERATOR:
+		case lx.TokenOperator:
 			for len(operators) > 0 && Precedence[operators[len(operators)-1].Value] >= Precedence[token.Value] {
 				output = append(output, operators[len(operators)-1])
 				operators = operators[:len(operators)-1]
@@ -53,11 +53,11 @@ func (p *Parser) EvaluateAssignmentExpression() ast.ASTNode {
 
 			operators = append(operators, token)
 			p.next()
-		case LEFT_PAREN:
+		case lx.TokenLeftParen:
 			operators = append(operators, token)
 			p.next()
-		case RIGHT_PAREN:
-			for operators[len(operators)-1].Type != LEFT_PAREN {
+		case lx.TokenRightParen:
+			for operators[len(operators)-1].Type != lx.TokenLeftParen {
 				output = append(output, operators[len(operators)-1])
 				operators = operators[:len(operators)-1]
 				continue
@@ -88,11 +88,11 @@ func (p *Parser) EvaluateAssignmentExpression() ast.ASTNode {
 
 func (p *Parser) ParsePrimaryExpression() ast.ASTNode {
 	switch p.peek().Type {
-	case NUMBER:
+	case lx.TokenNumber:
 		return p.ParseNumberLiteral()
-	case STRING:
+	case lx.TokenString:
 		return p.ParseStringLiteral(nil)
-	case IDENTIFIER:
+	case lx.TokenIdentifier:
 		return p.ParseIdentifier()
 	default:
 		panic("Expected a primary expression (number, string, or identifier)")

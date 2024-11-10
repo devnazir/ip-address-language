@@ -10,9 +10,9 @@ import (
 func (p *Parser) ParseShellExpression() ast.ASTNode {
 
 	switch p.peek().Value {
-	case lx.ECHO:
+	case lx.KeywordEcho:
 		return p.ParseEchoStatement()
-	case lx.LS:
+	case lx.KeywordLs:
 		return p.ParseLsStatement()
 	default:
 		oops.UnexpectedKeywordError(p.peek())
