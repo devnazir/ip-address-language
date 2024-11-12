@@ -19,13 +19,14 @@ const (
 	TokenCompositeType TokenType = "COMPOSITE_TYPE"
 	TokenKeyword       TokenType = "KEYWORD"
 	TokenShellKeyword  TokenType = "SHELL_KEYWORD"
-	TokenNumber        TokenType = "TokenNumber"
+	TokenNumber        TokenType = "NUMBER"
 	TokenOperator      TokenType = "OPERATOR"
 	TokenLeftParen     TokenType = "LEFT_PAREN"
 	TokenRightParen    TokenType = "RIGHT_PAREN"
 	TokenLeftCurly     TokenType = "LEFT_CURLY_BRACKET"
 	TokenRightCurly    TokenType = "RIGHT_CURLY_BRACKET"
 	TokenSemicolon     TokenType = "SEMICOLON"
+	TokenColon         TokenType = "COLON"
 	TokenEOF           TokenType = "EOF"
 	TokenString        TokenType = "STRING"
 	TokenFunction      TokenType = "FUNCTION"
@@ -43,7 +44,6 @@ const (
 	KeywordVar      = "var"
 	KeywordConst    = "const"
 	KeywordEcho     = "echo"
-	KeywordLs       = "ls"
 	KeywordSource   = "source"
 	KeywordIf       = "if"
 	KeywordElse     = "else"
@@ -54,12 +54,21 @@ const (
 	KeywordDo       = "do"
 	KeywordBreak    = "break"
 	KeywordContinue = "continue"
+	KeywordSleep    = "sleep"
+)
+
+const (
+	boolType    = "bool"
+	intType     = "int"
+	float64Type = "float64"
+	stringType  = "string"
 )
 
 var variableKeywords = KeywordList{KeywordVar, KeywordConst}
 var controlFlowKeywords = KeywordList{KeywordIf, KeywordElse, KeywordFor, KeywordWhile, KeywordDo, KeywordBreak, KeywordContinue}
-var shellKeywords = KeywordList{KeywordEcho, KeywordLs}
-var primitiveTypes = KeywordList{"bool", "int", "float64", "string"}
+var shellKeywords = KeywordList{KeywordEcho, KeywordSource, KeywordSleep}
+var otherKeywords = KeywordList{KeywordFunc, KeywordReturn}
+var primitiveTypes = KeywordList{boolType, intType, float64Type, stringType}
 
 func getKeywords() KeywordList {
 	return append(variableKeywords, controlFlowKeywords...)
@@ -78,6 +87,7 @@ var tokenSpecs = []TokenSpec{
 	{Type: TokenKeyword, Pattern: compilePattern(generatePattern(getKeywords()))},
 	{Type: TokenShellKeyword, Pattern: compilePattern(generatePattern(shellKeywords))},
 	{Type: TokenPrimitiveType, Pattern: compilePattern(generatePattern(primitiveTypes))},
+	{Type: TokenSubshell, Pattern: compilePattern(`\$\((.*)\)`)},
 
 	{Type: TokenIdentifier, Pattern: compilePattern(`(\s*|^)\b[a-zA-Z_][a-zA-Z0-9_]*\b(\s*|$)`)},
 	{Type: TokenFlag, Pattern: compilePattern(`-\w+`)},
@@ -92,7 +102,7 @@ var tokenSpecs = []TokenSpec{
 	{Type: TokenRightCurly, Pattern: compilePattern(`\}`)},
 	{Type: TokenSemicolon, Pattern: compilePattern(`;`)},
 	{Type: TokenNewline, Pattern: compilePattern(`\\n`)},
-	{Type: TokenSubshell, Pattern: compilePattern(`(?:.*)\$\(.*\)`)},
+	{Type: TokenColon, Pattern: compilePattern(`:`)},
 }
 
 func generateTokenMap() map[TokenType]*regexp.Regexp {

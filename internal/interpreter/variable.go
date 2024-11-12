@@ -14,11 +14,8 @@ func (i *Interpreter) InterpretVariableDeclaration(nodeVar ast.VariableDeclarati
 		oops.DuplicateIdentifierError(nodeVar)
 	}
 
-	if _, ok := nodeVar.Declarations[0].Init.(ast.ShellExpression); ok {
-		res := i.InterpretShellExpression(InterpretShellExpression{
-			expression:    nodeVar.Declarations[0].Init.(ast.ShellExpression),
-			captureOutput: true,
-		})
+	if _, ok := nodeVar.Declarations[0].Init.(ast.SubShell); ok {
+		res := i.InterpretSubShell(nodeVar.Declarations[0].Init.(ast.SubShell).Arguments.(string))
 		env.SetVariable(name, res)
 		return
 	}

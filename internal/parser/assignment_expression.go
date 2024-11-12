@@ -65,6 +65,10 @@ func (p *Parser) EvaluateAssignmentExpression() ast.ASTNode {
 
 			operators = operators[:len(operators)-1]
 			p.next()
+
+		case lx.TokenSubshell:
+			output = append(output, p.ParseSubShell())
+
 		default:
 			endLoop = true
 			break

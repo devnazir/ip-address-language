@@ -24,10 +24,6 @@ func (p *Parser) ParseProgram() *ast.Program {
 		// fmt.Println(p.peek())
 		switch p.peek().Type {
 		case lx.TokenKeyword:
-			if p.peek().Value == lx.KeywordSource {
-				program.Body = append(program.Body, p.ParseSourceDeclaration())
-			}
-
 			if p.peek().Value == lx.KeywordVar || p.peek().Value == lx.KeywordConst {
 				program.Body = append(program.Body, p.ParseVariableDeclaration())
 			}
@@ -43,10 +39,15 @@ func (p *Parser) ParseProgram() *ast.Program {
 				program.Body = append(program.Body, p.ParseAssignmentExpression(&identToken))
 			}
 
+		case lx.TokenSubshell:
+			program.Body = append(program.Body, p.ParseSubShell())
+
 		case lx.TokenEOF:
 			return program
+
 		case lx.TokenSemicolon, lx.TokenComment, lx.TokenWhitespace:
 			p.next()
+
 		case lx.TokenIllegal:
 			oops.IllegalTokenError(p.peek())
 		default:

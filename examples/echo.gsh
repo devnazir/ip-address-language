@@ -17,3 +17,12 @@ echo -e \e[35mHello World in Magenta Color\e[0m
 
 // with background white and text color black
 echo -e \e[47;30mHello World in White Background and Black Text Color\e[0m
+
+echo $(ls > ./output/ls.txt)
+
+var capturedLs = $(ls)
+echo $capturedLs
+
+$(echo "Added" >> ./output/ls.txt)
+
+echo $(echo $(echo 1 2 3) 4 5)

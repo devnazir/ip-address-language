@@ -31,6 +31,17 @@ func NewLexerFromFilename(filename string) *Lexer {
 
 func (l *Lexer) matchToken(chunk string, token *Token) bool {
 	for _, spec := range tokenSpecs {
+
+		if !spec.Pattern.MatchString(chunk) {
+			continue
+		}
+
+		// utils.PrintJson(map[string]interface{}{
+		// 	"chunk": chunk,
+		// 	"spec":  spec,
+		// 	"match": spec.Pattern.FindString(chunk),
+		// })
+
 		if match := spec.Pattern.FindString(chunk); match != "" && match == chunk[:len(match)] {
 			matchedValue := strings.TrimSpace(match)
 

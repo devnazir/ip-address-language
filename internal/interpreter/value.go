@@ -62,8 +62,3 @@ type InterpretShellExpression struct {
 	expression    ast.ShellExpression
 	captureOutput bool
 }
-
-type InterpretLsStmt struct {
-	expression    ast.LsStatement
-	captureOutput bool
-}

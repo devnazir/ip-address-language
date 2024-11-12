@@ -32,6 +32,8 @@ func (p *Parser) ParseEchoStatement() ast.ASTNode {
 			arguments = append(arguments, p.ParseNumberLiteral())
 		case lx.TokenIllegal:
 			arguments = append(arguments, p.ParseIllegal())
+		case lx.TokenSubshell:
+			arguments = append(arguments, p.ParseSubShell())
 		case lx.TokenSemicolon:
 			p.next()
 		default:

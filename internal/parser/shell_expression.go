@@ -8,17 +8,14 @@ import (
 )
 
 func (p *Parser) ParseShellExpression() ast.ASTNode {
-
 	switch p.peek().Value {
+	case lx.KeywordSource:
+		return p.ParseSourceDeclaration()
 	case lx.KeywordEcho:
 		return p.ParseEchoStatement()
-	case lx.KeywordLs:
-		return p.ParseLsStatement()
 	default:
 		oops.UnexpectedKeywordError(p.peek())
 	}
-
-	p.next()
 
 	return ast.ShellExpression{}
 }

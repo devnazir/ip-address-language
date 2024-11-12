@@ -53,6 +53,10 @@ func (i *Interpreter) IntrepretEchoStmt(params IntrepretEchoStmt) string {
 
 			cmdArgs += fmt.Sprintf("%v", literal.Raw)
 
+		case ast.SubShell:
+			subShell := argument.(ast.SubShell)
+			cmdArgs += "'$(" + fmt.Sprintf("%v", subShell.Arguments) + ")'"
+
 		case ast.Illegal:
 			illegal := argument.(ast.Illegal)
 			cmdArgs += fmt.Sprintf("%v", illegal.Value) + " "

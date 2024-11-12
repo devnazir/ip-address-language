@@ -11,6 +11,7 @@ type EchoStatement struct {
 	Flags     []string
 }
 
-type LsStatement struct {
+type SubShell struct { 
 	BaseNode
+	Arguments ASTNode
 }

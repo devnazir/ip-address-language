@@ -23,6 +23,13 @@ func (i *Interpreter) InterpretBinaryExpr(b ast.ASTNode) interface{} {
 		return value
 	}
 
+	if reflect.TypeOf(b) == reflect.TypeOf(ast.SubShell{}) {
+		name := b.(ast.Identifier).Name
+		value := env.GetVariable(name)
+
+		return value
+	}
+
 	if reflect.TypeOf(b) == reflect.TypeOf(ast.BinaryExpression{}) {
 		leftValue := i.InterpretBinaryExpr(b.(ast.BinaryExpression).Left)
 		rightValue := i.InterpretBinaryExpr(b.(ast.BinaryExpression).Right)

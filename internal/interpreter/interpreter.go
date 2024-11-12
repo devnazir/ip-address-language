@@ -35,6 +35,10 @@ func (i *Interpreter) Interpret(p ast.ASTNode) {
 				captureOutput: false,
 			})
 
+		case ast.SubShell:
+			res := i.InterpretSubShell(nodeItem.(ast.SubShell).Arguments.(string))
+			fmt.Printf("%v", res)
+
 		case ast.AssignmentExpression:
 			i.InterpretAssigmentExpression(nodeItem.(ast.AssignmentExpression))
 		}

@@ -16,12 +16,6 @@ func (i *Interpreter) InterpretShellExpression(params InterpretShellExpression) 
 			captureOutput: captureOutput,
 		})
 		result = res
-	case ast.LsStatement:
-		res := i.InterpretLsStmt(InterpretLsStmt{
-			expression:    expression.(ast.LsStatement),
-			captureOutput: captureOutput,
-		})
-		result = res
 	}
 
 	if captureOutput {
