@@ -43,7 +43,7 @@ func (p *Parser) EvaluateAssignmentExpression() ast.ASTNode {
 		}
 
 		switch token.Type {
-		case lx.TokenNumber, lx.TokenString, lx.TokenIdentifier:
+		case lx.TokenNumber, lx.TokenString, lx.TokenIdentifier, lx.TokenDollarSign:
 			output = append(output, p.ParsePrimaryExpression())
 		case lx.TokenOperator:
 			for len(operators) > 0 && Precedence[operators[len(operators)-1].Value] >= Precedence[token.Value] {
@@ -97,6 +97,8 @@ func (p *Parser) ParsePrimaryExpression() ast.ASTNode {
 	case lx.TokenString:
 		return p.ParseStringLiteral(nil)
 	case lx.TokenIdentifier:
+		return p.ParseIdentifier()
+	case lx.TokenDollarSign:
 		return p.ParseIdentifier()
 	default:
 		panic("Expected a primary expression (number, string, or identifier)")

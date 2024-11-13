@@ -93,9 +93,9 @@ var tokenSpecs = []TokenSpec{
 	{Type: TokenFlag, Pattern: compilePattern(`-\w+`)},
 	{Type: TokenNumber, Pattern: compilePattern(`\b\d+(\.\d+)?\b`)},
 	{Type: TokenOperator, Pattern: compilePattern(`[+\-*/=]`)},
-	{Type: TokenString, Pattern: compilePattern(`"([^\n"$])*"`)},
+	{Type: TokenString, Pattern: compilePattern(`"([^"\n])*"`)},
+	{Type: TokenDollarSign, Pattern: compilePattern(`(\s*|^)\$\w+(\s*|$)`)},
 
-	{Type: TokenDollarSign, Pattern: compilePattern(`(\s*|^|)\$\w+(\s*|$)`)},
 	{Type: TokenLeftParen, Pattern: compilePattern(`\(`)},
 	{Type: TokenRightParen, Pattern: compilePattern(`\)`)},
 	{Type: TokenLeftCurly, Pattern: compilePattern(`\{`)},

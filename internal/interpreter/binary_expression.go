@@ -24,9 +24,7 @@ func (i *Interpreter) InterpretBinaryExpr(b ast.ASTNode) interface{} {
 	}
 
 	if reflect.TypeOf(b) == reflect.TypeOf(ast.SubShell{}) {
-		name := b.(ast.Identifier).Name
-		value := env.GetVariable(name)
-
+		value := i.InterpretSubShell(b.(ast.SubShell).Arguments.(string))
 		return value
 	}
 

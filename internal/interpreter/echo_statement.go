@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"reflect"
 	"strconv"
+	"strings"
 
 	"github.com/devnazir/gosh-script/pkg/ast"
 	"github.com/devnazir/gosh-script/pkg/utils"
@@ -32,6 +33,11 @@ func (i *Interpreter) IntrepretEchoStmt(params IntrepretEchoStmt) string {
 
 			if reflect.TypeOf(value).Kind() == reflect.Int {
 				value = strconv.Itoa(value.(int))
+			}
+
+			vars := utils.FindShellVars(value.(string))
+			for _, v := range vars {
+				value = strings.ReplaceAll(value.(string), v, env.GetVariable(v[1:]).(string))
 			}
 
 			cmdArgs += fmt.Sprintf("%v", value) + " "
