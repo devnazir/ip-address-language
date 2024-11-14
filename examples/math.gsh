@@ -19,3 +19,11 @@ echo $a
 echo $b
 echo $c
 echo $d
+
+var Z = 1
+
+func init () {
+  echo $a;
+  echo $b;
+  echo $c;
+}

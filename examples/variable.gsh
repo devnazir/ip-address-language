@@ -3,3 +3,5 @@ var count2 int
 var str = "Hello World!"
 
 str = "Hello Again" 
+
+var Example = "Hello World!"

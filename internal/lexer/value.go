@@ -29,7 +29,6 @@ const (
 	TokenColon         TokenType = "COLON"
 	TokenEOF           TokenType = "EOF"
 	TokenString        TokenType = "STRING"
-	TokenFunction      TokenType = "FUNCTION"
 	TokenReturn        TokenType = "RETURN"
 	TokenIllegal       TokenType = "ILLEGAL"
 	TokenComment       TokenType = "COMMENT"
@@ -38,6 +37,7 @@ const (
 	TokenWhitespace    TokenType = "WHITESPACE"
 	TokenNewline       TokenType = "NEWLINE"
 	TokenSubshell      TokenType = "SUBSHELL"
+	TokenComma         TokenType = "COMMA"
 )
 
 const (
@@ -71,7 +71,13 @@ var otherKeywords = KeywordList{KeywordFunc, KeywordReturn}
 var primitiveTypes = KeywordList{boolType, intType, float64Type, stringType}
 
 func getKeywords() KeywordList {
-	return append(variableKeywords, controlFlowKeywords...)
+	totalKeywords := len(variableKeywords) + len(controlFlowKeywords) + len(otherKeywords)
+
+	allKeywords := make(KeywordList, 0, totalKeywords) // Pre-allocate the total size
+	allKeywords = append(allKeywords, variableKeywords...)
+	allKeywords = append(allKeywords, controlFlowKeywords...)
+	allKeywords = append(allKeywords, otherKeywords...)
+	return allKeywords
 }
 
 func generatePattern(keywords []string) string {
@@ -89,12 +95,12 @@ var tokenSpecs = []TokenSpec{
 	{Type: TokenPrimitiveType, Pattern: compilePattern(generatePattern(primitiveTypes))},
 	{Type: TokenSubshell, Pattern: compilePattern(`\$\((.*)\)`)},
 
-	{Type: TokenIdentifier, Pattern: compilePattern(`(\s*|^)\b[a-zA-Z_][a-zA-Z0-9_]*\b(\s*|$)`)},
+	{Type: TokenIdentifier, Pattern: compilePattern(`(\s*|^)\b[a-zA-Z_.][a-zA-Z0-9_.]*\b(\s*|$)`)},
 	{Type: TokenFlag, Pattern: compilePattern(`-\w+`)},
 	{Type: TokenNumber, Pattern: compilePattern(`\b\d+(\.\d+)?\b`)},
 	{Type: TokenOperator, Pattern: compilePattern(`[+\-*/=]`)},
 	{Type: TokenString, Pattern: compilePattern(`"([^"\n])*"`)},
-	{Type: TokenDollarSign, Pattern: compilePattern(`(\s*|^)\$\w+(\s*|$)`)},
+	{Type: TokenDollarSign, Pattern: compilePattern(`(\s*|^)\$\w+(\.\w+)*(\s*|$)`)},
 
 	{Type: TokenLeftParen, Pattern: compilePattern(`\(`)},
 	{Type: TokenRightParen, Pattern: compilePattern(`\)`)},
@@ -103,6 +109,7 @@ var tokenSpecs = []TokenSpec{
 	{Type: TokenSemicolon, Pattern: compilePattern(`;`)},
 	{Type: TokenNewline, Pattern: compilePattern(`\\n`)},
 	{Type: TokenColon, Pattern: compilePattern(`:`)},
+	{Type: TokenComma, Pattern: compilePattern(`,`)},
 }
 
 func generateTokenMap() map[TokenType]*regexp.Regexp {

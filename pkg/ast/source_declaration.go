@@ -2,5 +2,10 @@ package ast
 
 type SourceDeclaration struct {
 	BaseNode
-	Sources []ASTNode
+	Sources []Source
+}
+
+type Source struct {
+	StringLiteral
+	Alias string
 }
