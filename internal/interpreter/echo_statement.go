@@ -51,13 +51,25 @@ func (i *Interpreter) IntrepretEchoStmt(params IntrepretEchoStmt) string {
 			cmdArgs += fmt.Sprintf("%v", literal.Raw)
 		case ast.StringLiteral:
 			literal := argument.(ast.StringLiteral)
+			value := literal.Value
+
+			vars := utils.FindShellVars(value)
+			for _, v := range vars {
+
+				if _, ok := env.GetVariable(v[1:]).(int); ok {
+					value = strings.ReplaceAll(value, v, strconv.Itoa(env.GetVariable(v[1:]).(int)))
+					continue
+				}
+
+				value = strings.ReplaceAll(value, v, env.GetVariable(v[1:]).(string))
+			}
 
 			if literal.Value == "echo" {
-				cmdArgs += fmt.Sprintf("%v", literal.Value) + " -e '\n'"
+				cmdArgs += fmt.Sprintf("%v", value) + " -e '\n'"
 				break
 			}
 
-			cmdArgs += fmt.Sprintf("%v", literal.Raw)
+			cmdArgs += fmt.Sprintf("%v", value)
 
 		case ast.SubShell:
 			subShell := argument.(ast.SubShell)

@@ -2,7 +2,6 @@ package lexer
 
 import (
 	"regexp"
-	"strings"
 )
 
 type TokenType string
@@ -38,8 +37,10 @@ const (
 	TokenNewline       TokenType = "NEWLINE"
 	TokenSubshell      TokenType = "SUBSHELL"
 	TokenComma         TokenType = "COMMA"
+	TokenDot           TokenType = "DOT"
 )
 
+// List of keywords
 const (
 	KeywordVar      = "var"
 	KeywordConst    = "const"
@@ -62,65 +63,64 @@ const (
 	intType     = "int"
 	float64Type = "float64"
 	stringType  = "string"
+
+	MultiplicationSign = "*"
+	AdditionSign       = "+"
+	SubtractionSign    = "-"
+	DivisionSign       = "/"
+	EqualsSign         = "="
+
+	SingleLineComment     = "//"
+	MultiLineCommentStart = "/*"
+	MultilineDocComment   = "/**"
 )
 
-var variableKeywords = KeywordList{KeywordVar, KeywordConst}
-var controlFlowKeywords = KeywordList{KeywordIf, KeywordElse, KeywordFor, KeywordWhile, KeywordDo, KeywordBreak, KeywordContinue}
-var shellKeywords = KeywordList{KeywordEcho, KeywordSource, KeywordSleep}
-var otherKeywords = KeywordList{KeywordFunc, KeywordReturn}
-var primitiveTypes = KeywordList{boolType, intType, float64Type, stringType}
+var Keywords = map[string]TokenType{
+	KeywordVar:      TokenKeyword,
+	KeywordConst:    TokenKeyword,
+	KeywordEcho:     TokenShellKeyword,
+	KeywordSource:   TokenShellKeyword,
+	KeywordIf:       TokenKeyword,
+	KeywordElse:     TokenKeyword,
+	KeywordFunc:     TokenKeyword,
+	KeywordReturn:   TokenKeyword,
+	KeywordFor:      TokenKeyword,
+	KeywordWhile:    TokenKeyword,
+	KeywordDo:       TokenKeyword,
+	KeywordBreak:    TokenKeyword,
+	KeywordContinue: TokenKeyword,
+	KeywordSleep:    TokenShellKeyword,
 
-func getKeywords() KeywordList {
-	totalKeywords := len(variableKeywords) + len(controlFlowKeywords) + len(otherKeywords)
-
-	allKeywords := make(KeywordList, 0, totalKeywords) // Pre-allocate the total size
-	allKeywords = append(allKeywords, variableKeywords...)
-	allKeywords = append(allKeywords, controlFlowKeywords...)
-	allKeywords = append(allKeywords, otherKeywords...)
-	return allKeywords
+	// Primitive types
+	boolType:    TokenPrimitiveType,
+	intType:     TokenPrimitiveType,
+	float64Type: TokenPrimitiveType,
+	stringType:  TokenPrimitiveType,
 }
 
-func generatePattern(keywords []string) string {
-	return `(\s*|^)\b(` + strings.Join(keywords, "|") + `)\b(\s*|$)`
+var CommentSymbols = map[string]TokenType{
+	SingleLineComment:     TokenComment,
+	MultiLineCommentStart: TokenComment,
+	MultilineDocComment:   TokenComment,
 }
 
-func compilePattern(pattern string) *regexp.Regexp {
-	return regexp.MustCompile(pattern)
+var TokenSpecs = map[TokenType]string{
+	TokenDollarSign: `^\$\w+(\.\w+)*`,
+	TokenFlag:       `^\-[a-zA-Z]`,
+	TokenNumber:     `^\b\d+(\.\d+)?\b`,
+	TokenIdentifier: `^\b[a-zA-Z_][a-zA-Z0-9_]*\b`,
+	TokenOperator:   `^[+\-*/=]{1}[^a-zA-Z]\s*`,
+	TokenString:     `^"([^"\n])*"`,
+	TokenLeftParen:  `^\(`,
+	TokenRightParen: `^\)`,
+	TokenLeftCurly:  `^\{`,
+	TokenRightCurly: `^\}`,
+	TokenSemicolon:  `^\;`,
+	TokenColon:      `^:`,
+	TokenComma:      `^,`,
+	TokenNewline:    `^\\n`,
+	TokenSubshell:   `^\$\((.*)\)`,
 }
-
-var tokenSpecs = []TokenSpec{
-	{Type: TokenComment, Pattern: compilePattern(`(//.*)|(/\*[\s\S]*?\*/)`)},
-	{Type: TokenKeyword, Pattern: compilePattern(generatePattern(getKeywords()))},
-	{Type: TokenShellKeyword, Pattern: compilePattern(generatePattern(shellKeywords))},
-	{Type: TokenPrimitiveType, Pattern: compilePattern(generatePattern(primitiveTypes))},
-	{Type: TokenSubshell, Pattern: compilePattern(`\$\((.*)\)`)},
-
-	{Type: TokenIdentifier, Pattern: compilePattern(`(\s*|^)\b[a-zA-Z_.][a-zA-Z0-9_.]*\b(\s*|$)`)},
-	{Type: TokenFlag, Pattern: compilePattern(`-\w+`)},
-	{Type: TokenNumber, Pattern: compilePattern(`\b\d+(\.\d+)?\b`)},
-	{Type: TokenOperator, Pattern: compilePattern(`[+\-*/=]`)},
-	{Type: TokenString, Pattern: compilePattern(`"([^"\n])*"`)},
-	{Type: TokenDollarSign, Pattern: compilePattern(`(\s*|^)\$\w+(\.\w+)*(\s*|$)`)},
-
-	{Type: TokenLeftParen, Pattern: compilePattern(`\(`)},
-	{Type: TokenRightParen, Pattern: compilePattern(`\)`)},
-	{Type: TokenLeftCurly, Pattern: compilePattern(`\{`)},
-	{Type: TokenRightCurly, Pattern: compilePattern(`\}`)},
-	{Type: TokenSemicolon, Pattern: compilePattern(`;`)},
-	{Type: TokenNewline, Pattern: compilePattern(`\\n`)},
-	{Type: TokenColon, Pattern: compilePattern(`:`)},
-	{Type: TokenComma, Pattern: compilePattern(`,`)},
-}
-
-func generateTokenMap() map[TokenType]*regexp.Regexp {
-	tokenMap := make(map[TokenType]*regexp.Regexp)
-	for _, spec := range tokenSpecs {
-		tokenMap[spec.Type] = spec.Pattern
-	}
-	return tokenMap
-}
-
-var tokenMap = generateTokenMap()
 
 type Token struct {
 	Type     TokenType

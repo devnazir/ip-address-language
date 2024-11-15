@@ -1,12 +1,12 @@
 source (
   "variable.gsh"
-  "math.gsh" as m
+  "math.gsh"
 )
 
 var fromExample = Example
-var fromMath = m.Z
+var fromMath = Z
 
 echo $fromExample;
 echo $fromMath;
 
-echo $m.Z $Example;
+echo $Z $Example;
