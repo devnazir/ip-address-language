@@ -13,18 +13,20 @@ func (i *Interpreter) InterpretVariableDeclaration(nodeVar ast.VariableDeclarati
 		oops.DuplicateIdentifierError(nodeVar)
 	}
 
+	value := i.EvaluateVariableInit(nodeVar)
+
+	i.symbolTable.Insert(name, semantics.SymbolInfo{
+		Kind:           nodeVar.Kind,
+		Value:          value,
+		Line:           nodeVar.Line,
+		TypeAnnotation: nodeVar.TypeAnnotation,
+	})
+}
+
+func (i *Interpreter) EvaluateVariableInit(nodeVar ast.VariableDeclaration) interface{} {
 	if _, ok := nodeVar.Declaration.Init.(ast.SubShell); ok {
-		res := i.InterpretSubShell(nodeVar.Declaration.Init.(ast.SubShell).Arguments.(string))
-		i.symbolTable.Insert(name, semantics.SymbolInfo{
-			Type:  "",
-			Value: res,
-		})
-		return
+		return i.InterpretSubShell(nodeVar.Declaration.Init.(ast.SubShell).Arguments.(string))
 	}
 
-	value := i.InterpretBinaryExpr(nodeVar.Declaration.Init)
-	i.symbolTable.Insert(name, semantics.SymbolInfo{
-		Type:  "",
-		Value: value,
-	})
+	return i.InterpretBinaryExpr(nodeVar.Declaration.Init)
 }

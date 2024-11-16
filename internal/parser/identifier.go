@@ -25,7 +25,7 @@ func (p *Parser) ParseIdentifier() ast.ASTNode {
 
 	p.next()
 
-	if p.peek().Type == lx.TokenLeftBracket {
+	if p.peek().Type == lx.TokenLeftBracket || p.peek().Type == lx.TokenDot {
 		return p.ParseMemberExpression(&ast)
 	}
 

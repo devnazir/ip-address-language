@@ -7,11 +7,11 @@ import (
 )
 
 func (i *Interpreter) InterpretMemberExpr(expr ast.MemberExpression) interface{} {
-	object := i.EvaluateMemberExpr(expr.Object)
-	property := i.EvaluateMemberExpr(expr.Property)
 	computed := expr.Computed
+	object := i.EvaluateMemberExpr(expr.Object, true)
 
 	if computed {
+		property := i.EvaluateMemberExpr(expr.Property, computed)
 		indexable, ok := object.([]interface{})
 		if !ok {
 			panic("Not indexable")
@@ -30,12 +30,27 @@ func (i *Interpreter) InterpretMemberExpr(expr ast.MemberExpression) interface{}
 		return value
 	}
 
-	return nil
+	indexable, ok := object.(map[string]interface{})
+	if !ok {
+		panic("Not indexable")
+	}
+
+	property := i.EvaluateMemberExpr(expr.Property, computed)
+	value, ok := indexable[property.(string)]
+	if !ok {
+		panic(fmt.Sprintf("Property %v not found", expr.Property.(ast.Identifier).Name))
+	}
+
+	return value
 }
 
-func (i *Interpreter) EvaluateMemberExpr(node ast.ASTNode) interface{} {
+func (i *Interpreter) EvaluateMemberExpr(node ast.ASTNode, computed bool) interface{} {
 	switch node.(type) {
 	case ast.Identifier:
+		if !computed {
+			return node.(ast.Identifier).Name
+		}
+
 		name := node.(ast.Identifier).Name
 		info := i.scopeResolver.ResolveScope(name)
 

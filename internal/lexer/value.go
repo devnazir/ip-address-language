@@ -108,7 +108,7 @@ var CommentSymbols = map[string]TokenType{
 
 var TokenSpecs = map[TokenType]string{
 	TokenSubshell:     `^\$\((.*)\)`,
-	TokenDollarSign:   `^\$\w+(\.\w+)*`,
+	TokenDollarSign:   `^\$\w+`,
 	TokenFlag:         `^\-[a-zA-Z]`,
 	TokenNumber:       `^\b\d+(\.\d+)?\b`,
 	TokenIdentifier:   `^\b[a-zA-Z_][a-zA-Z0-9_]*\b`,

@@ -5,6 +5,7 @@ import (
 
 	lx "github.com/devnazir/gosh-script/internal/lexer"
 	"github.com/devnazir/gosh-script/pkg/ast"
+	"github.com/devnazir/gosh-script/pkg/semantics"
 )
 
 var (
@@ -65,5 +66,33 @@ var (
 
 	InvalidFileExtensionError = func(filename string) error {
 		panic(fmt.Errorf("Invalid file extension: %s, expected .gsh or .gosh or .gs", filename))
+	}
+
+	SourceAliasCannotBeAssignedError = func(symbolInfo *semantics.SymbolInfo) error {
+		panic(CreateErrorMessage(symbolInfo, "Source alias cannot be assigned to a variable"))
+	}
+
+	SourceAliasMustBeAlphanumericError = func(alias string) error {
+		panic(fmt.Errorf("Source alias must be alphanumeric, got: %s", alias))
+	}
+
+	InitFunctionCannotHaveParametersError = func(fNode ast.FunctionDeclaration) error {
+		panic(New(CreateErrorMessage(fNode, "init function cannot have parameters")))
+	}
+
+	InvalidEchoArgumentError = func(echoNode ast.EchoStatement) error {
+		panic(New(CreateErrorMessage(echoNode, "Invalid argument for echo statement")))
+	}
+
+	FunctionNotCalledWithEnoughArgumentsError = func(fNode ast.FunctionDeclaration, expectedArgs int, receivedArgs int) error {
+		panic(New(CreateErrorMessage(fNode, "Function '%s' expects %d arguments, got %d", fNode.Identifier.Name, expectedArgs, receivedArgs)))
+	}
+
+	FunctionCalledWithTooManyArgumentsError = func(fNode ast.FunctionDeclaration, expectedArgs int, receivedArgs int) error {
+		panic(New(CreateErrorMessage(fNode, "Function '%s' expects %d arguments, got %d", fNode.Identifier.Name, expectedArgs, receivedArgs)))
+	}
+
+	RestParameterMustBeLastError = func(fNode ast.FunctionDeclaration) error {
+		panic(New(CreateErrorMessage(fNode, "Rest parameter must be the last parameter")))
 	}
 )

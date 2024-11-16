@@ -44,8 +44,8 @@ func (p *Parser) ParseVariableDeclaration() ast.VariableDeclaration {
 
 	// check if the next token has primitive type
 	if p.peek().Type == lx.TokenPrimitiveType {
-		// primitiveType := p.peek().Value
-		// ast.TypeAnnotation = primitiveType
+		primitiveType := p.peek().Value
+		ast.TypeAnnotation = primitiveType
 		p.next()
 	}
 
@@ -66,8 +66,6 @@ func (p *Parser) ParseVariableDeclaration() ast.VariableDeclaration {
 	ast.Declaration.Init = p.EvaluateAssignmentExpression()
 	ast.Declaration.End = p.peek().End
 	ast.BaseNode.End = p.peek().End
-
-	// ast.TypeAnnotation = p.ParseTypeAnnotation(ast)
 
 	return ast
 }

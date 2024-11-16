@@ -5,6 +5,7 @@ import (
 	"runtime/debug"
 
 	"github.com/devnazir/gosh-script/pkg/ast"
+	"github.com/devnazir/gosh-script/pkg/oops"
 	"github.com/devnazir/gosh-script/pkg/semantics"
 )
 
@@ -36,11 +37,11 @@ func (i *Interpreter) InterpretBodyFunction(p ast.FunctionDeclaration, args []as
 	}
 
 	if len(args[:idxOfRestParam]) < lenParams {
-		panic("Function not called with enough arguments")
+		oops.FunctionNotCalledWithEnoughArgumentsError(p, lenParams, len(args[:idxOfRestParam]))
 	}
 
 	if len(args[:idxOfRestParam]) > lenParams {
-		panic("Function called with too many arguments")
+		oops.FunctionCalledWithTooManyArgumentsError(p, lenParams, len(args[:idxOfRestParam]))
 	}
 
 	restArgs := args[idxOfRestParam:]
@@ -67,7 +68,7 @@ func (i *Interpreter) InterpretBodyFunction(p ast.FunctionDeclaration, args []as
 		var value interface{}
 
 		if isRest && idx != len(p.Parameters)-1 {
-			panic("Rest parameter must be the last parameter")
+			oops.RestParameterMustBeLastError(p)
 		}
 
 		if isRest {

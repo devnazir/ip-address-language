@@ -24,6 +24,11 @@ func (i *Interpreter) InterpretBinaryExpr(b ast.ASTNode) interface{} {
 		value := i.InterpretSubShell(b.(ast.SubShell).Arguments.(string))
 		return value
 
+	case ast.MemberExpression:
+		memberExpr := b.(ast.MemberExpression)
+		value := i.EvaluateMemberExpr(memberExpr, memberExpr.Computed)
+		return value
+
 	case ast.BinaryExpression:
 		leftValue := i.InterpretBinaryExpr(b.(ast.BinaryExpression).Left)
 		rightValue := i.InterpretBinaryExpr(b.(ast.BinaryExpression).Right)

@@ -6,3 +6,7 @@ type FunctionDeclaration struct {
 	Body       []ASTNode
 	Parameters []Identifier
 }
+
+func (f FunctionDeclaration) GetLine() int {
+	return f.Line
+}

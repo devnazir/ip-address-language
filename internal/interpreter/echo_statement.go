@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/devnazir/gosh-script/pkg/ast"
+	"github.com/devnazir/gosh-script/pkg/oops"
 	"github.com/devnazir/gosh-script/pkg/utils"
 )
 
@@ -96,7 +97,7 @@ func (i *Interpreter) IntrepretEchoStmt(params IntrepretEchoStmt) string {
 			cmdArgs += fmt.Sprintf("%v", i.InterpretMemberExpr(memberExpr))
 
 		default:
-			panic("Invalid argument type")
+			oops.InvalidEchoArgumentError(expression)
 		}
 	}
 

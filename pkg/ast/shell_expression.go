@@ -11,7 +11,11 @@ type EchoStatement struct {
 	Flags     []string
 }
 
-type SubShell struct { 
+func (e EchoStatement) GetLine() int {
+	return e.Line
+}
+
+type SubShell struct {
 	BaseNode
 	Arguments ASTNode
 }

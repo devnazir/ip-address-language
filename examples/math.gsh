@@ -20,10 +20,9 @@ echo $b
 echo $c
 echo $d
 
-var Z = 1
+var Z = "Hello World";
 
 func init () {
-  echo $a;
-  echo $b;
-  echo $c;
+  echo "Hello From Init"
 }
+

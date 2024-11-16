@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"runtime/debug"
 
+	lx "github.com/devnazir/gosh-script/internal/lexer"
 	"github.com/devnazir/gosh-script/pkg/ast"
+	"github.com/devnazir/gosh-script/pkg/oops"
 	"github.com/devnazir/gosh-script/pkg/semantics"
 )
 
@@ -25,6 +27,8 @@ func (i *Interpreter) Interpret(p ast.ASTNode) {
 			fmt.Println(r)
 			debug.PrintStack()
 		}
+
+		// utils.PrintJson(i.symbolTable.Scopes)
 	}()
 
 	program := p.(*ast.Program)
@@ -33,7 +37,6 @@ func (i *Interpreter) Interpret(p ast.ASTNode) {
 	for _, nodeItem := range program.Body {
 		i.InterpretNode(nodeItem, entryPoint)
 	}
-
 }
 
 func (i *Interpreter) InterpretNode(nodeItem ast.ASTNode, entryPoint string) {
@@ -58,11 +61,16 @@ func (i *Interpreter) InterpretNode(nodeItem ast.ASTNode, entryPoint string) {
 		i.InterpretSourceDeclaration((nodeItem).(ast.SourceDeclaration).Sources, entryPoint)
 
 	case ast.FunctionDeclaration:
+		name := (nodeItem).(ast.FunctionDeclaration).Identifier.Name
+
+		if name == "init" && len((nodeItem).(ast.FunctionDeclaration).Parameters) > 0 {
+			oops.InitFunctionCannotHaveParametersError((nodeItem).(ast.FunctionDeclaration))
+		}
+
 		i.symbolTable.Insert((nodeItem).(ast.FunctionDeclaration).Identifier.Name, semantics.SymbolInfo{
-			IsFunction: true,
-			Type:       "function",
-			Parameters: (nodeItem).(ast.FunctionDeclaration).Parameters,
-			Value:      (nodeItem).(ast.FunctionDeclaration),
+			Kind:  lx.KeywordFunc,
+			Value: (nodeItem).(ast.FunctionDeclaration),
+			Line:  (nodeItem).(ast.FunctionDeclaration).Line,
 		})
 
 	case ast.CallExpression:

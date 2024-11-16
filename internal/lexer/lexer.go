@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/devnazir/gosh-script/pkg/utils"
 )
 
 func NewLexer(source, filename string) *Lexer {
@@ -71,7 +73,7 @@ func (l *Lexer) tokenizeWord(word string) TokenType {
 func (l *Lexer) tokenizeComment(symbole string) TokenType {
 	if t, ok := CommentSymbols[symbole]; ok {
 		if symbole == SingleLineComment {
-			comment, _ := l.matchPattern(`.*\n`)
+			comment, _ := l.matchPattern(`.*\n?`)
 			l.updateLineCount(comment)
 		}
 
@@ -90,7 +92,7 @@ func (l *Lexer) tokenizeComment(symbole string) TokenType {
 
 func (l *Lexer) getWord() string {
 	start := l.Pos
-	for l.Pos < len(l.Source) && isAlphaNumeric(l.Source[l.Pos]) {
+	for l.Pos < len(l.Source) && utils.IsAlphaNumeric(l.Source[l.Pos]) {
 		l.Pos++
 	}
 	return l.Source[start:l.Pos]
@@ -114,22 +116,10 @@ func (l *Lexer) getComment() string {
 		return ""
 	}
 
-	for l.Pos < len(l.Source) && isComment(l.Source[l.Pos]) {
+	for l.Pos < len(l.Source) && utils.IsComment(l.Source[l.Pos]) {
 		l.Pos++
 	}
 	return l.Source[start:l.Pos]
-}
-
-func isComment(ch byte) bool {
-	return ch == '/' || ch == '*'
-}
-
-func isAlphaNumeric(ch byte) bool {
-	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_'
-}
-
-func isNumeric(ch byte) bool {
-	return ch >= '0' && ch <= '9'
 }
 
 func (l *Lexer) Tokenize() *[]Token {

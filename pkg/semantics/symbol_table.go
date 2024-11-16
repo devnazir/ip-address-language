@@ -1,12 +1,14 @@
 package semantics
 
-import "github.com/devnazir/gosh-script/pkg/ast"
-
 type SymbolInfo struct {
-	Type       string
-	IsFunction bool
-	Parameters []ast.Identifier
-	Value      interface{}
+	Kind           string
+	Value          interface{}
+	TypeAnnotation string
+	Line           int
+}
+
+func (si SymbolInfo) GetLine() int {
+	return si.Line
 }
 
 type SymbolTable struct {

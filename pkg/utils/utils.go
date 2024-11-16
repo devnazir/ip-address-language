@@ -29,3 +29,19 @@ func FindDirByFilename(root, filename string) (string, error) {
 
 	return dir, nil
 }
+
+func IsComment(ch byte) bool {
+	return ch == '/' || ch == '*'
+}
+
+func IsAlphaNumeric(ch byte) bool {
+	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_'
+}
+
+func IsNumeric(ch byte) bool {
+	return ch >= '0' && ch <= '9'
+}
+
+func IsAlpha(ch byte) bool {
+	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
+}
