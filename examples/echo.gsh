@@ -37,4 +37,4 @@ echo -e $capturedLs2
 var str = "Hello $name"
 echo $str;
 
-echo Hi $str
+echo "Hi $str"

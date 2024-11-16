@@ -8,27 +8,23 @@ import (
 )
 
 func (i *Interpreter) InterpretBinaryExpr(b ast.ASTNode) interface{} {
-	if reflect.TypeOf(b) == reflect.TypeOf(ast.StringLiteral{}) {
+
+	switch b.(type) {
+	case ast.StringLiteral:
 		return b.(ast.StringLiteral).Value
-	}
-
-	if reflect.TypeOf(b) == reflect.TypeOf(ast.NumberLiteral{}) {
+	case ast.NumberLiteral:
 		return b.(ast.NumberLiteral).Value
-	}
-
-	if reflect.TypeOf(b) == reflect.TypeOf(ast.Identifier{}) {
+	case ast.Identifier:
 		name := b.(ast.Identifier).Name
-		value := env.GetVariable(name)
+		info := i.scopeResolver.ResolveScope(name)
 
-		return value
-	}
+		return info.Value
 
-	if reflect.TypeOf(b) == reflect.TypeOf(ast.SubShell{}) {
+	case ast.SubShell:
 		value := i.InterpretSubShell(b.(ast.SubShell).Arguments.(string))
 		return value
-	}
 
-	if reflect.TypeOf(b) == reflect.TypeOf(ast.BinaryExpression{}) {
+	case ast.BinaryExpression:
 		leftValue := i.InterpretBinaryExpr(b.(ast.BinaryExpression).Left)
 		rightValue := i.InterpretBinaryExpr(b.(ast.BinaryExpression).Right)
 		operator := b.(ast.BinaryExpression).Operator
@@ -93,7 +89,8 @@ func (i *Interpreter) InterpretBinaryExpr(b ast.ASTNode) interface{} {
 			return result
 		}
 		return int(result.(float64))
-	}
 
-	return 0
+	default:
+		return 0
+	}
 }

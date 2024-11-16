@@ -105,6 +105,7 @@ var CommentSymbols = map[string]TokenType{
 }
 
 var TokenSpecs = map[TokenType]string{
+	TokenSubshell:   `^\$\((.*)\)`,
 	TokenDollarSign: `^\$\w+(\.\w+)*`,
 	TokenFlag:       `^\-[a-zA-Z]`,
 	TokenNumber:     `^\b\d+(\.\d+)?\b`,
@@ -119,7 +120,6 @@ var TokenSpecs = map[TokenType]string{
 	TokenColon:      `^:`,
 	TokenComma:      `^,`,
 	TokenNewline:    `^\\n`,
-	TokenSubshell:   `^\$\((.*)\)`,
 }
 
 type Token struct {

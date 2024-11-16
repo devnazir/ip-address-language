@@ -56,7 +56,7 @@ var (
 	}
 
 	DuplicateIdentifierError = func(variableDecl ast.VariableDeclaration) error {
-		panic(New(CreateErrorMessage(variableDecl, "Identifier '%s' has already been declared", variableDecl.Declarations[0].Id.(ast.Identifier).Name)))
+		panic(New(CreateErrorMessage(variableDecl, "Identifier '%s' has already been declared", variableDecl.Declaration.Id.(ast.Identifier).Name)))
 	}
 
 	IdentifierNotFoundError = func(identifierToken ast.Identifier) error {

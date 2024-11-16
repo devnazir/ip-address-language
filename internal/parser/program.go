@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"path/filepath"
 	"reflect"
 
@@ -50,12 +51,7 @@ func (p *Parser) ParseBodyProgram(program *ast.Program) ast.ASTNode {
 		program.Body = append(program.Body, p.ParseShellExpression())
 
 	case lx.TokenIdentifier:
-		identToken := p.next()
-
-		if p.peek().Type == lx.TokenOperator && p.peek().Value == "=" {
-			p.next()
-			program.Body = append(program.Body, p.ParseAssignmentExpression(&identToken))
-		}
+		program.Body = append(program.Body, p.ParseTokenIdentifier())
 
 	case lx.TokenSubshell:
 		program.Body = append(program.Body, p.ParseSubShell())
@@ -75,4 +71,50 @@ func (p *Parser) ParseBodyProgram(program *ast.Program) ast.ASTNode {
 	}
 
 	return program
+}
+
+func (p *Parser) ParseTokenIdentifier() ast.ASTNode {
+	identToken := p.next()
+
+	switch p.peek().Type {
+	case lx.TokenOperator:
+		if p.peek().Value == "=" {
+			p.next()
+			return p.ParseAssignmentExpression(&identToken)
+		}
+
+	case lx.TokenLeftParen:
+		p.next()
+		arguments := []ast.ASTNode{}
+
+		for p.peek().Type != lx.TokenRightParen {
+			arguments = append(arguments, p.ParsePrimaryExpression())
+		}
+
+		p.next()
+
+		return ast.CallExpression{
+			BaseNode: ast.BaseNode{
+				Type:  reflect.TypeOf(ast.CallExpression{}).Name(),
+				Start: identToken.Start,
+				End:   p.peek().End,
+				Line:  identToken.Line,
+			},
+			Callee: ast.Identifier{
+				BaseNode: ast.BaseNode{
+					Type:  reflect.TypeOf(ast.Identifier{}).Name(),
+					Start: identToken.Start,
+					End:   identToken.End,
+					Line:  identToken.Line,
+				},
+				Name: identToken.Value,
+			},
+			Arguments: arguments,
+		}
+
+	default:
+		panic("Unexpected token " + fmt.Sprint(identToken.Value))
+	}
+
+	return nil
 }

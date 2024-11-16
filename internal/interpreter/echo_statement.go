@@ -29,7 +29,9 @@ func (i *Interpreter) IntrepretEchoStmt(params IntrepretEchoStmt) string {
 		switch argument.(type) {
 		case ast.Identifier:
 			identifier := argument.(ast.Identifier)
-			value := env.GetVariable(identifier.Name)
+
+			info := i.scopeResolver.ResolveScope(identifier.Name)
+			value := info.Value
 
 			if reflect.TypeOf(value).Kind() == reflect.Int {
 				value = strconv.Itoa(value.(int))
@@ -37,7 +39,8 @@ func (i *Interpreter) IntrepretEchoStmt(params IntrepretEchoStmt) string {
 
 			vars := utils.FindShellVars(value.(string))
 			for _, v := range vars {
-				value = strings.ReplaceAll(value.(string), v, env.GetVariable(v[1:]).(string))
+				info := i.scopeResolver.ResolveScope(v[1:])
+				value = strings.ReplaceAll(value.(string), v, info.Value.(string))
 			}
 
 			cmdArgs += fmt.Sprintf("%v", value) + " "
@@ -55,13 +58,13 @@ func (i *Interpreter) IntrepretEchoStmt(params IntrepretEchoStmt) string {
 
 			vars := utils.FindShellVars(value)
 			for _, v := range vars {
-
-				if _, ok := env.GetVariable(v[1:]).(int); ok {
-					value = strings.ReplaceAll(value, v, strconv.Itoa(env.GetVariable(v[1:]).(int)))
+				info := i.scopeResolver.ResolveScope(v[1:])
+				if _, ok := info.Value.(int); ok {
+					value = strings.ReplaceAll(value, v, strconv.Itoa(info.Value.(int)))
 					continue
 				}
 
-				value = strings.ReplaceAll(value, v, env.GetVariable(v[1:]).(string))
+				value = strings.ReplaceAll(value, v, info.Value.(string))
 			}
 
 			if literal.Value == "echo" {

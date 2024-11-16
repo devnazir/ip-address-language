@@ -59,5 +59,4 @@ func (p *Parser) ParseEchoStatement() ast.ASTNode {
 			Flags:     flags,
 		},
 	}
-
 }

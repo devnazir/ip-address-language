@@ -33,8 +33,8 @@ func (i *Interpreter) InterpretSourceDeclaration(sources []ast.Source, entrypoin
 func (i *Interpreter) InterpretSourceAst(p *ast.Program, alias string) {
 	for _, nodeItem := range p.Body {
 		switch nodeItem.(type) {
-		case ast.VariableDeclaration:
-			name := nodeItem.(ast.VariableDeclaration).Declarations[0].Id.(ast.Identifier).Name
+		case *ast.VariableDeclaration:
+			name := nodeItem.(*ast.VariableDeclaration).Declaration.Id.(ast.Identifier).Name
 
 			if isIdentifierExported(name) {
 
@@ -42,18 +42,16 @@ func (i *Interpreter) InterpretSourceAst(p *ast.Program, alias string) {
 					name = alias + "." + name
 				}
 
-				node := nodeItem.(ast.VariableDeclaration)
+				node := nodeItem.(*ast.VariableDeclaration)
 
 				i.InterpretVariableDeclaration(ast.VariableDeclaration{
-					Declarations: []ast.VariableDeclarator{
-						{
-							Id: ast.Identifier{
-								Name:     name,
-								BaseNode: node.Declarations[0].Id.(ast.Identifier).BaseNode,
-							},
-							BaseNode: node.Declarations[0].BaseNode,
-							Init:     node.Declarations[0].Init,
+					Declaration: ast.VariableDeclarator{
+						Id: ast.Identifier{
+							Name:     name,
+							BaseNode: node.Declaration.Id.(ast.Identifier).BaseNode,
 						},
+						BaseNode: node.Declaration.BaseNode,
+						Init:     node.Declaration.Init,
 					},
 					BaseNode:       node.BaseNode,
 					Kind:           node.Kind,
@@ -63,9 +61,9 @@ func (i *Interpreter) InterpretSourceAst(p *ast.Program, alias string) {
 				InterpretNode(i, nodeItem, p.EntryPoint)
 			}
 
-		case ast.FunctionDeclaration:
-			name := nodeItem.(ast.FunctionDeclaration).Identifier.Name
-			params := nodeItem.(ast.FunctionDeclaration).Parameters
+		case *ast.FunctionDeclaration:
+			name := nodeItem.(*ast.FunctionDeclaration).Identifier.Name
+			params := nodeItem.(*ast.FunctionDeclaration).Parameters
 
 			if name == "init" {
 
@@ -73,7 +71,7 @@ func (i *Interpreter) InterpretSourceAst(p *ast.Program, alias string) {
 					panic("init function cannot have parameters")
 				}
 
-				i.InterpretFunctionDeclaration(nodeItem.(ast.FunctionDeclaration))
+				i.InterpretBodyFunction(nodeItem.(ast.FunctionDeclaration))
 			}
 
 			// default:

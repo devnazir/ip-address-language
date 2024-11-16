@@ -16,8 +16,8 @@ func (p *Parser) ParseVariableDeclaration() ast.VariableDeclaration {
 			End:   0,
 			Line:  p.peek().Line,
 		},
-		Declarations: []ast.VariableDeclarator{},
-		Kind:         p.peek().Value,
+		Declaration: ast.VariableDeclarator{},
+		Kind:        p.peek().Value,
 	}
 
 	varTypeToken := p.next() // skip "var"
@@ -32,7 +32,7 @@ func (p *Parser) ParseVariableDeclaration() ast.VariableDeclaration {
 		oops.ExpectedIdentifierError(p.peek())
 	}
 
-	ast.Declarations = append(ast.Declarations, p.ParseVariableDeclarator())
+	ast.Declaration = p.ParseVariableDeclarator()
 
 	p.next() // skip identifier, next to assignment operator or type annotation
 
@@ -63,8 +63,8 @@ func (p *Parser) ParseVariableDeclaration() ast.VariableDeclaration {
 	}
 
 	p.next() // next to assignment expression
-	ast.Declarations[0].Init = p.EvaluateAssignmentExpression()
-	ast.Declarations[0].End = p.peek().End
+	ast.Declaration.Init = p.EvaluateAssignmentExpression()
+	ast.Declaration.End = p.peek().End
 	ast.BaseNode.End = p.peek().End
 
 	// ast.TypeAnnotation = p.ParseTypeAnnotation(ast)

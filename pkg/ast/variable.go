@@ -2,13 +2,13 @@ package ast
 
 type VariableDeclaration struct {
 	BaseNode
-	Declarations   []VariableDeclarator
+	Declaration    VariableDeclarator
 	Kind           string
 	TypeAnnotation string
 }
 
 func (vd VariableDeclaration) GetLine() int {
-	return vd.Declarations[0].Line
+	return vd.Declaration.Line
 }
 
 type VariableDeclarator struct {
