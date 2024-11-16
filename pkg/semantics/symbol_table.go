@@ -10,27 +10,27 @@ type SymbolInfo struct {
 }
 
 type SymbolTable struct {
-	scopes []map[string]SymbolInfo
+	Scopes []map[string]SymbolInfo
 }
 
 func NewSymbolTable() *SymbolTable {
-	return &SymbolTable{scopes: []map[string]SymbolInfo{{}}}
+	return &SymbolTable{Scopes: []map[string]SymbolInfo{{}}}
 }
 
 func (st *SymbolTable) Insert(name string, info SymbolInfo) {
-	currentScope := st.scopes[len(st.scopes)-1]
+	currentScope := st.Scopes[len(st.Scopes)-1]
 	currentScope[name] = info
 }
 
 func (st *SymbolTable) Exists(name string) bool {
-	currentScope := st.scopes[len(st.scopes)-1]
+	currentScope := st.Scopes[len(st.Scopes)-1]
 	_, exists := currentScope[name]
 	return exists
 }
 
 func (st *SymbolTable) Get(name string) (SymbolInfo, bool) {
-	for i := len(st.scopes) - 1; i >= 0; i-- {
-		if info, exists := st.scopes[i][name]; exists {
+	for i := len(st.Scopes) - 1; i >= 0; i-- {
+		if info, exists := st.Scopes[i][name]; exists {
 			return info, true
 		}
 	}
@@ -38,8 +38,8 @@ func (st *SymbolTable) Get(name string) (SymbolInfo, bool) {
 }
 
 func (st *SymbolTable) ExistsInAnyScope(name string) bool {
-	for i := len(st.scopes) - 1; i >= 0; i-- {
-		if _, exists := st.scopes[i][name]; exists {
+	for i := len(st.Scopes) - 1; i >= 0; i-- {
+		if _, exists := st.Scopes[i][name]; exists {
 			return true
 		}
 	}
@@ -47,11 +47,11 @@ func (st *SymbolTable) ExistsInAnyScope(name string) bool {
 }
 
 func (st *SymbolTable) PushScope() {
-	st.scopes = append(st.scopes, make(map[string]SymbolInfo))
+	st.Scopes = append(st.Scopes, make(map[string]SymbolInfo))
 }
 
 func (st *SymbolTable) PopScope() {
-	if len(st.scopes) > 1 {
-		st.scopes = st.scopes[:len(st.scopes)-1]
+	if len(st.Scopes) > 1 {
+		st.Scopes = st.Scopes[:len(st.Scopes)-1]
 	}
 }

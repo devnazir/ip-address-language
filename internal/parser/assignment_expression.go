@@ -7,17 +7,17 @@ import (
 	"github.com/devnazir/gosh-script/pkg/ast"
 )
 
-func (p *Parser) ParseAssignmentExpression(identToken *lx.Token) ast.ASTNode {
+func (p *Parser) ParseAssignmentExpression(ident *ast.Identifier) ast.ASTNode {
 	expression := p.EvaluateAssignmentExpression()
 
 	return ast.AssignmentExpression{
 		Identifier: ast.Identifier{
-			Name: identToken.Value,
+			Name: ident.Name,
 			BaseNode: ast.BaseNode{
 				Type:  reflect.TypeOf(ast.AssignmentExpression{}).Name(),
-				Start: identToken.Start,
-				End:   identToken.End,
-				Line:  identToken.Line,
+				Start: ident.Start,
+				End:   ident.End,
+				Line:  ident.Line,
 			},
 		},
 		Expression: expression,

@@ -23,3 +23,10 @@ func sayHello() {
 }
 
 sayHello()
+
+func withRest(name, ...rest) {
+  echo "Hello, $name!"
+  echo $rest[0]
+}
+
+withRest("Nazir", "I am the real programmer", "I am a student")

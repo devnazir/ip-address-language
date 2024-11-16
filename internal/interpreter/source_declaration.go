@@ -58,7 +58,7 @@ func (i *Interpreter) InterpretSourceAst(p *ast.Program, alias string) {
 					TypeAnnotation: node.TypeAnnotation,
 				})
 			} else {
-				InterpretNode(i, nodeItem, p.EntryPoint)
+				i.InterpretNode(nodeItem, p.EntryPoint)
 			}
 
 		case *ast.FunctionDeclaration:
@@ -71,7 +71,7 @@ func (i *Interpreter) InterpretSourceAst(p *ast.Program, alias string) {
 					panic("init function cannot have parameters")
 				}
 
-				i.InterpretBodyFunction(nodeItem.(ast.FunctionDeclaration))
+				i.InterpretBodyFunction(nodeItem.(ast.FunctionDeclaration), nil)
 			}
 
 			// default:

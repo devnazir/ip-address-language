@@ -10,3 +10,10 @@ type CallExpression struct {
 	Callee    ASTNode
 	Arguments []ASTNode
 }
+
+type MemberExpression struct {
+	BaseNode
+	Object   ASTNode
+	Property ASTNode
+	Computed bool
+}

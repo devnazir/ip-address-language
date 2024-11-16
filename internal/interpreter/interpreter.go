@@ -31,12 +31,12 @@ func (i *Interpreter) Interpret(p ast.ASTNode) {
 	entryPoint := program.EntryPoint
 
 	for _, nodeItem := range program.Body {
-		InterpretNode(i, nodeItem, entryPoint)
+		i.InterpretNode(nodeItem, entryPoint)
 	}
 
 }
 
-func InterpretNode(i *Interpreter, nodeItem ast.ASTNode, entryPoint string) {
+func (i *Interpreter) InterpretNode(nodeItem ast.ASTNode, entryPoint string) {
 	switch (nodeItem).(type) {
 	case ast.VariableDeclaration:
 		i.InterpretVariableDeclaration((nodeItem).(ast.VariableDeclaration))
@@ -67,6 +67,9 @@ func InterpretNode(i *Interpreter, nodeItem ast.ASTNode, entryPoint string) {
 
 	case ast.CallExpression:
 		info := i.scopeResolver.ResolveScope((nodeItem).(ast.CallExpression).Callee.(ast.Identifier).Name)
-		i.InterpretBodyFunction(info.Value.(ast.FunctionDeclaration))
+		arguments := (nodeItem).(ast.CallExpression).Arguments
+		i.InterpretBodyFunction(info.Value.(ast.FunctionDeclaration), arguments)
 	}
+
+	// utils.PrintJson(i.symbolTable.Scopes)
 }

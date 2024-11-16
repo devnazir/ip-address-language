@@ -7,6 +7,7 @@ import (
 
 func (i *Interpreter) InterpretAssigmentExpression(astExpr ast.AssignmentExpression) {
 	value := i.InterpretBinaryExpr(astExpr.Expression)
+	i.scopeResolver.ResolveScope(astExpr.Name)
 	i.symbolTable.Insert(astExpr.Name, semantics.SymbolInfo{
 		Type:  "",
 		Value: value,

@@ -40,14 +40,32 @@ func (p *Parser) ParseFunctionDeclaration() ast.ASTNode {
 	if leftParen.Type != lx.TokenLeftParen {
 		panic("Expected left parenthesis")
 	}
-
 	for p.peek().Type != lx.TokenRightParen && p.peek().Type != lx.TokenLeftCurly {
+
+		isRestParameter := false
+		dotLen := 0
+		maxDotLen := 3
+
+		for p.peek().Type == lx.TokenDot {
+			dotLen++
+
+			if dotLen > maxDotLen {
+				panic("Expected identifier")
+			}
+
+			p.next()
+		}
+
+		if dotLen == maxDotLen {
+			isRestParameter = true
+		}
 
 		if p.peek().Type != lx.TokenIdentifier {
 			panic("Expected identifier")
 		}
 
 		if p.peek().Type == lx.TokenIdentifier {
+
 			ident := ast.Identifier{
 				BaseNode: ast.BaseNode{
 					Type:  reflect.TypeOf(ast.Identifier{}).Name(),
@@ -56,6 +74,10 @@ func (p *Parser) ParseFunctionDeclaration() ast.ASTNode {
 					Line:  p.peek().Line,
 				},
 				Name: p.peek().Value,
+			}
+
+			if isRestParameter {
+				ident.IsRestParameter = true
 			}
 
 			node.Parameters = append(node.Parameters, ident)
@@ -72,6 +94,7 @@ func (p *Parser) ParseFunctionDeclaration() ast.ASTNode {
 				panic("Expected comma or right parenthesis")
 			}
 		}
+
 	}
 
 	// consume the right parenthesis

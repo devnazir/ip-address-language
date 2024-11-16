@@ -24,6 +24,8 @@ const (
 	TokenRightParen    TokenType = "RIGHT_PAREN"
 	TokenLeftCurly     TokenType = "LEFT_CURLY_BRACKET"
 	TokenRightCurly    TokenType = "RIGHT_CURLY_BRACKET"
+	TokenLeftBracket   TokenType = "LEFT_BRACKET"
+	TokenRightBracket  TokenType = "RIGHT_BRACKET"
 	TokenSemicolon     TokenType = "SEMICOLON"
 	TokenColon         TokenType = "COLON"
 	TokenEOF           TokenType = "EOF"
@@ -105,21 +107,24 @@ var CommentSymbols = map[string]TokenType{
 }
 
 var TokenSpecs = map[TokenType]string{
-	TokenSubshell:   `^\$\((.*)\)`,
-	TokenDollarSign: `^\$\w+(\.\w+)*`,
-	TokenFlag:       `^\-[a-zA-Z]`,
-	TokenNumber:     `^\b\d+(\.\d+)?\b`,
-	TokenIdentifier: `^\b[a-zA-Z_][a-zA-Z0-9_]*\b`,
-	TokenOperator:   `^[+\-*/=]{1}[^a-zA-Z]\s*`,
-	TokenString:     `^"([^"\n])*"`,
-	TokenLeftParen:  `^\(`,
-	TokenRightParen: `^\)`,
-	TokenLeftCurly:  `^\{`,
-	TokenRightCurly: `^\}`,
-	TokenSemicolon:  `^\;`,
-	TokenColon:      `^:`,
-	TokenComma:      `^,`,
-	TokenNewline:    `^\\n`,
+	TokenSubshell:     `^\$\((.*)\)`,
+	TokenDollarSign:   `^\$\w+(\.\w+)*`,
+	TokenFlag:         `^\-[a-zA-Z]`,
+	TokenNumber:       `^\b\d+(\.\d+)?\b`,
+	TokenIdentifier:   `^\b[a-zA-Z_][a-zA-Z0-9_]*\b`,
+	TokenOperator:     `^[+\-*/=]{1}[^a-zA-Z]\s*`,
+	TokenString:       `^"([^"\n])*"`,
+	TokenLeftParen:    `^\(`,
+	TokenRightParen:   `^\)`,
+	TokenLeftCurly:    `^\{`,
+	TokenRightCurly:   `^\}`,
+	TokenLeftBracket:  `^\[`,
+	TokenRightBracket: `^\]`,
+	TokenSemicolon:    `^\;`,
+	TokenColon:        `^:`,
+	TokenDot:          `^\.`,
+	TokenComma:        `^,`,
+	TokenNewline:      `^\\n`,
 }
 
 type Token struct {

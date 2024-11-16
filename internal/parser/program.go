@@ -74,46 +74,23 @@ func (p *Parser) ParseBodyProgram(program *ast.Program) ast.ASTNode {
 }
 
 func (p *Parser) ParseTokenIdentifier() ast.ASTNode {
-	identToken := p.next()
+	identifier := p.ParseIdentifier().(ast.Identifier)
 
 	switch p.peek().Type {
 	case lx.TokenOperator:
-		if p.peek().Value == "=" {
+		if p.peek().Value == lx.EqualsSign {
 			p.next()
-			return p.ParseAssignmentExpression(&identToken)
+			return p.ParseAssignmentExpression(&identifier)
 		}
 
 	case lx.TokenLeftParen:
-		p.next()
-		arguments := []ast.ASTNode{}
+		return p.parseCallExpression(&identifier)
 
-		for p.peek().Type != lx.TokenRightParen {
-			arguments = append(arguments, p.ParsePrimaryExpression())
-		}
-
-		p.next()
-
-		return ast.CallExpression{
-			BaseNode: ast.BaseNode{
-				Type:  reflect.TypeOf(ast.CallExpression{}).Name(),
-				Start: identToken.Start,
-				End:   p.peek().End,
-				Line:  identToken.Line,
-			},
-			Callee: ast.Identifier{
-				BaseNode: ast.BaseNode{
-					Type:  reflect.TypeOf(ast.Identifier{}).Name(),
-					Start: identToken.Start,
-					End:   identToken.End,
-					Line:  identToken.Line,
-				},
-				Name: identToken.Value,
-			},
-			Arguments: arguments,
-		}
+	case lx.TokenLeftBracket:
+		return p.ParseMemberExpression(&identifier)
 
 	default:
-		panic("Unexpected token " + fmt.Sprint(identToken.Value))
+		panic("Unexpected token " + fmt.Sprint(identifier.Name))
 	}
 
 	return nil

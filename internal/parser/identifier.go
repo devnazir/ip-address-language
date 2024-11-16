@@ -4,11 +4,12 @@ import (
 	"reflect"
 	"strings"
 
+	lx "github.com/devnazir/gosh-script/internal/lexer"
 	"github.com/devnazir/gosh-script/pkg/ast"
 	"github.com/devnazir/gosh-script/pkg/utils"
 )
 
-func (p *Parser) ParseIdentifier() ast.Identifier {
+func (p *Parser) ParseIdentifier() ast.ASTNode {
 	v, _ := utils.RemoveDoubleQuotes(p.peek().Value)
 	trimmedName := strings.Trim(v, "$")
 
@@ -21,6 +22,12 @@ func (p *Parser) ParseIdentifier() ast.Identifier {
 			Line:  p.peek().Line,
 		},
 	}
+
 	p.next()
+
+	if p.peek().Type == lx.TokenLeftBracket {
+		return p.ParseMemberExpression(&ast)
+	}
+
 	return ast
 }

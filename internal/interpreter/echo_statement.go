@@ -37,10 +37,19 @@ func (i *Interpreter) IntrepretEchoStmt(params IntrepretEchoStmt) string {
 				value = strconv.Itoa(value.(int))
 			}
 
+			if reflect.TypeOf(value).Kind() == reflect.Slice {
+				for _, v := range value.([]interface{}) {
+					cmdArgs += fmt.Sprintf("%v", v) + " "
+				}
+				break
+			}
+
 			vars := utils.FindShellVars(value.(string))
 			for _, v := range vars {
 				info := i.scopeResolver.ResolveScope(v[1:])
-				value = strings.ReplaceAll(value.(string), v, info.Value.(string))
+				val := info.Value
+
+				value = strings.ReplaceAll(value.(string), v, val.(string))
 			}
 
 			cmdArgs += fmt.Sprintf("%v", value) + " "
@@ -81,6 +90,10 @@ func (i *Interpreter) IntrepretEchoStmt(params IntrepretEchoStmt) string {
 		case ast.Illegal:
 			illegal := argument.(ast.Illegal)
 			cmdArgs += fmt.Sprintf("%v", illegal.Value) + " "
+
+		case ast.MemberExpression:
+			memberExpr := argument.(ast.MemberExpression)
+			cmdArgs += fmt.Sprintf("%v", i.InterpretMemberExpr(memberExpr))
 
 		default:
 			panic("Invalid argument type")

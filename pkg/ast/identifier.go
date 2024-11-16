@@ -2,7 +2,8 @@ package ast
 
 type Identifier struct {
 	BaseNode
-	Name string
+	Name            string
+	IsRestParameter bool
 }
 
 func (i Identifier) GetLine() int {
