@@ -24,9 +24,9 @@ func sayHello() {
 
 sayHello()
 
-func withRest(name, ...rest) {
+func withRest(name, age, ...rest) {
   echo "Hello, $name!"
   echo $rest[0]
 }
 
-withRest("Nazir", "I am the real programmer", "I am a student")
+withRest("Nazir", "Ulum", "Doe")

@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+
 func TestFindSubShellArgs(t *testing.T) {
 	text := "List of files: $(ls)"
 	expectedArgs := []string{"$(ls)", "ls"}

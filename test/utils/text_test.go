@@ -1,11 +1,18 @@
 package utils_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/devnazir/gosh-script/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestMain(m *testing.M) {
+	fmt.Println("Tests are about to start")
+	m.Run()
+	fmt.Println("Tests are finished")
+}
 
 func TestRemoveDoubleQuotes(t *testing.T) {
 	text := "\"Hello, World!\""

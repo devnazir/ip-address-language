@@ -19,47 +19,15 @@ func (i *Interpreter) InterpretBodyFunction(p ast.FunctionDeclaration, args []as
 	}()
 
 	i.scopeResolver.EnterScope()
-	idxOfRestParam := len(p.Parameters) - 1
-	lenParams := len(p.Parameters)
-	hasRestParam := false
 
-	for idx, param := range p.Parameters {
-		isRest := param.IsRestParameter
-		if isRest {
-			hasRestParam = true
-			idxOfRestParam = idx
-			lenParams -= 1
-		}
+	idxOfRestParams, err := i.getRestParamIndex(&p)
+
+	if err != nil {
+		panic(err)
 	}
 
-	if !hasRestParam {
-		idxOfRestParam = len(p.Parameters)
-	}
-
-	if len(args[:idxOfRestParam]) < lenParams {
-		oops.FunctionNotCalledWithEnoughArgumentsError(p, lenParams, len(args[:idxOfRestParam]))
-	}
-
-	if len(args[:idxOfRestParam]) > lenParams {
-		oops.FunctionCalledWithTooManyArgumentsError(p, lenParams, len(args[:idxOfRestParam]))
-	}
-
-	restArgs := args[idxOfRestParam:]
-	restArgsValues := make([]interface{}, len(restArgs))
-
-	for idx, arg := range restArgs {
-		switch arg := arg.(type) {
-		case ast.StringLiteral:
-			restArgsValues[idx] = arg.Value
-		case ast.NumberLiteral:
-			restArgsValues[idx] = arg.Value
-		case ast.Identifier:
-			name := arg.Name
-			info := i.scopeResolver.ResolveScope(name)
-
-			restArgsValues[idx] = info.Value
-		}
-	}
+	validateParameter(&p, args, idxOfRestParams)
+	restArguments := i.getRestArguments(args, idxOfRestParams)
 
 	for idx, param := range p.Parameters {
 		name := param.Name
@@ -67,13 +35,9 @@ func (i *Interpreter) InterpretBodyFunction(p ast.FunctionDeclaration, args []as
 
 		var value interface{}
 
-		if isRest && idx != len(p.Parameters)-1 {
-			oops.RestParameterMustBeLastError(p)
-		}
-
 		if isRest {
 			i.symbolTable.Insert(name, semantics.SymbolInfo{
-				Value: restArgsValues,
+				Value: restArguments,
 			})
 			break
 		}
@@ -100,4 +64,108 @@ func (i *Interpreter) InterpretBodyFunction(p ast.FunctionDeclaration, args []as
 	}
 
 	i.scopeResolver.ExitScope()
+}
+
+func (i *Interpreter) getRestParamIndex(functionDecl *ast.FunctionDeclaration) (int, error) {
+	var item ast.Identifier
+	index := -1
+
+	if len(functionDecl.Parameters) == 0 {
+		return index, nil
+	}
+
+	if len(functionDecl.Parameters) > 1 {
+		index = len(functionDecl.Parameters) - 1
+		item = functionDecl.Parameters[index]
+	} else {
+		item = functionDecl.Parameters[0]
+		index = 0
+	}
+
+	validateMiddleRestParameters := func() error {
+		if len(functionDecl.Parameters) > 1 {
+			for _, param := range functionDecl.Parameters[1:index] {
+				if param.IsRestParameter {
+					return fmt.Errorf("Rest parameter must be last")
+				}
+			}
+		}
+
+		return nil
+	}
+
+	if !item.IsRestParameter {
+
+		if index > 0 {
+			// check the first item
+			firstItem := functionDecl.Parameters[0]
+			if firstItem.IsRestParameter {
+				return index, fmt.Errorf("Rest parameter must be last")
+			}
+		}
+
+		err := validateMiddleRestParameters()
+		if err != nil {
+			return index, err
+		}
+
+		index = -1
+	}
+
+	// check if there is duplicate rest parameter
+	err := validateMiddleRestParameters()
+	if err != nil {
+		return index, fmt.Errorf("Duplicate rest parameter")
+	}
+
+	if item.IsRestParameter {
+		return index, nil
+	}
+
+	return index, nil
+}
+
+func validateParameter(functionDecl *ast.FunctionDeclaration, args []ast.ASTNode, restParamIndex int) {
+	hasRestParam := restParamIndex != -1
+	paramCount := len(functionDecl.Parameters)
+
+	argsLimit := len(args)
+	if hasRestParam {
+		argsLimit = restParamIndex
+		paramCount--
+	}
+
+	argsCount := len(args[:argsLimit])
+
+	if argsCount < paramCount {
+		oops.FunctionNotCalledWithEnoughArgumentsError(*functionDecl, paramCount, argsCount)
+	}
+	if argsCount > paramCount {
+		oops.FunctionCalledWithTooManyArgumentsError(*functionDecl, paramCount, argsCount)
+	}
+}
+
+func (i *Interpreter) getRestArguments(args []ast.ASTNode, restParamIndex int) []interface{} {
+	if len(args) == 0 || restParamIndex == -1 {
+		return []interface{}{}
+	}
+
+	restArgs := args[restParamIndex:]
+	restArgsValues := make([]interface{}, len(restArgs))
+
+	for idx, arg := range restArgs {
+		switch arg := arg.(type) {
+		case ast.StringLiteral:
+			restArgsValues[idx] = arg.Value
+		case ast.NumberLiteral:
+			restArgsValues[idx] = arg.Value
+		case ast.Identifier:
+			name := arg.Name
+			info := i.scopeResolver.ResolveScope(name)
+
+			restArgsValues[idx] = info.Value
+		}
+	}
+
+	return restArgsValues
 }
