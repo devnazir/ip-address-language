@@ -30,3 +30,16 @@ func withRest(name, age, ...rest) {
 }
 
 withRest("Nazir", "Ulum", "Doe")
+
+var fn = func() {
+  echo "Hello, From Anonymous Function"
+}
+
+fn()
+
+var fn2 = func(name, ...rest) {
+  echo "Hello, $name From Anonymous Function"
+  echo "Rest: " $rest[0]
+}
+
+fn2("Ulum", "Doe")

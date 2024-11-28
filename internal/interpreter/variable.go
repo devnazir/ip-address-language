@@ -28,5 +28,15 @@ func (i *Interpreter) EvaluateVariableInit(nodeVar ast.VariableDeclaration) inte
 		return i.InterpretSubShell(nodeVar.Declaration.Init.(ast.SubShell).Arguments.(string))
 	}
 
+	if _, ok := nodeVar.Declaration.Init.(ast.FunctionDeclaration); ok {
+		fnDeclaration := nodeVar.Declaration.Init.(ast.FunctionDeclaration)
+
+		if !fnDeclaration.IsAnonymous {
+			panic("Function declaration must be anonymous")
+		}
+
+		return fnDeclaration
+	}
+
 	return i.InterpretBinaryExpr(nodeVar.Declaration.Init)
 }

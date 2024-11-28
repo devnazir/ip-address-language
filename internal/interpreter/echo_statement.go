@@ -69,9 +69,15 @@ func (i *Interpreter) IntrepretEchoStmt(params IntrepretEchoStmt) string {
 			vars := utils.FindShellVars(value)
 			for _, v := range vars {
 				info := i.scopeResolver.ResolveScope(v[1:])
+
 				if _, ok := info.Value.(int); ok {
 					value = strings.ReplaceAll(value, v, strconv.Itoa(info.Value.(int)))
 					continue
+				}
+
+				if _, ok := info.Value.([]interface{}); ok {
+					value = strings.ReplaceAll(value, v, fmt.Sprintf("%v", info.Value))
+					break
 				}
 
 				value = strings.ReplaceAll(value, v, info.Value.(string))

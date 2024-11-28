@@ -5,6 +5,7 @@ type FunctionDeclaration struct {
 	Identifier
 	Body       []ASTNode
 	Parameters []Identifier
+	IsAnonymous bool
 }
 
 func (f FunctionDeclaration) GetLine() int {

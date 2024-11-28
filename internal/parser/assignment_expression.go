@@ -69,6 +69,15 @@ func (p *Parser) EvaluateAssignmentExpression() ast.ASTNode {
 		case lx.TokenSubshell:
 			output = append(output, p.ParseSubShell())
 
+		case lx.TokenKeyword:
+			if token.Value == lx.KeywordFunc {
+				output = append(output, p.ParseFunctionDeclaration())
+				p.next()
+				continue
+			}
+
+			p.next()
+
 		default:
 			endLoop = true
 			break
@@ -80,8 +89,6 @@ func (p *Parser) EvaluateAssignmentExpression() ast.ASTNode {
 		output = append(output, operators[len(operators)-1])
 		operators = operators[:len(operators)-1]
 	}
-
-	// utils.ParseToJson(output)
 
 	if isBinaryExpression {
 		return p.ParseBinaryExpression(output)

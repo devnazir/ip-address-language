@@ -20,28 +20,40 @@ func (p *Parser) ParseFunctionDeclaration() ast.ASTNode {
 		Parameters: []ast.Identifier{},
 	}
 
+	isAnonymousFn := false
+
 	p.next()
 	// consume the function name
-	fnName := p.next().Value
+	identToken := p.next()
 
-	node.Identifier = ast.Identifier{
-		BaseNode: ast.BaseNode{
-			Type:  reflect.TypeOf(ast.Identifier{}).Name(),
-			Start: p.peek().Start,
-			End:   p.peek().End,
-			Line:  p.peek().Line,
-		},
-		Name: fnName,
+	if identToken.Type == lx.TokenLeftParen {
+		isAnonymousFn = true
+	}
+
+	node.IsAnonymous = isAnonymousFn
+
+	if !isAnonymousFn {
+		node.Identifier = ast.Identifier{
+			BaseNode: ast.BaseNode{
+				Type:  reflect.TypeOf(ast.Identifier{}).Name(),
+				Start: p.peek().Start,
+				End:   p.peek().End,
+				Line:  p.peek().Line,
+			},
+			Name: identToken.Value,
+		}
 	}
 
 	// consume the left parenthesis
-	leftParen := p.next()
+	if !isAnonymousFn {
+		nextToken := p.next()
 
-	if leftParen.Type != lx.TokenLeftParen {
-		panic("Expected left parenthesis")
+		if nextToken.Type != lx.TokenLeftParen && !isAnonymousFn {
+			panic("Expected left parenthesis")
+		}
 	}
-	for p.peek().Type != lx.TokenRightParen && p.peek().Type != lx.TokenLeftCurly {
 
+	for p.peek().Type != lx.TokenRightParen && p.peek().Type != lx.TokenLeftCurly {
 		isRestParameter := false
 		dotLen := 0
 		maxDotLen := 3
@@ -94,13 +106,11 @@ func (p *Parser) ParseFunctionDeclaration() ast.ASTNode {
 				panic("Expected comma or right parenthesis")
 			}
 		}
-
 	}
 
-	// consume the right parenthesis
-	rightParen := p.next()
+	rightParenToken := p.next()
 
-	if rightParen.Type != lx.TokenRightParen {
+	if rightParenToken.Type != lx.TokenRightParen {
 		panic("Expected right parenthesis")
 	}
 
