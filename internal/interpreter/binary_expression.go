@@ -11,7 +11,7 @@ func (i *Interpreter) InterpretBinaryExpr(b ast.ASTNode) interface{} {
 
 	switch b.(type) {
 	case ast.StringLiteral:
-		return b.(ast.StringLiteral).Value
+		return b.(ast.StringLiteral).Raw
 	case ast.NumberLiteral:
 		return b.(ast.NumberLiteral).Value
 	case ast.Identifier:

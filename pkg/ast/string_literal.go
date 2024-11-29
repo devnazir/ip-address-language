@@ -5,3 +5,8 @@ type StringLiteral struct {
 	Value string
 	Raw   string
 }
+
+type StringTemplateLiteral struct {
+	BaseNode
+	Parts []ASTNode
+}

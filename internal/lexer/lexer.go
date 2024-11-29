@@ -137,6 +137,11 @@ func (l *Lexer) Tokenize() *[]Token {
 			token.Value = strings.TrimSpace(word)
 			token.End = l.Pos
 			token.RawValue = l.Source[startPos:l.Pos]
+
+			if l.Pos < len(l.Source) && l.Source[l.Pos] == ' ' {
+				token.RawValue = l.Source[startPos : l.Pos+1]
+			}
+
 			l.Tokens = append(l.Tokens, token)
 			continue
 		}
@@ -163,6 +168,11 @@ func (l *Lexer) Tokenize() *[]Token {
 				token.Type = typ
 				token.Value = strings.TrimSpace(match)
 				token.RawValue = l.Source[startPos:l.Pos]
+
+				if l.Pos < len(l.Source) && l.Source[l.Pos] == ' ' {
+					token.RawValue = l.Source[startPos : l.Pos+1]
+				}
+
 				token.End = l.Pos
 				l.Tokens = append(l.Tokens, token)
 				matched = true

@@ -64,7 +64,7 @@ func (i *Interpreter) IntrepretEchoStmt(params IntrepretEchoStmt) string {
 			cmdArgs += fmt.Sprintf("%v", literal.Raw)
 		case ast.StringLiteral:
 			literal := argument.(ast.StringLiteral)
-			value := literal.Value
+			value := literal.Raw
 
 			vars := utils.FindShellVars(value)
 			for _, v := range vars {

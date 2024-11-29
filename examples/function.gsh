@@ -39,7 +39,7 @@ fn()
 
 var fn2 = func(name, ...rest) {
   echo "Hello, $name From Anonymous Function"
-  echo "Rest: " $rest[0]
+  echo "Rest:" $rest[1]
 }
 
-fn2("Ulum", "Doe")
+fn2("Ulum", "Doe", "Nazir")

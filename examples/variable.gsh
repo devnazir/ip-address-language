@@ -5,3 +5,6 @@ var str = "Hello World!"
 str = "Hello Again" 
 
 var Example = "Hello World!"
+
+var str2 = 'Hello World!'
+var template = `Hello World! $str`
