@@ -45,8 +45,8 @@ func (i *Interpreter) InterpretMemberExpr(expr ast.MemberExpression) interface{}
 }
 
 func (i *Interpreter) EvaluateMemberExpr(node ast.ASTNode, computed bool) interface{} {
-	switch node.(type) {
-	case ast.Identifier:
+	switch node.GetType() {
+	case ast.IdentifierTree:
 		if !computed {
 			return node.(ast.Identifier).Name
 		}
@@ -56,13 +56,13 @@ func (i *Interpreter) EvaluateMemberExpr(node ast.ASTNode, computed bool) interf
 
 		return info.Value
 
-	case ast.NumberLiteral:
+	case ast.NumberLiteralTree:
 		return node.(ast.NumberLiteral).Value
 
-	case ast.StringLiteral:
+	case ast.StringLiteralTree:
 		return node.(ast.StringLiteral).Value
 
-	case ast.MemberExpression:
+	case ast.MemberExpressionTree:
 		return i.InterpretMemberExpr(node.(ast.MemberExpression))
 
 	default:

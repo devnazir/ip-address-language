@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"reflect"
 	"strings"
 
 	lx "github.com/devnazir/gosh-script/internal/lexer"
@@ -9,14 +8,14 @@ import (
 	"github.com/devnazir/gosh-script/pkg/utils"
 )
 
-func (p *Parser) ParseIdentifier() ast.ASTNode {
+func (p *Parser) ParseIdentifier() (ast.ASTNode, error) {
 	v, _ := utils.RemoveDoubleQuotes(p.peek().Value)
 	trimmedName := strings.Trim(v, "$")
 
-	ast := ast.Identifier{
+	tree := ast.Identifier{
 		Name: strings.TrimSpace(trimmedName),
 		BaseNode: ast.BaseNode{
-			Type:  reflect.TypeOf(ast.Identifier{}).Name(),
+			Type:  ast.IdentifierTree,
 			Start: p.peek().Start,
 			End:   p.peek().End,
 			Line:  p.peek().Line,
@@ -26,8 +25,13 @@ func (p *Parser) ParseIdentifier() ast.ASTNode {
 	p.next()
 
 	if p.peek().Type == lx.TokenLeftBracket || p.peek().Type == lx.TokenDot {
-		return p.ParseMemberExpression(&ast)
+		memberExpression, err := p.ParseMemberExpression(tree)
+		if err != nil {
+			return nil, err
+		}
+
+		return memberExpression, nil
 	}
 
-	return ast
+	return tree, nil
 }

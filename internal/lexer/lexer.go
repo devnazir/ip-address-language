@@ -174,6 +174,7 @@ func (l *Lexer) Tokenize() *[]Token {
 				}
 
 				token.End = l.Pos
+
 				l.Tokens = append(l.Tokens, token)
 				matched = true
 				break

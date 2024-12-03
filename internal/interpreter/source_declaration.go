@@ -12,8 +12,8 @@ import (
 	"github.com/devnazir/gosh-script/pkg/utils"
 )
 
-func (i *Interpreter) InterpretSourceDeclaration(sources []ast.Source, entrypoint string) {
-	for _, sources := range sources {
+func (i *Interpreter) InterpretSourceDeclaration(sourceDeclaration ast.SourceDeclaration, entrypoint string) {
+	for _, sources := range sourceDeclaration.Sources {
 		file := sources.Value
 		fileDir, err := utils.FindDirByFilename(entrypoint, file)
 		alias := sources.Alias
@@ -26,7 +26,7 @@ func (i *Interpreter) InterpretSourceDeclaration(sources []ast.Source, entrypoin
 		lexer := lx.NewLexerFromFilename(fileDir + "/" + file)
 		tokens := lexer.Tokenize()
 
-		parser := parser.NewParser(tokens, lexer)
+		parser := parser.NewParser(tokens)
 		ast := parser.Parse()
 		i.InterpretSourceAst(ast, alias)
 	}
@@ -39,8 +39,8 @@ func (i *Interpreter) InterpretSourceAst(p *ast.Program, alias string) {
 	}
 
 	for _, nodeItem := range p.Body {
-		switch nodeItem.(type) {
-		case ast.VariableDeclaration:
+		switch nodeItem.GetType() {
+		case ast.VariableDeclarationTree:
 			node := nodeItem.(ast.VariableDeclaration)
 			name := node.Declaration.Id.(ast.Identifier).Name
 
@@ -62,7 +62,7 @@ func (i *Interpreter) InterpretSourceAst(p *ast.Program, alias string) {
 				i.InterpretNode(nodeItem, p.EntryPoint)
 			}
 
-		case ast.FunctionDeclaration:
+		case ast.FunctionDeclarationTree:
 			name := nodeItem.(ast.FunctionDeclaration).Identifier.Name
 			params := nodeItem.(ast.FunctionDeclaration).Parameters
 

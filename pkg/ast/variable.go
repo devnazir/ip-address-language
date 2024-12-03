@@ -1,5 +1,10 @@
 package ast
 
+const (
+	VariableDeclarationTree = "VariableDeclaration"
+	VariableDeclaratorTree  = "VariableDeclarator"
+)
+
 type VariableDeclaration struct {
 	BaseNode
 	Declaration    VariableDeclarator
@@ -15,4 +20,8 @@ type VariableDeclarator struct {
 	BaseNode
 	Id   ASTNode
 	Init ASTNode
+}
+
+func (vd VariableDeclarator) GetLine() int {
+	return vd.Line
 }

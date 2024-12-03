@@ -14,7 +14,6 @@ import (
 
 func (i *Interpreter) IntrepretEchoStmt(params IntrepretEchoStmt) string {
 	expression := params.expression
-	captureOutput := params.captureOutput
 
 	echoArguments := expression.Arguments
 	echoFlags := expression.Flags
@@ -27,84 +26,7 @@ func (i *Interpreter) IntrepretEchoStmt(params IntrepretEchoStmt) string {
 	}
 
 	for _, argument := range echoArguments {
-		switch argument.(type) {
-		case ast.Identifier:
-			identifier := argument.(ast.Identifier)
-
-			info := i.scopeResolver.ResolveScope(identifier.Name)
-			value := info.Value
-
-			if reflect.TypeOf(value).Kind() == reflect.Int {
-				value = strconv.Itoa(value.(int))
-			}
-
-			if reflect.TypeOf(value).Kind() == reflect.Slice {
-				for _, v := range value.([]interface{}) {
-					cmdArgs += fmt.Sprintf("%v", v) + " "
-				}
-				break
-			}
-
-			vars := utils.FindShellVars(value.(string))
-			for _, v := range vars {
-				info := i.scopeResolver.ResolveScope(v[1:])
-				val := info.Value
-
-				value = strings.ReplaceAll(value.(string), v, val.(string))
-			}
-
-			cmdArgs += fmt.Sprintf("%v", value) + " "
-		case ast.NumberLiteral:
-			literal := argument.(ast.NumberLiteral)
-
-			if reflect.TypeOf(literal.Value).Kind() == reflect.Int {
-				literal.Value = strconv.Itoa(literal.Value.(int))
-			}
-
-			cmdArgs += fmt.Sprintf("%v", literal.Raw)
-		case ast.StringLiteral:
-			literal := argument.(ast.StringLiteral)
-			value := literal.Raw
-
-			vars := utils.FindShellVars(value)
-			for _, v := range vars {
-				info := i.scopeResolver.ResolveScope(v[1:])
-
-				if _, ok := info.Value.(int); ok {
-					value = strings.ReplaceAll(value, v, strconv.Itoa(info.Value.(int)))
-					continue
-				}
-
-				if _, ok := info.Value.([]interface{}); ok {
-					value = strings.ReplaceAll(value, v, fmt.Sprintf("%v", info.Value))
-					break
-				}
-
-				value = strings.ReplaceAll(value, v, info.Value.(string))
-			}
-
-			if literal.Value == "echo" {
-				cmdArgs += fmt.Sprintf("%v", value) + " -e '\n'"
-				break
-			}
-
-			cmdArgs += fmt.Sprintf("%v", value)
-
-		case ast.SubShell:
-			subShell := argument.(ast.SubShell)
-			cmdArgs += "'$(" + fmt.Sprintf("%v", subShell.Arguments) + ")'"
-
-		case ast.Illegal:
-			illegal := argument.(ast.Illegal)
-			cmdArgs += fmt.Sprintf("%v", illegal.Value) + " "
-
-		case ast.MemberExpression:
-			memberExpr := argument.(ast.MemberExpression)
-			cmdArgs += fmt.Sprintf("%v", i.InterpretMemberExpr(memberExpr))
-
-		default:
-			oops.InvalidEchoArgumentError(expression)
-		}
+		cmdArgs += i.processArgument(argument) + " "
 	}
 
 	command, _ := utils.RemoveDoubleQuotes(cmdFlags + "'" + cmdArgs + "'")
@@ -115,10 +37,71 @@ func (i *Interpreter) IntrepretEchoStmt(params IntrepretEchoStmt) string {
 		panic(string(out))
 	}
 
-	if captureOutput {
-		return fmt.Sprintf("%s", out)
+	return fmt.Sprintf("%s", out)
+}
+
+func (i *Interpreter) processArgument(argument ast.ASTNode) string {
+	var result string
+
+	switch argument.GetType() {
+	case ast.IdentifierTree:
+		identifier := argument.(ast.Identifier)
+		info := i.scopeResolver.ResolveScope(identifier.Name)
+		value := i.resolveValue(info.Value)
+		result = formatValue(value)
+	case ast.NumberLiteralTree:
+		literal := argument.(ast.NumberLiteral)
+		result = formatValue(literal.Value)
+	case ast.StringLiteralTree:
+		literal := argument.(ast.StringLiteral)
+		result = i.resolveStringLiteral(literal)
+	case ast.SubShellTree:
+		subShell := argument.(ast.SubShell)
+		result = fmt.Sprintf("'$(%v)'", subShell.Arguments)
+	case ast.IllegalTree:
+		illegal := argument.(ast.Illegal)
+		result = illegal.Value
+	case ast.MemberExpressionTree:
+		memberExpr := argument.(ast.MemberExpression)
+		result = fmt.Sprintf("%v", i.InterpretMemberExpr(memberExpr))
+	default:
+		oops.InvalidEchoArgumentError(argument.(ast.EchoStatement))
 	}
 
-	fmt.Printf("%s", out)
-	return ""
+	return result
+}
+
+func (i *Interpreter) resolveValue(value interface{}) string {
+	if reflect.TypeOf(value).Kind() == reflect.Int {
+		return strconv.Itoa(value.(int))
+	}
+	if reflect.TypeOf(value).Kind() == reflect.Slice {
+		var result string
+		for _, v := range value.([]interface{}) {
+			result += fmt.Sprintf("%v ", v)
+		}
+		return result
+	}
+	return fmt.Sprintf("%v", value)
+}
+
+func (i *Interpreter) resolveStringLiteral(literal ast.StringLiteral) string {
+	value := literal.Raw
+	vars := utils.FindShellVars(value)
+
+	for _, v := range vars {
+		info := i.scopeResolver.ResolveScope(v[1:])
+		resolvedValue := i.resolveValue(info.Value)
+		value = strings.ReplaceAll(value, v, resolvedValue)
+	}
+
+	if literal.Value == "echo" {
+		return fmt.Sprintf("%v -e '\n'", value)
+	}
+
+	return value
+}
+
+func formatValue(value interface{}) string {
+	return fmt.Sprintf("%v", value)
 }

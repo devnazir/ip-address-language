@@ -1,13 +1,11 @@
 package parser
 
 import (
-	"reflect"
-
 	lx "github.com/devnazir/gosh-script/internal/lexer"
 	"github.com/devnazir/gosh-script/pkg/ast"
 )
 
-func (p *Parser) ParseEchoStatement() ast.ASTNode {
+func (p *Parser) ParseEchoStatement() (ast.ShellExpression, error) {
 	p.next()
 
 	startStmtToken := p.peek()
@@ -24,7 +22,11 @@ func (p *Parser) ParseEchoStatement() ast.ASTNode {
 		case lx.TokenString, lx.TokenIdentifier:
 			arguments = append(arguments, p.ParseStringLiteral(&ParseStringLiteral{valueAsRaw: true}))
 		case lx.TokenDollarSign:
-			arguments = append(arguments, p.ParseIdentifier())
+			identifier, err := p.ParseIdentifier()
+			if err != nil {
+				return ast.ShellExpression{}, err
+			}
+			arguments = append(arguments, identifier)
 		case lx.TokenFlag:
 			flags = append(flags, p.peek().Value)
 			p.next()
@@ -41,16 +43,16 @@ func (p *Parser) ParseEchoStatement() ast.ASTNode {
 		}
 	}
 
-	return ast.ShellExpression{
+	tree := ast.ShellExpression{
 		BaseNode: ast.BaseNode{
-			Type:  reflect.TypeOf(ast.ShellExpression{}).Name(),
+			Type:  ast.ShellExpressionTree,
 			Start: startStmtToken.Start,
 			End:   startStmtToken.End,
 			Line:  startStmtToken.Line,
 		},
 		Expression: ast.EchoStatement{
 			BaseNode: ast.BaseNode{
-				Type:  reflect.TypeOf(ast.EchoStatement{}).Name(),
+				Type:  ast.EchoStatementTree,
 				Start: startStmtToken.Start,
 				End:   startStmtToken.End,
 				Line:  startStmtToken.Line,
@@ -59,4 +61,6 @@ func (p *Parser) ParseEchoStatement() ast.ASTNode {
 			Flags:     flags,
 		},
 	}
+
+	return tree, nil
 }

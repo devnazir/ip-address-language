@@ -1,10 +1,14 @@
 package ast
 
+const (
+	FunctionDeclarationTree = "FunctionDeclaration"
+)
+
 type FunctionDeclaration struct {
 	BaseNode
-	Identifier
-	Body       []ASTNode
-	Parameters []Identifier
+	Identifier  Identifier
+	Body        []ASTNode
+	Parameters  []Identifier
 	IsAnonymous bool
 }
 

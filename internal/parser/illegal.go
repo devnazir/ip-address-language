@@ -1,15 +1,13 @@
 package parser
 
 import (
-	"reflect"
-
 	"github.com/devnazir/gosh-script/pkg/ast"
 )
 
 func (p *Parser) ParseIllegal() ast.Illegal {
-	ast := ast.Illegal{
+	tree := ast.Illegal{
 		BaseNode: ast.BaseNode{
-			Type:  reflect.TypeOf(ast.Illegal{}).Name(),
+			Type:  ast.IllegalTree,
 			Start: p.peek().Start,
 			End:   p.peek().End,
 			Line:  p.peek().Line,
@@ -18,5 +16,5 @@ func (p *Parser) ParseIllegal() ast.Illegal {
 		Raw:   p.peek().RawValue,
 	}
 	p.next()
-	return ast
+	return tree
 }

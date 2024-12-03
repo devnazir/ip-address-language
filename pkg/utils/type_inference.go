@@ -34,3 +34,18 @@ func InferType(value interface{}) (interface{}, string) {
 		return nil, ""
 	}
 }
+
+func InferDefaultValue(value interface{}) interface{} {
+	switch value {
+	case "int":
+		return *new(int)
+	case "bool":
+		return *new(bool)
+	case "float64":
+		return *new(float64)
+	case "string":
+		return *new(string)
+	default:
+		return nil
+	}
+}

@@ -142,6 +142,10 @@ func (t Token) GetLine() int {
 	return t.Line
 }
 
+func (t Token) GetType() interface{} {
+	return t.Type
+}
+
 type Lexer struct {
 	Source   string
 	Tokens   []Token

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"runtime/debug"
 
-	lx "github.com/devnazir/gosh-script/internal/lexer"
+	"github.com/devnazir/gosh-script/internal/lexer"
 	"github.com/devnazir/gosh-script/pkg/ast"
 	"github.com/devnazir/gosh-script/pkg/oops"
 	"github.com/devnazir/gosh-script/pkg/semantics"
@@ -35,49 +35,54 @@ func (i *Interpreter) Interpret(p ast.ASTNode) {
 	entryPoint := program.EntryPoint
 
 	for _, nodeItem := range program.Body {
-		i.InterpretNode(nodeItem, entryPoint)
+		err := i.InterpretNode(nodeItem, entryPoint)
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
-func (i *Interpreter) InterpretNode(nodeItem ast.ASTNode, entryPoint string) {
-	switch (nodeItem).(type) {
-	case ast.VariableDeclaration:
+func (i *Interpreter) InterpretNode(nodeItem ast.ASTNode, entryPoint string) error {
+	switch nodeItem.GetType() {
+	case ast.VariableDeclarationTree:
 		i.InterpretVariableDeclaration((nodeItem).(ast.VariableDeclaration))
 
-	case ast.ShellExpression:
+	case ast.ShellExpressionTree:
 		i.InterpretShellExpression(InterpretShellExpression{
 			expression:    (nodeItem).(ast.ShellExpression),
 			captureOutput: false,
 		})
 
-	case ast.SubShell:
-		res := i.InterpretSubShell((nodeItem).(ast.SubShell).Arguments.(string))
+	case ast.SubShellTree:
+		res := i.InterpretSubShell((nodeItem).(ast.SubShell).Arguments)
 		fmt.Printf("%v", res)
 
-	case ast.AssignmentExpression:
+	case ast.AssignmentExpressionTree:
 		i.InterpretAssigmentExpression((nodeItem).(ast.AssignmentExpression))
 
-	case ast.SourceDeclaration:
-		i.InterpretSourceDeclaration((nodeItem).(ast.SourceDeclaration).Sources, entryPoint)
+	case ast.SourceDeclarationTree:
+		i.InterpretSourceDeclaration((nodeItem).(ast.SourceDeclaration), entryPoint)
 
-	case ast.FunctionDeclaration:
+	case ast.FunctionDeclarationTree:
 		name := (nodeItem).(ast.FunctionDeclaration).Identifier.Name
 
 		if name == "init" && len((nodeItem).(ast.FunctionDeclaration).Parameters) > 0 {
-			oops.InitFunctionCannotHaveParametersError((nodeItem).(ast.FunctionDeclaration))
+			return oops.RuntimeError(nodeItem, "init function cannot have parameters")
 		}
 
 		i.symbolTable.Insert((nodeItem).(ast.FunctionDeclaration).Identifier.Name, semantics.SymbolInfo{
-			Kind:  lx.KeywordFunc,
+			Kind:  lexer.KeywordFunc,
 			Value: (nodeItem).(ast.FunctionDeclaration),
 			Line:  (nodeItem).(ast.FunctionDeclaration).Line,
 		})
 
-	case ast.CallExpression:
+	case ast.CallExpressionTree:
 		info := i.scopeResolver.ResolveScope((nodeItem).(ast.CallExpression).Callee.(ast.Identifier).Name)
 		arguments := (nodeItem).(ast.CallExpression).Arguments
 		i.InterpretBodyFunction(info.Value.(ast.FunctionDeclaration), arguments)
 	}
 
-	// utils.PrintJson(i.symbolTable.Scopes)
+	// utils.PrintJson(i.symbolTable)
+
+	return nil
 }

@@ -7,15 +7,22 @@ import (
 	lx "github.com/devnazir/gosh-script/internal/lexer"
 )
 
-func (p *Parser) ParseShellExpression() ast.ASTNode {
+func (p *Parser) ParseShellExpression() (ast.ASTNode, error) {
 	switch p.peek().Value {
 	case lx.KeywordSource:
-		return p.ParseSourceDeclaration()
-	case lx.KeywordEcho:
-		return p.ParseEchoStatement()
-	default:
-		oops.UnexpectedKeywordError(p.peek())
-	}
+		sourceDeclaration, err := p.ParseSourceDeclaration()
+		if err != nil {
+			panic(err)
+		}
 
-	return ast.ShellExpression{}
+		return sourceDeclaration, nil
+	case lx.KeywordEcho:
+		echoStatement, err := p.ParseEchoStatement()
+		if err != nil {
+			panic(err)
+		}
+		return echoStatement, nil
+	default:
+		return nil, oops.SyntaxError(p.peek(), "Unknown shell expression")
+	}
 }

@@ -1,5 +1,9 @@
 package ast
 
+const (
+	IdentifierTree = "Identifier"
+)
+
 type Identifier struct {
 	BaseNode
 	Name            string

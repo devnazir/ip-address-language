@@ -9,27 +9,27 @@ import (
 
 func (i *Interpreter) InterpretBinaryExpr(b ast.ASTNode) interface{} {
 
-	switch b.(type) {
-	case ast.StringLiteral:
+	switch b.GetType() {
+	case ast.StringLiteralTree:
 		return b.(ast.StringLiteral).Raw
-	case ast.NumberLiteral:
+	case ast.NumberLiteralTree:
 		return b.(ast.NumberLiteral).Value
-	case ast.Identifier:
+	case ast.IdentifierTree:
 		name := b.(ast.Identifier).Name
 		info := i.scopeResolver.ResolveScope(name)
 
 		return info.Value
 
-	case ast.SubShell:
-		value := i.InterpretSubShell(b.(ast.SubShell).Arguments.(string))
+	case ast.SubShellTree:
+		value := i.InterpretSubShell(b.(ast.SubShell).Arguments)
 		return value
 
-	case ast.MemberExpression:
+	case ast.MemberExpressionTree:
 		memberExpr := b.(ast.MemberExpression)
 		value := i.EvaluateMemberExpr(memberExpr, memberExpr.Computed)
 		return value
 
-	case ast.BinaryExpression:
+	case ast.BinaryExpressionTree:
 		leftValue := i.InterpretBinaryExpr(b.(ast.BinaryExpression).Left)
 		rightValue := i.InterpretBinaryExpr(b.(ast.BinaryExpression).Right)
 		operator := b.(ast.BinaryExpression).Operator

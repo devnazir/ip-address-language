@@ -1,17 +1,17 @@
 package parser
 
 import (
-	"reflect"
+	"fmt"
 
 	lx "github.com/devnazir/gosh-script/internal/lexer"
 	"github.com/devnazir/gosh-script/pkg/ast"
 	"github.com/devnazir/gosh-script/pkg/oops"
 )
 
-func (p *Parser) ParseVariableDeclaration() ast.VariableDeclaration {
-	ast := ast.VariableDeclaration{
+func (p *Parser) ParseVariableDeclaration() (ast.VariableDeclaration, error) {
+	tree := ast.VariableDeclaration{
 		BaseNode: ast.BaseNode{
-			Type:  "VariableDeclaration",
+			Type:  ast.VariableDeclarationTree,
 			Start: p.pos,
 			End:   0,
 			Line:  p.peek().Line,
@@ -26,26 +26,26 @@ func (p *Parser) ParseVariableDeclaration() ast.VariableDeclaration {
 	// expect identifier
 	if p.peek().Type != lx.TokenIdentifier {
 		if p.peek().Value != lx.KeywordVar && p.peek().Value != lx.KeywordConst {
-			oops.IllegalIdentifierError(p.peek())
+			return ast.VariableDeclaration{}, fmt.Errorf(oops.CreateErrorMessage(p.peek(), "Illegal identifier"))
 		}
 
-		oops.ExpectedIdentifierError(p.peek())
+		return ast.VariableDeclaration{}, fmt.Errorf(oops.CreateErrorMessage(p.peek(), "Expected identifier"))
 	}
 
-	ast.Declaration = p.ParseVariableDeclarator()
+	tree.Declaration = p.ParseVariableDeclarator()
 
 	p.next() // skip identifier, next to assignment operator or type annotation
 
 	if p.peek().Type != lx.TokenPrimitiveType && varTypeToken.Value == lx.KeywordVar {
 		if p.peek().Type != lx.TokenOperator && p.peek().Value != "=" {
-			oops.ExpectedTypeAnnotationError(identToken)
+			return ast.VariableDeclaration{}, fmt.Errorf(oops.CreateErrorMessage(identToken, "Expected assignment operator"))
 		}
 	}
 
 	// check if the next token has primitive type
 	if p.peek().Type == lx.TokenPrimitiveType {
 		primitiveType := p.peek().Value
-		ast.TypeAnnotation = primitiveType
+		tree.TypeAnnotation = primitiveType
 		p.next()
 	}
 
@@ -56,24 +56,26 @@ func (p *Parser) ParseVariableDeclaration() ast.VariableDeclaration {
 
 		// var can be used to declare a variable without assignment
 		if varTypeToken.Value == lx.KeywordVar {
-			return ast
+			tree.Declaration.End = p.peek().End
+			tree.BaseNode.End = p.peek().End
+			return tree, nil
 		}
 
-		oops.UnexpectedTokenError(p.peek(), "=")
+		return ast.VariableDeclaration{}, fmt.Errorf(oops.CreateErrorMessage(p.peek(), "Expected assignment operator"))
 	}
 
 	p.next() // next to assignment expression
-	ast.Declaration.Init = p.EvaluateAssignmentExpression()
-	ast.Declaration.End = p.peek().End
-	ast.BaseNode.End = p.peek().End
+	tree.Declaration.Init = p.EvaluateAssignmentExpression()
+	tree.Declaration.End = p.peek().End
+	tree.BaseNode.End = p.peek().End
 
-	return ast
+	return tree, nil
 }
 
 func (p *Parser) ParseVariableDeclarator() ast.VariableDeclarator {
-	ast := ast.VariableDeclarator{
+	tree := ast.VariableDeclarator{
 		BaseNode: ast.BaseNode{
-			Type:  reflect.TypeOf(ast.VariableDeclarator{}).Name(),
+			Type:  ast.VariableDeclaratorTree,
 			Start: p.peek().Start,
 			End:   0,
 			Line:  p.peek().Line,
@@ -81,7 +83,7 @@ func (p *Parser) ParseVariableDeclarator() ast.VariableDeclarator {
 		Id: ast.Identifier{
 			Name: p.peek().Value,
 			BaseNode: ast.BaseNode{
-				Type:  reflect.TypeOf(ast.Identifier{}).Name(),
+				Type:  ast.IdentifierTree,
 				Start: p.peek().Start,
 				End:   p.peek().End,
 				Line:  p.peek().Line,
@@ -90,5 +92,5 @@ func (p *Parser) ParseVariableDeclarator() ast.VariableDeclarator {
 		Init: nil,
 	}
 
-	return ast
+	return tree
 }

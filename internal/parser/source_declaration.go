@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"reflect"
-
 	lx "github.com/devnazir/gosh-script/internal/lexer"
 	"github.com/devnazir/gosh-script/pkg/ast"
 	"github.com/devnazir/gosh-script/pkg/oops"
@@ -27,7 +25,7 @@ func (p *Parser) generateAlias(sources *[]ast.Source) {
 	p.next()
 }
 
-func (p *Parser) ParseSourceDeclaration() ast.ASTNode {
+func (p *Parser) ParseSourceDeclaration() (ast.SourceDeclaration, error) {
 	token := p.next()
 	sources := &[]ast.Source{}
 
@@ -55,23 +53,24 @@ func (p *Parser) ParseSourceDeclaration() ast.ASTNode {
 				endLoop = true
 				p.next()
 			default:
-				oops.ExpectedTokenError(p.peek(), ")")
-				p.next()
+				return ast.SourceDeclaration{}, oops.SyntaxError(p.peek(), "Expected )")
 			}
 		}
 	default:
-		oops.UnexpectedTokenError(p.peek(), "")
+		return ast.SourceDeclaration{}, oops.SyntaxError(p.peek(), "Unexpected token")
 	}
 
-	return ast.SourceDeclaration{
+	tree := ast.SourceDeclaration{
 		BaseNode: ast.BaseNode{
-			Type:  reflect.TypeOf(ast.SourceDeclaration{}).Name(),
+			Type:  ast.SourceDeclarationTree,
 			Start: token.Start,
 			End:   p.peek().End,
 			Line:  p.peek().Line,
 		},
 		Sources: *sources,
 	}
+
+	return tree, nil
 }
 
 func (p *Parser) ParseSource(alias string) ast.Source {

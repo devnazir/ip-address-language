@@ -1,5 +1,11 @@
 package ast
 
+const (
+	AssignmentExpressionTree = "AssignmentExpression"
+	CallExpressionTree       = "CallExpression"
+	MemberExpressionTree     = "MemberExpression"
+)
+
 type AssignmentExpression struct {
 	Identifier
 	Expression ASTNode

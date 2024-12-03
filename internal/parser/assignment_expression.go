@@ -1,20 +1,19 @@
 package parser
 
 import (
-	"reflect"
-
 	lx "github.com/devnazir/gosh-script/internal/lexer"
 	"github.com/devnazir/gosh-script/pkg/ast"
+	"github.com/devnazir/gosh-script/pkg/oops"
 )
 
-func (p *Parser) ParseAssignmentExpression(ident *ast.Identifier) ast.ASTNode {
+func (p *Parser) ParseAssignmentExpression(ident ast.Identifier) ast.ASTNode {
 	expression := p.EvaluateAssignmentExpression()
 
 	return ast.AssignmentExpression{
 		Identifier: ast.Identifier{
 			Name: ident.Name,
 			BaseNode: ast.BaseNode{
-				Type:  reflect.TypeOf(ast.AssignmentExpression{}).Name(),
+				Type:  ast.AssignmentExpressionTree,
 				Start: ident.Start,
 				End:   ident.End,
 				Line:  ident.Line,
@@ -44,7 +43,12 @@ func (p *Parser) EvaluateAssignmentExpression() ast.ASTNode {
 
 		switch token.Type {
 		case lx.TokenNumber, lx.TokenString, lx.TokenIdentifier, lx.TokenDollarSign, lx.TokenStringTemplateLiteral:
-			output = append(output, p.ParsePrimaryExpression())
+			primaryExpression, err := p.ParsePrimaryExpression()
+			if err != nil {
+				panic(err)
+			}
+
+			output = append(output, primaryExpression)
 		case lx.TokenOperator:
 			for len(operators) > 0 && Precedence[operators[len(operators)-1].Value] >= Precedence[token.Value] {
 				output = append(output, operators[len(operators)-1])
@@ -71,7 +75,11 @@ func (p *Parser) EvaluateAssignmentExpression() ast.ASTNode {
 
 		case lx.TokenKeyword:
 			if token.Value == lx.KeywordFunc {
-				output = append(output, p.ParseFunctionDeclaration())
+				fnDeclaration, err := p.ParseFunctionDeclaration()
+				if err != nil {
+					panic(err)
+				}
+				output = append(output, fnDeclaration)
 				p.next()
 				continue
 			}
@@ -97,19 +105,21 @@ func (p *Parser) EvaluateAssignmentExpression() ast.ASTNode {
 	return output[0]
 }
 
-func (p *Parser) ParsePrimaryExpression() ast.ASTNode {
+func (p *Parser) ParsePrimaryExpression() (ast.ASTNode, error) {
 	switch p.peek().Type {
 	case lx.TokenNumber:
-		return p.ParseNumberLiteral()
+		return p.ParseNumberLiteral(), nil
 	case lx.TokenString:
-		return p.ParseStringLiteral(nil)
-	case lx.TokenIdentifier:
-		return p.ParseIdentifier()
-	case lx.TokenDollarSign:
-		return p.ParseIdentifier()
+		return p.ParseStringLiteral(nil), nil
+	case lx.TokenIdentifier, lx.TokenDollarSign:
+		identifier, err := p.ParseIdentifier()
+		if err != nil {
+			panic(err)
+		}
+		return identifier, nil
 	case lx.TokenStringTemplateLiteral:
-		return p.ParseStringTemplateLiteral()
+		return p.ParseStringTemplateLiteral(), nil
 	default:
-		panic("Expected a primary expression (number, string, or identifier)")
+		return nil, oops.SyntaxError(p.peek(), "Unexpected token")
 	}
 }

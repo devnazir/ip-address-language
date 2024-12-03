@@ -12,7 +12,6 @@ type Interpreter struct {
 
 type IntrepretEchoStmt struct {
 	expression    ast.EchoStatement
-	captureOutput bool
 }
 
 type InterpretShellExpression struct {

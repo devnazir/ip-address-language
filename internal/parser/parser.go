@@ -8,10 +8,9 @@ import (
 	"github.com/devnazir/gosh-script/pkg/ast"
 )
 
-func NewParser(tokens *[]lx.Token, lexer *lx.Lexer) *Parser {
+func NewParser(tokens *[]lx.Token) *Parser {
 	return &Parser{
 		tokens: *tokens,
-		lexer:  *lexer,
 		pos:    0,
 	}
 }

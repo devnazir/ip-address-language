@@ -1,24 +1,26 @@
 package parser
 
 import (
-	"reflect"
-
 	lx "github.com/devnazir/gosh-script/internal/lexer"
 	"github.com/devnazir/gosh-script/pkg/ast"
+	"github.com/devnazir/gosh-script/pkg/oops"
 )
 
-func (p *Parser) ParseMemberExpression(ident *ast.Identifier) ast.ASTNode {
+func (p *Parser) ParseMemberExpression(ident ast.Identifier) (ast.MemberExpression, error) {
 	token := p.next()
-	property := p.ParsePrimaryExpression()
+	property, err := p.ParsePrimaryExpression()
+	if err != nil {
+		return ast.MemberExpression{}, err
+	}
 
 	base := ast.MemberExpression{
 		BaseNode: ast.BaseNode{
-			Type:  reflect.TypeOf(ast.MemberExpression{}).Name(),
+			Type:  ast.MemberExpressionTree,
 			Start: ident.Start,
 			End:   token.End,
 			Line:  ident.Line,
 		},
-		Object:   *ident,
+		Object:   ident,
 		Property: property,
 		Computed: false,
 	}
@@ -31,11 +33,14 @@ func (p *Parser) ParseMemberExpression(ident *ast.Identifier) ast.ASTNode {
 		switch p.peek().Type {
 		case lx.TokenDot:
 			p.next()
-			property := p.ParseIdentifier()
+			property, err := p.ParseIdentifier()
+			if err != nil {
+				return ast.MemberExpression{}, err
+			}
 
 			base = ast.MemberExpression{
 				BaseNode: ast.BaseNode{
-					Type:  reflect.TypeOf(ast.MemberExpression{}).Name(),
+					Type:  ast.MemberExpressionTree,
 					Start: token.Start,
 					End:   token.End,
 					Line:  p.peek().Line,
@@ -47,17 +52,20 @@ func (p *Parser) ParseMemberExpression(ident *ast.Identifier) ast.ASTNode {
 
 		case lx.TokenLeftBracket:
 			p.next()
-			property := p.ParsePrimaryExpression()
+			property, err := p.ParsePrimaryExpression()
+			if err != nil {
+				return ast.MemberExpression{}, err
+			}
 
 			if p.peek().Type != lx.TokenRightBracket {
-				panic("Expected ']' after computed property")
+				return ast.MemberExpression{}, oops.SyntaxError(p.peek(), "Expected ']' after computed property")
 			}
 
 			p.next()
 
 			base = ast.MemberExpression{
 				BaseNode: ast.BaseNode{
-					Type:  reflect.TypeOf(ast.MemberExpression{}).Name(),
+					Type:  ast.MemberExpressionTree,
 					Start: token.Start,
 					End:   token.End,
 					Line:  p.peek().Line,
@@ -71,7 +79,7 @@ func (p *Parser) ParseMemberExpression(ident *ast.Identifier) ast.ASTNode {
 			p.next()
 
 		default:
-			return base
+			return base, nil
 		}
 	}
 }

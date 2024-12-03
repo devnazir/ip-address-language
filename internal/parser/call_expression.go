@@ -1,13 +1,11 @@
 package parser
 
 import (
-	"reflect"
-
 	lx "github.com/devnazir/gosh-script/internal/lexer"
 	"github.com/devnazir/gosh-script/pkg/ast"
 )
 
-func (p *Parser) parseCallExpression(ident *ast.Identifier) ast.CallExpression {
+func (p *Parser) parseCallExpression(ident ast.Identifier) ast.CallExpression {
 	p.next()
 	arguments := []ast.ASTNode{}
 
@@ -18,21 +16,26 @@ func (p *Parser) parseCallExpression(ident *ast.Identifier) ast.CallExpression {
 			continue
 		}
 
-		arguments = append(arguments, p.ParsePrimaryExpression())
+		primaryExpression, err := p.ParsePrimaryExpression()
+		if err != nil {
+			panic(err)
+		}
+
+		arguments = append(arguments, primaryExpression)
 	}
 
 	p.next()
 
 	return ast.CallExpression{
 		BaseNode: ast.BaseNode{
-			Type:  reflect.TypeOf(ast.CallExpression{}).Name(),
+			Type:  ast.CallExpressionTree,
 			Start: ident.Start,
 			End:   p.peek().End,
 			Line:  ident.Line,
 		},
 		Callee: ast.Identifier{
 			BaseNode: ast.BaseNode{
-				Type:  reflect.TypeOf(ast.Identifier{}).Name(),
+				Type:  ast.IdentifierTree,
 				Start: ident.Start,
 				End:   ident.End,
 				Line:  ident.Line,

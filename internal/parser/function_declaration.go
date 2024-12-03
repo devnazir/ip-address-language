@@ -1,16 +1,15 @@
 package parser
 
 import (
-	"reflect"
-
 	lx "github.com/devnazir/gosh-script/internal/lexer"
 	"github.com/devnazir/gosh-script/pkg/ast"
+	"github.com/devnazir/gosh-script/pkg/oops"
 )
 
-func (p *Parser) ParseFunctionDeclaration() ast.ASTNode {
+func (p *Parser) ParseFunctionDeclaration() (ast.FunctionDeclaration, error) {
 	node := ast.FunctionDeclaration{
 		BaseNode: ast.BaseNode{
-			Type:  reflect.TypeOf(ast.FunctionDeclaration{}).Name(),
+			Type:  ast.FunctionDeclarationTree,
 			Start: p.peek().Start,
 			End:   p.peek().End,
 			Line:  p.peek().Line,
@@ -35,7 +34,7 @@ func (p *Parser) ParseFunctionDeclaration() ast.ASTNode {
 	if !isAnonymousFn {
 		node.Identifier = ast.Identifier{
 			BaseNode: ast.BaseNode{
-				Type:  reflect.TypeOf(ast.Identifier{}).Name(),
+				Type:  ast.IdentifierTree,
 				Start: p.peek().Start,
 				End:   p.peek().End,
 				Line:  p.peek().Line,
@@ -49,7 +48,7 @@ func (p *Parser) ParseFunctionDeclaration() ast.ASTNode {
 		nextToken := p.next()
 
 		if nextToken.Type != lx.TokenLeftParen && !isAnonymousFn {
-			panic("Expected left parenthesis")
+			return ast.FunctionDeclaration{}, oops.SyntaxError(nextToken, "Expected left parenthesis")
 		}
 	}
 
@@ -62,7 +61,7 @@ func (p *Parser) ParseFunctionDeclaration() ast.ASTNode {
 			dotLen++
 
 			if dotLen > maxDotLen {
-				panic("Expected identifier")
+				return ast.FunctionDeclaration{}, oops.SyntaxError(p.peek(), "Invalid rest parameter")
 			}
 
 			p.next()
@@ -73,14 +72,14 @@ func (p *Parser) ParseFunctionDeclaration() ast.ASTNode {
 		}
 
 		if p.peek().Type != lx.TokenIdentifier {
-			panic("Expected identifier")
+			return ast.FunctionDeclaration{}, oops.SyntaxError(p.peek(), "Expected identifier")
 		}
 
 		if p.peek().Type == lx.TokenIdentifier {
 
 			ident := ast.Identifier{
 				BaseNode: ast.BaseNode{
-					Type:  reflect.TypeOf(ast.Identifier{}).Name(),
+					Type:  ast.IdentifierTree,
 					Start: p.peek().Start,
 					End:   p.peek().End,
 					Line:  p.peek().Line,
@@ -103,7 +102,7 @@ func (p *Parser) ParseFunctionDeclaration() ast.ASTNode {
 			if p.peek().Type == lx.TokenRightParen {
 				break
 			} else {
-				panic("Expected comma or right parenthesis")
+				return ast.FunctionDeclaration{}, oops.SyntaxError(p.peek(), "Expected comma or right parenthesis")
 			}
 		}
 	}
@@ -111,21 +110,21 @@ func (p *Parser) ParseFunctionDeclaration() ast.ASTNode {
 	rightParenToken := p.next()
 
 	if rightParenToken.Type != lx.TokenRightParen {
-		panic("Expected right parenthesis")
+		return ast.FunctionDeclaration{}, oops.SyntaxError(rightParenToken, "Expected right parenthesis")
 	}
 
 	// consume the left curly brace
 	leftCurly := p.next()
 
 	if leftCurly.Type != lx.TokenLeftCurly {
-		panic("Expected left curly brace")
+		return ast.FunctionDeclaration{}, oops.SyntaxError(leftCurly, "Expected left curly brace")
 	}
 
 	body := []ast.ASTNode{}
 	for p.peek().Type != lx.TokenRightCurly {
-		program := p.ParseBodyProgram(&ast.Program{
+		program, err := p.ParseBodyProgram(&ast.Program{
 			BaseNode: ast.BaseNode{
-				Type:  reflect.TypeOf(ast.Program{}).Name(),
+				Type:  ast.ProgramTree,
 				Start: p.peek().Start,
 				End:   0,
 				Line:  p.peek().Line,
@@ -133,14 +132,18 @@ func (p *Parser) ParseFunctionDeclaration() ast.ASTNode {
 			Body: node.Body,
 		})
 
+		if err != nil {
+			return ast.FunctionDeclaration{}, err
+		}
+
 		body = append(body, program.(*ast.Program).Body[0])
 	}
 
 	node.Body = body
 
 	if p.peek().Type != lx.TokenRightCurly {
-		panic("Expected right curly brace")
+		return ast.FunctionDeclaration{}, oops.SyntaxError(p.peek(), "Expected right curly brace")
 	}
 
-	return node
+	return node, nil
 }

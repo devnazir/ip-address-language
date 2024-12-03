@@ -9,6 +9,22 @@ import (
 	"github.com/devnazir/gosh-script/pkg/semantics"
 )
 
+func (i *Interpreter) processFnArgument(arg ast.ASTNode) string {
+	switch arg.GetType() {
+	case ast.StringLiteralTree:
+		return arg.(ast.StringLiteral).Value
+	case ast.NumberLiteralTree:
+		return fmt.Sprintf("%v", arg.(ast.NumberLiteral).Value)
+	case ast.IdentifierTree:
+		name := arg.(ast.Identifier).Name
+		info := i.scopeResolver.ResolveScope(name)
+
+		return fmt.Sprintf("%v", info.Value)
+	}
+
+	return ""
+}
+
 func (i *Interpreter) InterpretBodyFunction(p ast.FunctionDeclaration, args []ast.ASTNode) {
 
 	defer func() {
@@ -33,25 +49,13 @@ func (i *Interpreter) InterpretBodyFunction(p ast.FunctionDeclaration, args []as
 		name := param.Name
 		isRest := param.IsRestParameter
 
-		var value interface{}
+		var value = i.processFnArgument(args[idx])
 
 		if isRest {
 			i.symbolTable.Insert(name, semantics.SymbolInfo{
 				Value: restArguments,
 			})
 			break
-		}
-
-		switch arg := args[idx].(type) {
-		case ast.StringLiteral:
-			value = arg.Value
-		case ast.NumberLiteral:
-			value = arg.Value
-		case ast.Identifier:
-			name := arg.Name
-			info := i.scopeResolver.ResolveScope(name)
-
-			value = info.Value
 		}
 
 		i.symbolTable.Insert(name, semantics.SymbolInfo{
@@ -154,13 +158,13 @@ func (i *Interpreter) getRestArguments(args []ast.ASTNode, restParamIndex int) [
 	restArgsValues := make([]interface{}, len(restArgs))
 
 	for idx, arg := range restArgs {
-		switch arg := arg.(type) {
-		case ast.StringLiteral:
-			restArgsValues[idx] = arg.Value
-		case ast.NumberLiteral:
-			restArgsValues[idx] = arg.Value
-		case ast.Identifier:
-			name := arg.Name
+		switch arg.GetType() {
+		case ast.StringLiteralTree:
+			restArgsValues[idx] = arg.(ast.StringLiteral).Value
+		case ast.NumberLiteralTree:
+			restArgsValues[idx] = arg.(ast.NumberLiteral).Value
+		case ast.IdentifierTree:
+			name := arg.(ast.Identifier).Name
 			info := i.scopeResolver.ResolveScope(name)
 
 			restArgsValues[idx] = info.Value

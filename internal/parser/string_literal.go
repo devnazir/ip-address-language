@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"reflect"
-
 	lx "github.com/devnazir/gosh-script/internal/lexer"
 	"github.com/devnazir/gosh-script/pkg/ast"
 	"github.com/devnazir/gosh-script/pkg/utils"
@@ -25,10 +23,10 @@ func (p *Parser) ParseStringLiteral(params *ParseStringLiteral) ast.StringLitera
 
 	ast := ast.StringLiteral{
 		BaseNode: ast.BaseNode{
-			Type:  reflect.TypeOf(ast.StringLiteral{}).Name(),
-			Start: p.peek().Start,
-			End:   p.peek().End,
-			Line:  p.peek().Line,
+			Type:    ast.StringLiteralTree,
+			Start:   p.peek().Start,
+			End:     p.peek().End,
+			Line:    p.peek().Line,
 		},
 		Value: v,
 		Raw:   p.peek().RawValue,
@@ -48,9 +46,9 @@ func (p *Parser) ParseStringTemplateLiteral() ast.StringTemplateLiteral {
 		return ast.StringLiteral{
 			Value: token.Value,
 			BaseNode: ast.BaseNode{
-				Type:  reflect.TypeOf(ast.StringLiteral{}).Name(),
-				Start: token.Start,
-				End:   token.End,
+				Type:  ast.StringLiteralTree,
+				Start: token.Start + len(token.Value) + len(*tokens),
+				End:   token.End + len(*tokens) + len(token.Value),
 				Line:  token.Line,
 			},
 			Raw: token.RawValue,
@@ -58,6 +56,11 @@ func (p *Parser) ParseStringTemplateLiteral() ast.StringTemplateLiteral {
 	}
 
 	for _, token := range *tokens {
+
+		if token.Value == "" {
+			continue
+		}
+
 		switch token.Type {
 		case lx.TokenIdentifier:
 			parts = append(parts, parseAsStringLiteral(token))
@@ -66,9 +69,9 @@ func (p *Parser) ParseStringTemplateLiteral() ast.StringTemplateLiteral {
 			parts = append(parts, ast.Identifier{
 				Name: name,
 				BaseNode: ast.BaseNode{
-					Type:  reflect.TypeOf(ast.Identifier{}).Name(),
-					Start: token.Start,
-					End:   token.End,
+					Type:  ast.IdentifierTree,
+					Start: token.Start + len(token.Value) + len(*tokens), // +1 to remove the dollar sign
+					End:   token.End + len(token.Value) + len(*tokens),
 					Line:  token.Line,
 				},
 			})
@@ -77,10 +80,10 @@ func (p *Parser) ParseStringTemplateLiteral() ast.StringTemplateLiteral {
 		}
 	}
 
-	ast := ast.StringTemplateLiteral{
+	tree := ast.StringTemplateLiteral{
 		Parts: parts,
 		BaseNode: ast.BaseNode{
-			Type:  reflect.TypeOf(ast.StringTemplateLiteral{}).Name(),
+			Type:  ast.StringTemplateLiteralTree,
 			Start: p.peek().Start,
 			End:   p.peek().End,
 			Line:  p.peek().Line,
@@ -88,5 +91,5 @@ func (p *Parser) ParseStringTemplateLiteral() ast.StringTemplateLiteral {
 	}
 
 	p.next()
-	return ast
+	return tree
 }

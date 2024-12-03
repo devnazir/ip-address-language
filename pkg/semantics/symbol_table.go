@@ -1,10 +1,17 @@
 package semantics
 
+import (
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
+)
+
 type SymbolInfo struct {
 	Kind           string
 	Value          interface{}
 	TypeAnnotation string
 	Line           int
+	Address        string
 }
 
 func (si SymbolInfo) GetLine() int {
@@ -12,15 +19,20 @@ func (si SymbolInfo) GetLine() int {
 }
 
 type SymbolTable struct {
-	Scopes []map[string]SymbolInfo
+	Scopes  []map[string]SymbolInfo
+	Address map[string]SymbolInfo
 }
 
 func NewSymbolTable() *SymbolTable {
-	return &SymbolTable{Scopes: []map[string]SymbolInfo{{}}}
+	return &SymbolTable{
+		Scopes:  []map[string]SymbolInfo{{}},
+		Address: make(map[string]SymbolInfo),
+	}
 }
 
 func (st *SymbolTable) Insert(name string, info SymbolInfo) {
 	currentScope := st.Scopes[len(st.Scopes)-1]
+	info.Address = st.MakeAddress(info)
 	currentScope[name] = info
 }
 
@@ -56,4 +68,19 @@ func (st *SymbolTable) PopScope() {
 	if len(st.Scopes) > 1 {
 		st.Scopes = st.Scopes[:len(st.Scopes)-1]
 	}
+}
+
+func (st *SymbolTable) MakeAddress(info SymbolInfo) string {
+	hash := sha256.New()
+	hash.Write([]byte(fmt.Sprintf("%v", info)))
+
+	if _, exists := st.Address[fmt.Sprintf("%x", hash.Sum(nil))]; exists {
+		return fmt.Sprintf("%x", hash.Sum(nil))
+	}
+
+	return hex.EncodeToString(hash.Sum(nil))
+}
+
+func (st *SymbolTable) InsertAddress(address string, info SymbolInfo) {
+	st.Address[address] = info
 }

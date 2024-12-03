@@ -40,7 +40,7 @@ func main() {
 	tokens := lexer.Tokenize()
 	saveToFile("tokens.json", lexer.Tokenize()) // for debug purpose
 
-	parser := parser.NewParser(tokens, lexer)
+	parser := parser.NewParser(tokens)
 
 	ast := parser.Parse()
 	saveToFile("ast.json", ast) // for debug purpose

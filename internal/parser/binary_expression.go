@@ -7,6 +7,16 @@ import (
 	"github.com/devnazir/gosh-script/pkg/ast"
 )
 
+func getPosition(node interface{}) (start, end int) {
+	switch v := node.(type) {
+	case ast.NumberLiteral:
+		return v.Start, v.End
+	case ast.StringLiteral:
+		return v.Start, v.End
+	}
+	return 0, 0
+}
+
 func (p *Parser) ParseBinaryExpression(output []ast.ASTNode) ast.ASTNode {
 	stack := []ast.ASTNode{}
 
@@ -22,11 +32,14 @@ func (p *Parser) ParseBinaryExpression(output []ast.ASTNode) ast.ASTNode {
 		left := stack[len(stack)-2]
 		stack = stack[:len(stack)-2]
 
+		start, _ := getPosition(left)
+		_, end := getPosition(right)
+
 		stack = append(stack, ast.BinaryExpression{
 			BaseNode: ast.BaseNode{
-				Type:  reflect.TypeOf(ast.BinaryExpression{}).Name(),
-				Start: nodeItem.(lx.Token).Start,
-				End:   nodeItem.(lx.Token).End,
+				Type:  ast.BinaryExpressionTree,
+				Start: start,
+				End:   end,
 				Line:  nodeItem.(lx.Token).Line,
 			},
 			Operator: nodeItem.(lx.Token).Value,

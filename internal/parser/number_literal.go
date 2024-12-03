@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"reflect"
-
 	"github.com/devnazir/gosh-script/pkg/ast"
 	"github.com/devnazir/gosh-script/pkg/utils"
 )
@@ -12,9 +10,9 @@ func (p *Parser) ParseNumberLiteral() ast.NumberLiteral {
 
 	numVal, _ := utils.InferType(value)
 
-	ast := ast.NumberLiteral{
+	tree := ast.NumberLiteral{
 		BaseNode: ast.BaseNode{
-			Type:  reflect.TypeOf(ast.NumberLiteral{}).Name(),
+			Type:  ast.NumberLiteralTree,
 			Start: p.peek().Start,
 			End:   p.peek().End,
 			Line:  p.peek().Line,
@@ -23,5 +21,5 @@ func (p *Parser) ParseNumberLiteral() ast.NumberLiteral {
 		Raw:   value,
 	}
 	p.next()
-	return ast
+	return tree
 }

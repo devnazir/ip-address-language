@@ -6,6 +6,7 @@ import (
 	"github.com/devnazir/gosh-script/pkg/ast"
 	"github.com/devnazir/gosh-script/pkg/oops"
 	"github.com/devnazir/gosh-script/pkg/semantics"
+	"github.com/devnazir/gosh-script/pkg/utils"
 )
 
 func (i *Interpreter) InterpretVariableDeclaration(nodeVar ast.VariableDeclaration) {
@@ -26,11 +27,19 @@ func (i *Interpreter) InterpretVariableDeclaration(nodeVar ast.VariableDeclarati
 }
 
 func (i *Interpreter) EvaluateVariableInit(nodeVar ast.VariableDeclaration) interface{} {
-	if _, ok := nodeVar.Declaration.Init.(ast.SubShell); ok {
-		return i.InterpretSubShell(nodeVar.Declaration.Init.(ast.SubShell).Arguments.(string))
+
+	if nodeVar.Declaration.Init == nil {
+		typeAnnotation := nodeVar.TypeAnnotation
+		return utils.InferDefaultValue(typeAnnotation)
 	}
 
-	if _, ok := nodeVar.Declaration.Init.(ast.FunctionDeclaration); ok {
+	declarationType := nodeVar.Declaration.Init.GetType()
+
+	if declarationType == ast.SubShellTree {
+		return i.InterpretSubShell(nodeVar.Declaration.Init.(ast.SubShell).Arguments)
+	}
+
+	if declarationType == ast.FunctionDeclarationTree {
 		fnDeclaration := nodeVar.Declaration.Init.(ast.FunctionDeclaration)
 
 		if !fnDeclaration.IsAnonymous {
@@ -40,7 +49,7 @@ func (i *Interpreter) EvaluateVariableInit(nodeVar ast.VariableDeclaration) inte
 		return fnDeclaration
 	}
 
-	if _, ok := nodeVar.Declaration.Init.(ast.StringTemplateLiteral); ok {
+	if declarationType == ast.StringTemplateLiteralTree {
 		stringTemplateLiteral := nodeVar.Declaration.Init.(ast.StringTemplateLiteral)
 		var result string
 

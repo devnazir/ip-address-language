@@ -1,6 +1,11 @@
 package interpreter
 
-import "github.com/devnazir/gosh-script/pkg/ast"
+import (
+	"fmt"
+
+	"github.com/devnazir/gosh-script/pkg/ast"
+	"github.com/devnazir/gosh-script/pkg/semantics"
+)
 
 func (i *Interpreter) InterpretShellExpression(params InterpretShellExpression) interface{} {
 	nodeShell := params.expression
@@ -9,17 +14,42 @@ func (i *Interpreter) InterpretShellExpression(params InterpretShellExpression) 
 
 	var result interface{}
 
-	switch expression.(type) {
-	case ast.EchoStatement:
-		res := i.IntrepretEchoStmt(IntrepretEchoStmt{
-			expression:    expression.(ast.EchoStatement),
-			captureOutput: captureOutput,
-		})
-		result = res
-	}
+	switch expression.GetType() {
+	case ast.EchoStatementTree:
+		argsString := ""
+		flags := ""
+		for _, arg := range expression.(ast.EchoStatement).Arguments {
+			argsString += i.processArgument(arg) + " "
+		}
 
-	if captureOutput {
-		return result
+		for _, flag := range expression.(ast.EchoStatement).Flags {
+			flags += flag + " "
+		}
+
+		address := i.symbolTable.MakeAddress(semantics.SymbolInfo{
+			Value: map[string]string{
+				"args":  argsString,
+				"flags": flags,
+			},
+		})
+
+		if _, ok := i.symbolTable.Address[address]; ok {
+			result = i.symbolTable.Address[address].Value
+		} else {
+			result = i.IntrepretEchoStmt(IntrepretEchoStmt{
+				expression: expression.(ast.EchoStatement),
+			})
+
+			i.symbolTable.InsertAddress(address, semantics.SymbolInfo{
+				Value: result,
+			})
+		}
+
+		if captureOutput {
+			return result
+		}
+
+		fmt.Printf("%v", result)
 	}
 
 	return nil

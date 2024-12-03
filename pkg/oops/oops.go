@@ -37,3 +37,15 @@ func (t Node) GetLine() int {
 func CreateErrorMessage[T LineGetter](node T, msg string, args ...interface{}) string {
 	return fmt.Sprintf(msg+" at line %d", append(args, node.GetLine())...)
 }
+
+func SyntaxError[T LineGetter](node T, msg string, args ...interface{}) error {
+	return fmt.Errorf(CreateErrorMessage(node, "Syntax error: "+msg, append(args, node.GetLine())...))
+}
+
+func RuntimeError[T LineGetter](node T, msg string, args ...interface{}) error {
+	return fmt.Errorf(CreateErrorMessage(node, "Runtime error: "+msg, append(args, node.GetLine())...))
+}
+
+func TypeError[T LineGetter](node T, msg string, args ...interface{}) error {
+	return fmt.Errorf(CreateErrorMessage(node, "Type error: "+msg, append(args, node.GetLine())...))
+}
