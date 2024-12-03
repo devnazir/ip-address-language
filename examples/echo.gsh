@@ -34,7 +34,7 @@ echo $(echo $(echo 1 2 3) 4 5)
 var capturedLs2 = "List of files: \n" + $(ls) + "\nEnd of list"
 echo -e $capturedLs2
 
-var str = "Hello $name"
+var str = `Hello $name`
 echo $str;
 
 echo "Hi $str"

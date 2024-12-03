@@ -27,7 +27,7 @@ func TestParseAssignmentExpression(t *testing.T) {
 			expected: ast.AssignmentExpression{
 				Identifier: ast.Identifier{
 					BaseNode: ast.BaseNode{
-						Type:  "Identifier",
+						Type:  "AssignmentExpression",
 						Start: 0,
 						End:   1,
 						Line:  1,
@@ -53,7 +53,7 @@ func TestParseAssignmentExpression(t *testing.T) {
 			expected: ast.AssignmentExpression{
 				Identifier: ast.Identifier{
 					BaseNode: ast.BaseNode{
-						Type:  "Identifier",
+						Type:  "AssignmentExpression",
 						Start: 0,
 						End:   1,
 						Line:  1,
@@ -98,7 +98,7 @@ func TestParseAssignmentExpression(t *testing.T) {
 			expected: ast.AssignmentExpression{
 				Identifier: ast.Identifier{
 					BaseNode: ast.BaseNode{
-						Type:  "Identifier",
+						Type:  "AssignmentExpression",
 						Start: 0,
 						End:   1,
 						Line:  1,

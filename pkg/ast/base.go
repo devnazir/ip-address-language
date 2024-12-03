@@ -14,7 +14,6 @@ type BaseNode struct {
 	Start   int
 	End     int
 	Line    int
-	Address string
 }
 
 func (b BaseNode) GetType() interface{} {
