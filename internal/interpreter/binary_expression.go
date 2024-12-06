@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"github.com/devnazir/gosh-script/pkg/ast"
+	"github.com/devnazir/gosh-script/pkg/oops"
 )
 
 func (i *Interpreter) InterpretBinaryExpr(b ast.ASTNode) interface{} {
@@ -14,6 +15,8 @@ func (i *Interpreter) InterpretBinaryExpr(b ast.ASTNode) interface{} {
 		return b.(ast.StringLiteral).Raw
 	case ast.NumberLiteralTree:
 		return b.(ast.NumberLiteral).Value
+	case ast.BooleanLiteralTree:
+		return b.(ast.BooleanLiteral).Value
 	case ast.IdentifierTree:
 		name := b.(ast.Identifier).Name
 		info := i.scopeResolver.ResolveScope(name)
@@ -38,8 +41,17 @@ func (i *Interpreter) InterpretBinaryExpr(b ast.ASTNode) interface{} {
 		var leftFloat, rightFloat float64
 		var isLeftFloat, isRightFloat bool
 
-		if reflect.TypeOf(leftValue) == reflect.TypeOf("") || reflect.TypeOf(rightValue) == reflect.TypeOf("") {
+		boolType := reflect.TypeOf(true)
+		stringType := reflect.TypeOf("")
+		leftType := reflect.TypeOf(leftValue)
+		rightType := reflect.TypeOf(rightValue)
+
+		if leftType == stringType || rightType == stringType {
 			isConcat = true
+		}
+
+		if leftType == boolType || rightType == boolType {
+			panic(oops.SyntaxError(b.(ast.BinaryExpression).Right, "Invalid operation"))
 		}
 
 		switch v := leftValue.(type) {
@@ -67,9 +79,8 @@ func (i *Interpreter) InterpretBinaryExpr(b ast.ASTNode) interface{} {
 		}
 
 		if isConcat {
-
 			if operator != "+" {
-				panic(fmt.Sprintf("%v operator is not allowed", operator))
+				panic(oops.SyntaxError(b.(ast.BinaryExpression).Right, "Invalid operation"))
 			}
 
 			return fmt.Sprintf("%v", leftValue) + fmt.Sprintf("%v", rightValue)

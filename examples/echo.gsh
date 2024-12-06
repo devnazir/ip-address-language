@@ -25,16 +25,23 @@ echo $(ls > ./output/ls.txt)
  */
 
 var capturedLs = $(ls)
+
 echo $capturedLs
 
 $(echo "Added" >> ./output/ls.txt)
 
 echo $(echo $(echo 1 2 3) 4 5)
 
-var capturedLs2 = "List of files: \n" + $(ls) + "\nEnd of list"
+var capturedLs2 = `List of files:\n$(ls) \nEnd of list`
+
 echo -e $capturedLs2
 
+var capturedLs3 = "capturedLs3: \n"+ $(ls) + "\nEnd of list"
+
+echo -e $capturedLs3
+
 var str = `Hello $name`
+
 echo $str;
 
 echo "Hi $str"

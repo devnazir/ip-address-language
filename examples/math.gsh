@@ -26,3 +26,5 @@ func init () {
   echo "Hello From Init"
 }
 
+var cobain = 1
+echo $cobain

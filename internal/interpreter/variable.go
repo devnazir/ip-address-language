@@ -1,8 +1,6 @@
 package interpreter
 
 import (
-	"reflect"
-
 	"github.com/devnazir/gosh-script/pkg/ast"
 	"github.com/devnazir/gosh-script/pkg/oops"
 	"github.com/devnazir/gosh-script/pkg/semantics"
@@ -54,12 +52,6 @@ func (i *Interpreter) EvaluateVariableInit(nodeVar ast.VariableDeclaration) inte
 		var result string
 
 		for _, part := range stringTemplateLiteral.Parts {
-
-			if reflect.TypeOf(part) == reflect.TypeOf(ast.Identifier{}) {
-				// add space between variables
-				result += " "
-			}
-
 			result += i.InterpretBinaryExpr(part).(string)
 		}
 

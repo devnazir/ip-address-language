@@ -32,6 +32,24 @@ func (p *Parser) EvaluateAssignmentExpression() ast.ASTNode {
 	token := p.peek()
 	startLine := token.Line
 
+	// array expression
+	if token.Type == lx.TokenLeftBracket {
+		expr, err := p.ParseArrayExpression()
+		if err != nil {
+			panic(err)
+		}
+		return expr
+	}
+
+	// object expression
+	if token.Type == lx.TokenLeftCurly {
+		expr, err := p.ParseObjectExpression()
+		if err != nil {
+			panic(err)
+		}
+		return expr
+	}
+
 	for !endLoop && token.Type != lx.TokenShellKeyword {
 		token := p.peek()
 
@@ -42,7 +60,14 @@ func (p *Parser) EvaluateAssignmentExpression() ast.ASTNode {
 		}
 
 		switch token.Type {
-		case lx.TokenNumber, lx.TokenString, lx.TokenIdentifier, lx.TokenDollarSign, lx.TokenStringTemplateLiteral:
+		case
+			lx.TokenNumber,
+			lx.TokenString,
+			lx.TokenIdentifier,
+			lx.TokenDollarSign,
+			lx.TokenStringTemplateLiteral,
+			lx.TokenBoolean:
+
 			primaryExpression, err := p.ParsePrimaryExpression()
 			if err != nil {
 				panic(err)
@@ -102,7 +127,11 @@ func (p *Parser) EvaluateAssignmentExpression() ast.ASTNode {
 		return p.ParseBinaryExpression(output)
 	}
 
-	return output[0]
+	if len(output) == 1 {
+		return output[0]
+	}
+
+	return nil
 }
 
 func (p *Parser) ParsePrimaryExpression() (ast.ASTNode, error) {
@@ -114,11 +143,29 @@ func (p *Parser) ParsePrimaryExpression() (ast.ASTNode, error) {
 	case lx.TokenIdentifier, lx.TokenDollarSign:
 		identifier, err := p.ParseIdentifier()
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 		return identifier, nil
 	case lx.TokenStringTemplateLiteral:
 		return p.ParseStringTemplateLiteral(), nil
+	case lx.TokenBoolean:
+		return p.ParseBooleanLiteral(), nil
+	case lx.TokenLeftBracket:
+		arrayExpression, err := p.ParseArrayExpression()
+
+		if err != nil {
+			return nil, err
+		}
+
+		return arrayExpression, nil
+	case lx.TokenLeftCurly:
+		objectExpression, err := p.ParseObjectExpression()
+
+		if err != nil {
+			return nil, err
+		}
+
+		return objectExpression, nil
 	default:
 		return nil, oops.SyntaxError(p.peek(), "Unexpected token")
 	}

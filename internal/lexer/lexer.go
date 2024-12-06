@@ -67,6 +67,10 @@ func (l *Lexer) tokenizeWord(word string) TokenType {
 		return TokenNumber
 	}
 
+	if word == BoolTrue || word == BoolFalse {
+		return TokenBoolean
+	}
+
 	return TokenIdentifier
 }
 

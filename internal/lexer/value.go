@@ -41,6 +41,9 @@ const (
 	TokenSubshell              TokenType = "SUBSHELL"
 	TokenComma                 TokenType = "COMMA"
 	TokenDot                   TokenType = "DOT"
+	TokenBoolean               TokenType = "BOOLEAN"
+	TokenArray                 TokenType = "ARRAY"
+	TokenObject                TokenType = "OBJECT"
 )
 
 // List of keywords
@@ -76,6 +79,9 @@ const (
 	SingleLineComment     = "//"
 	MultiLineCommentStart = "/*"
 	MultilineDocComment   = "/**"
+
+	BoolTrue  = "true"
+	BoolFalse = "false"
 )
 
 var Keywords = map[string]TokenType{
@@ -99,6 +105,9 @@ var Keywords = map[string]TokenType{
 	intType:     TokenPrimitiveType,
 	float64Type: TokenPrimitiveType,
 	stringType:  TokenPrimitiveType,
+
+	BoolTrue:  TokenBoolean,
+	BoolFalse: TokenBoolean,
 }
 
 var CommentSymbols = map[string]TokenType{

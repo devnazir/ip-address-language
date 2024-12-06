@@ -39,13 +39,13 @@ func CreateErrorMessage[T LineGetter](node T, msg string, args ...interface{}) s
 }
 
 func SyntaxError[T LineGetter](node T, msg string, args ...interface{}) error {
-	return fmt.Errorf(CreateErrorMessage(node, "Syntax error: "+msg, append(args, node.GetLine())...))
+	return fmt.Errorf(CreateErrorMessage(node, "Syntax error: "+msg, args...))
 }
 
 func RuntimeError[T LineGetter](node T, msg string, args ...interface{}) error {
-	return fmt.Errorf(CreateErrorMessage(node, "Runtime error: "+msg, append(args, node.GetLine())...))
+	return fmt.Errorf(CreateErrorMessage(node, "Runtime error: "+msg, args...))
 }
 
 func TypeError[T LineGetter](node T, msg string, args ...interface{}) error {
-	return fmt.Errorf(CreateErrorMessage(node, "Type error: "+msg, append(args, node.GetLine())...))
+	return fmt.Errorf(CreateErrorMessage(node, "Type error: "+msg, args...))
 }

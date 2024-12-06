@@ -8,3 +8,29 @@ var Example = "Hello World!"
 
 var str2 = 'Hello World!'
 var template = `Hello World! $str`
+
+var booleanTrue = true
+var booleanFalse = false
+
+echo $booleanTrue
+echo $booleanFalse
+
+var array = [1, 2, 3, 4, 5]
+var multiArray = [
+  [1, 2, 3], 
+  [4, 5, 6], 
+  [7, 8, 9]
+]
+
+var object = {
+  name: "John",
+  age: 30,
+  array: [1, 2, 3, 4, 5],
+  bool: false,
+  nested: {
+    name: "John",
+    age: 30,
+    array: [1, 2, 3, 4, 5],
+    bool: false
+  }
+} 

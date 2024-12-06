@@ -23,10 +23,10 @@ func (p *Parser) ParseStringLiteral(params *ParseStringLiteral) ast.StringLitera
 
 	ast := ast.StringLiteral{
 		BaseNode: ast.BaseNode{
-			Type:    ast.StringLiteralTree,
-			Start:   p.peek().Start,
-			End:     p.peek().End,
-			Line:    p.peek().Line,
+			Type:  ast.StringLiteralTree,
+			Start: p.peek().Start,
+			End:   p.peek().End,
+			Line:  p.peek().Line,
 		},
 		Value: v,
 		Raw:   p.peek().RawValue,
@@ -64,6 +64,17 @@ func (p *Parser) ParseStringTemplateLiteral() ast.StringTemplateLiteral {
 		switch token.Type {
 		case lx.TokenIdentifier:
 			parts = append(parts, parseAsStringLiteral(token))
+		case lx.TokenSubshell:
+			matcherArgs := utils.FindSubShellArgs(token.Value)
+			parts = append(parts, ast.SubShell{
+				Arguments: matcherArgs[1],
+				BaseNode: ast.BaseNode{
+					Type:  ast.SubShellTree,
+					Start: token.Start + len(token.Value) + len(*tokens),
+					End:   token.End + len(token.Value) + len(*tokens),
+					Line:  token.Line,
+				},
+			})
 		case lx.TokenDollarSign:
 			name := token.Value[1:]
 			parts = append(parts, ast.Identifier{
