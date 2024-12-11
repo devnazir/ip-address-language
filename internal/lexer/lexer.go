@@ -131,7 +131,7 @@ func (l *Lexer) Tokenize() *[]Token {
 		l.skipWhitespace()
 
 		startPos := l.Pos
-		token := Token{Start: startPos, Line: l.Line}
+		token := Token{Start: startPos, Line: l.Line, Index: l.CurrentIndex}
 
 		// Keyword or identifier
 		word := l.getWord()
@@ -147,6 +147,7 @@ func (l *Lexer) Tokenize() *[]Token {
 			}
 
 			l.Tokens = append(l.Tokens, token)
+			l.CurrentIndex++
 			continue
 		}
 
@@ -181,6 +182,7 @@ func (l *Lexer) Tokenize() *[]Token {
 
 				l.Tokens = append(l.Tokens, token)
 				matched = true
+				l.CurrentIndex++
 				break
 			}
 		}
@@ -192,13 +194,14 @@ func (l *Lexer) Tokenize() *[]Token {
 			token.End = l.Pos + 1
 			l.Tokens = append(l.Tokens, token)
 			l.Pos++
+			l.CurrentIndex++
 		}
 	}
 
 	shouldAddEOF := len(l.Tokens) == 0 || l.Tokens[len(l.Tokens)-1].Type != TokenEOF
 
 	if shouldAddEOF {
-		l.Tokens = append(l.Tokens, Token{Type: TokenEOF, Start: l.Pos, End: l.Pos, Line: l.Line})
+		l.Tokens = append(l.Tokens, Token{Type: TokenEOF, Start: l.Pos, End: l.Pos, Line: l.Line, Index: l.CurrentIndex})
 	}
 
 	return &l.Tokens

@@ -26,7 +26,7 @@ func (i *Interpreter) IntrepretEchoStmt(params IntrepretEchoStmt) string {
 	}
 
 	for _, argument := range echoArguments {
-		cmdArgs += i.processArgument(argument) + " "
+		cmdArgs += i.processArgument(argument)
 	}
 
 	command, _ := utils.RemoveDoubleQuotes(cmdFlags + "'" + cmdArgs + "'")
@@ -55,6 +55,11 @@ func (i *Interpreter) processArgument(argument ast.ASTNode) string {
 	case ast.StringLiteralTree:
 		literal := argument.(ast.StringLiteral)
 		result = i.resolveStringLiteral(literal)
+	case ast.StringTemplateLiteralTree:
+		literal := argument.(ast.StringTemplateLiteral)
+		for _, part := range literal.Parts {
+			result += i.processArgument(part)
+		}
 	case ast.SubShellTree:
 		subShell := argument.(ast.SubShell)
 		result = fmt.Sprintf("'$(%v)'", subShell.Arguments)
@@ -63,7 +68,7 @@ func (i *Interpreter) processArgument(argument ast.ASTNode) string {
 		result = illegal.Value
 	case ast.MemberExpressionTree:
 		memberExpr := argument.(ast.MemberExpression)
-		result = fmt.Sprintf("%v", i.InterpretMemberExpr(memberExpr))
+		result = fmt.Sprintf("%v ", i.InterpretMemberExpr(memberExpr))
 	default:
 		oops.InvalidEchoArgumentError(argument.(ast.EchoStatement))
 	}
@@ -78,7 +83,7 @@ func (i *Interpreter) resolveValue(value interface{}) string {
 	if reflect.TypeOf(value).Kind() == reflect.Slice {
 		var result string
 		for _, v := range value.([]interface{}) {
-			result += fmt.Sprintf("%v ", v)
+			result += fmt.Sprintf("%v", v)
 		}
 		return result
 	}

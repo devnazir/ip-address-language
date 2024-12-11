@@ -78,6 +78,23 @@ func (p *Parser) ParseMemberExpression(ident ast.Identifier) (ast.MemberExpressi
 		case lx.TokenRightBracket:
 			p.next()
 
+		case lx.TokenLeftParen:
+			ident := ast.Identifier{
+				BaseNode: ast.BaseNode{
+					Type:  ast.IdentifierTree,
+					Start: base.Start,
+					End:   base.End,
+					Line:  base.Line,
+				},
+				Name: base.Property.(ast.Identifier).Name,
+			}
+
+			callExpression := p.parseCallExpression(ident)
+			base.Property = callExpression
+
+		case lx.TokenRightParen:
+			p.next()
+
 		default:
 			return base, nil
 		}

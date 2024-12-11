@@ -65,7 +65,7 @@ func (p *Parser) EvaluateAssignmentExpression() ast.ASTNode {
 			lx.TokenString,
 			lx.TokenIdentifier,
 			lx.TokenDollarSign,
-			lx.TokenStringTemplateLiteral,
+			lx.TokenTickQuote,
 			lx.TokenBoolean:
 
 			primaryExpression, err := p.ParsePrimaryExpression()
@@ -146,8 +146,12 @@ func (p *Parser) ParsePrimaryExpression() (ast.ASTNode, error) {
 			return nil, err
 		}
 		return identifier, nil
-	case lx.TokenStringTemplateLiteral:
-		return p.ParseStringTemplateLiteral(), nil
+	case lx.TokenTickQuote:
+		templateString, err := p.ParseStringTemplateLiteral()
+		if err != nil {
+			return nil, err
+		}
+		return templateString, nil
 	case lx.TokenBoolean:
 		return p.ParseBooleanLiteral(), nil
 	case lx.TokenLeftBracket:
@@ -167,6 +171,6 @@ func (p *Parser) ParsePrimaryExpression() (ast.ASTNode, error) {
 
 		return objectExpression, nil
 	default:
-		return nil, oops.SyntaxError(p.peek(), "Unexpected token")
+		return nil, oops.SyntaxError(p.peek(), "Unexpected token"+p.peek().Value)
 	}
 }

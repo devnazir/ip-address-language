@@ -7,7 +7,6 @@ import (
 	lx "github.com/devnazir/gosh-script/internal/lexer"
 	"github.com/devnazir/gosh-script/pkg/ast"
 	"github.com/devnazir/gosh-script/pkg/oops"
-	"github.com/devnazir/gosh-script/pkg/utils"
 )
 
 func (p *Parser) ParseProgram() *ast.Program {
@@ -87,7 +86,7 @@ func (p *Parser) ParseBodyProgram(program *ast.Program) (ast.ASTNode, error) {
 		oops.IllegalTokenError(p.peek())
 
 	default:
-		utils.PrintJson(p.peek())
+		// utils.PrintJson(p.peek())
 		panic(oops.SyntaxError(p.peek(), "Unknown token"))
 	}
 
@@ -99,6 +98,10 @@ func (p *Parser) ParseTokenIdentifier() (ast.ASTNode, error) {
 
 	if err != nil {
 		return nil, err
+	}
+
+	if identifier.GetType() == ast.MemberExpressionTree {
+		return identifier, nil
 	}
 
 	switch p.peek().Type {

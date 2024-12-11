@@ -23,6 +23,11 @@ type SymbolTable struct {
 	Address map[string]SymbolInfo
 }
 
+func (st *SymbolTable) GetScopes() []map[string]SymbolInfo {
+	scopes := make([]map[string]SymbolInfo, len(st.Scopes))
+	return scopes
+}
+
 func NewSymbolTable() *SymbolTable {
 	return &SymbolTable{
 		Scopes:  []map[string]SymbolInfo{{}},
@@ -33,6 +38,11 @@ func NewSymbolTable() *SymbolTable {
 func (st *SymbolTable) Insert(name string, info SymbolInfo) {
 	currentScope := st.Scopes[len(st.Scopes)-1]
 	info.Address = st.MakeAddress(info)
+	currentScope[name] = info
+}
+
+func (st *SymbolTable) Update(name string, info SymbolInfo) {
+	currentScope := st.Scopes[len(st.Scopes)-1]
 	currentScope[name] = info
 }
 

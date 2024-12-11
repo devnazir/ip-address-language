@@ -1,25 +1,24 @@
 package parser
 
 import (
-	"strings"
-
 	lx "github.com/devnazir/gosh-script/internal/lexer"
 	"github.com/devnazir/gosh-script/pkg/ast"
 	"github.com/devnazir/gosh-script/pkg/utils"
 )
 
 func (p *Parser) ParseIdentifier() (ast.ASTNode, error) {
-	v, _ := utils.RemoveDoubleQuotes(p.peek().Value)
-	trimmedName := strings.Trim(v, "$")
+	v := utils.GetVariableName(p.peek().Value)
+	rawValue := utils.GetVariableName(p.peek().RawValue)
 
 	tree := ast.Identifier{
-		Name: strings.TrimSpace(trimmedName),
+		Name: v,
 		BaseNode: ast.BaseNode{
 			Type:  ast.IdentifierTree,
 			Start: p.peek().Start,
 			End:   p.peek().End,
 			Line:  p.peek().Line,
 		},
+		Raw: rawValue,
 	}
 
 	p.next()

@@ -3,6 +3,7 @@ package parser
 import (
 	lx "github.com/devnazir/gosh-script/internal/lexer"
 	"github.com/devnazir/gosh-script/pkg/ast"
+	"github.com/devnazir/gosh-script/pkg/oops"
 	"github.com/devnazir/gosh-script/pkg/utils"
 )
 
@@ -35,72 +36,51 @@ func (p *Parser) ParseStringLiteral(params *ParseStringLiteral) ast.StringLitera
 	return ast
 }
 
-func (p *Parser) ParseStringTemplateLiteral() ast.StringTemplateLiteral {
-	removedQuotes := p.peek().Value[1 : len(p.peek().Value)-1]
-	newLexer := lx.NewLexer(removedQuotes, "")
-	tokens := newLexer.Tokenize()
-
+func (p *Parser) ParseStringTemplateLiteral() (ast.StringTemplateLiteral, error) {
 	parts := []ast.ASTNode{}
+	start := p.peek().Start
 
-	parseAsStringLiteral := func(token lx.Token) ast.ASTNode {
-		return ast.StringLiteral{
-			Value: token.Value,
-			BaseNode: ast.BaseNode{
-				Type:  ast.StringLiteralTree,
-				Start: token.Start + len(token.Value) + len(*tokens),
-				End:   token.End + len(*tokens) + len(token.Value),
-				Line:  token.Line,
-			},
-			Raw: token.RawValue,
+	if p.peek().Type == lx.TokenTickQuote {
+		p.next()
+
+		for p.peek().Type != lx.TokenTickQuote {
+			if p.peek().Type == lx.TokenEOF {
+				break
+			}
+
+			switch p.peek().Type {
+			case lx.TokenIdentifier:
+				parts = append(parts, p.ParseStringLiteral(&ParseStringLiteral{valueAsRaw: true}))
+			case lx.TokenDollarSign:
+				identifier, err := p.ParseIdentifier()
+				if err != nil {
+					panic(err)
+				}
+				parts = append(parts, identifier)
+			case lx.TokenSubshell:
+				parts = append(parts, p.ParseSubShell())
+			default:
+				if p.peek().Type == lx.TokenRightCurly {
+					p.next()
+					continue
+				}
+				parts = append(parts, p.ParseStringLiteral(nil))
+			}
 		}
-	}
 
-	for _, token := range *tokens {
-
-		if token.Value == "" {
-			continue
-		}
-
-		switch token.Type {
-		case lx.TokenIdentifier:
-			parts = append(parts, parseAsStringLiteral(token))
-		case lx.TokenSubshell:
-			matcherArgs := utils.FindSubShellArgs(token.Value)
-			parts = append(parts, ast.SubShell{
-				Arguments: matcherArgs[1],
+		if p.peek().Type == lx.TokenTickQuote {
+			p.next()
+			return ast.StringTemplateLiteral{
+				Parts: parts,
 				BaseNode: ast.BaseNode{
-					Type:  ast.SubShellTree,
-					Start: token.Start + len(token.Value) + len(*tokens),
-					End:   token.End + len(token.Value) + len(*tokens),
-					Line:  token.Line,
+					Type:  ast.StringTemplateLiteralTree,
+					Start: start,
+					End:   p.peek().End,
+					Line:  p.peek().Line,
 				},
-			})
-		case lx.TokenDollarSign:
-			name := token.Value[1:]
-			parts = append(parts, ast.Identifier{
-				Name: name,
-				BaseNode: ast.BaseNode{
-					Type:  ast.IdentifierTree,
-					Start: token.Start + len(token.Value) + len(*tokens), // +1 to remove the dollar sign
-					End:   token.End + len(token.Value) + len(*tokens),
-					Line:  token.Line,
-				},
-			})
-		default:
-			parts = append(parts, parseAsStringLiteral(token))
+			}, nil
 		}
 	}
 
-	tree := ast.StringTemplateLiteral{
-		Parts: parts,
-		BaseNode: ast.BaseNode{
-			Type:  ast.StringTemplateLiteralTree,
-			Start: p.peek().Start,
-			End:   p.peek().End,
-			Line:  p.peek().Line,
-		},
-	}
-
-	p.next()
-	return tree
+	return ast.StringTemplateLiteral{}, oops.SyntaxError(p.peek(), "Invalid string template literal")
 }

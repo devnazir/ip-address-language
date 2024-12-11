@@ -77,9 +77,14 @@ func (i *Interpreter) InterpretNode(nodeItem ast.ASTNode, entryPoint string) err
 		})
 
 	case ast.CallExpressionTree:
-		info := i.scopeResolver.ResolveScope((nodeItem).(ast.CallExpression).Callee.(ast.Identifier).Name)
+		identName := (nodeItem).(ast.CallExpression).Callee.(ast.Identifier).Name
+		info := i.scopeResolver.ResolveScope(identName)
+
 		arguments := (nodeItem).(ast.CallExpression).Arguments
 		i.InterpretBodyFunction(info.Value.(ast.FunctionDeclaration), arguments)
+
+	case ast.MemberExpressionTree:
+		i.InterpretMemberExpr(nodeItem.(ast.MemberExpression))
 	}
 
 	// utils.PrintJson(i.symbolTable)

@@ -3,6 +3,7 @@ package utils
 import (
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 func InferType(value interface{}) (interface{}, string) {
@@ -14,22 +15,28 @@ func InferType(value interface{}) (interface{}, string) {
 	case float64:
 		return v, reflect.TypeOf(v).Name()
 	case string:
+		stringValue := strings.TrimSpace(v)
 
-		if intVal, err := strconv.Atoi(v); err == nil {
+		if intVal, err := strconv.Atoi(stringValue); err == nil {
 			return intVal, reflect.TypeOf(int(0)).Name()
 		}
 
-		if floatVal, err := strconv.ParseFloat(v, 64); err == nil {
+		if floatVal, err := strconv.ParseFloat(stringValue, 64); err == nil {
 			return floatVal, reflect.TypeOf(float64(0)).Name()
 		}
 
-		if v == "true" {
+		if stringValue == "true" {
 			return true, reflect.TypeOf(true).Name()
-		} else if v == "false" {
+		} else if stringValue == "false" {
 			return false, reflect.TypeOf(false).Name()
 		}
 
-		return v, reflect.TypeOf(v).Name()
+		return stringValue, reflect.TypeOf(v).Name()
+	case []interface{}:
+		return v, reflect.Array.String()
+	case map[string]interface{}:
+		return v, reflect.Map.String()
+
 	default:
 		return nil, ""
 	}

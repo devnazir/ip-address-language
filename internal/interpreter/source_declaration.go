@@ -44,7 +44,7 @@ func (i *Interpreter) InterpretSourceAst(p *ast.Program, alias string) {
 			node := nodeItem.(ast.VariableDeclaration)
 			name := node.Declaration.Id.(ast.Identifier).Name
 
-			value := i.EvaluateVariableInit(node)
+			value, _ := i.EvaluateVariableInit(node)
 
 			if isIdentifierExported(name) {
 				if len(alias) > 0 {

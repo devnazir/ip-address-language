@@ -13,3 +13,8 @@ func RemoveDoubleQuotes(text string) (string, int) {
 	text = strings.ReplaceAll(text, "\"", "")
 	return text, doubleQuotesCount
 }
+
+func GetVariableName(text string) string {
+	replacer := strings.NewReplacer("\"", "", "$", "", "{", "", "}", "")
+	return replacer.Replace(text)
+}

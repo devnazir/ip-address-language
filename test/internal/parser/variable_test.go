@@ -137,28 +137,29 @@ func TestParseVariableDeclaration(t *testing.T) {
 					BaseNode: ast.BaseNode{
 						Type:  "StringTemplateLiteral",
 						Start: 8,
-						End:   21,
+						End:   22,
 						Line:  1,
 					},
 					Parts: []ast.ASTNode{
 						ast.StringLiteral{
 							BaseNode: ast.BaseNode{
 								Type:  "StringLiteral",
-								Start: 8,
-								End:   13,
+								Start: 9,
+								End:   14,
 								Line:  1,
 							},
-							Value: "hello",
+							Value: "hello ",
 							Raw:   "hello ",
 						},
 						ast.Identifier{
 							BaseNode: ast.BaseNode{
 								Type:  "Identifier",
-								Start: 14,
-								End:   19,
+								Start: 15,
+								End:   20,
 								Line:  1,
 							},
 							Name:            "name",
+							Raw:             "name",
 							IsRestParameter: false,
 						},
 					},

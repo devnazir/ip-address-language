@@ -36,6 +36,13 @@ func (p *Parser) ParseEchoStatement() (ast.ShellExpression, error) {
 			arguments = append(arguments, p.ParseIllegal())
 		case lx.TokenSubshell:
 			arguments = append(arguments, p.ParseSubShell())
+		case lx.TokenTickQuote:
+			templateLiteral, err := p.ParseStringTemplateLiteral()
+			if err != nil {
+				return ast.ShellExpression{}, err
+			}
+
+			arguments = append(arguments, templateLiteral)
 		case lx.TokenSemicolon:
 			p.next()
 		default:

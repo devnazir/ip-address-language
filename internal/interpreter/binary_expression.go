@@ -2,10 +2,11 @@ package interpreter
 
 import (
 	"fmt"
-	"reflect"
+	"strings"
 
 	"github.com/devnazir/gosh-script/pkg/ast"
 	"github.com/devnazir/gosh-script/pkg/oops"
+	"github.com/devnazir/gosh-script/pkg/utils"
 )
 
 func (i *Interpreter) InterpretBinaryExpr(b ast.ASTNode) interface{} {
@@ -20,8 +21,10 @@ func (i *Interpreter) InterpretBinaryExpr(b ast.ASTNode) interface{} {
 	case ast.IdentifierTree:
 		name := b.(ast.Identifier).Name
 		info := i.scopeResolver.ResolveScope(name)
+		value := fmt.Sprintf("%v", info.Value)
+		finalValue := strings.NewReplacer(name, value).Replace(b.(ast.Identifier).Raw)
 
-		return info.Value
+		return finalValue
 
 	case ast.SubShellTree:
 		value := i.InterpretSubShell(b.(ast.SubShell).Arguments)
@@ -41,16 +44,14 @@ func (i *Interpreter) InterpretBinaryExpr(b ast.ASTNode) interface{} {
 		var leftFloat, rightFloat float64
 		var isLeftFloat, isRightFloat bool
 
-		boolType := reflect.TypeOf(true)
-		stringType := reflect.TypeOf("")
-		leftType := reflect.TypeOf(leftValue)
-		rightType := reflect.TypeOf(rightValue)
+		_, leftType := utils.InferType(leftValue)
+		_, rightType := utils.InferType(rightValue)
 
-		if leftType == stringType || rightType == stringType {
+		if leftType == "string" || rightType == "string" {
 			isConcat = true
 		}
 
-		if leftType == boolType || rightType == boolType {
+		if leftType == "bool" || rightType == "bool" {
 			panic(oops.SyntaxError(b.(ast.BinaryExpression).Right, "Invalid operation"))
 		}
 

@@ -7,6 +7,7 @@ const (
 type Identifier struct {
 	BaseNode
 	Name            string
+	Raw             string
 	IsRestParameter bool
 }
 

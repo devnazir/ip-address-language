@@ -12,7 +12,7 @@ func (i *Interpreter) InterpretAssigmentExpression(astExpr ast.AssignmentExpress
 	info := i.scopeResolver.ResolveScope(astExpr.Name)
 
 	if info.Kind == lx.KeywordSource {
-		oops.SourceAliasCannotBeAssignedError(info)
+		panic(oops.SyntaxError(astExpr, "Source alias cannot be reassigned"))
 	}
 
 	i.symbolTable.Insert(astExpr.Name, semantics.SymbolInfo{

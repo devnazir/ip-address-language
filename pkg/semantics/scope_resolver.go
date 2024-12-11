@@ -2,6 +2,8 @@ package semantics
 
 import (
 	"fmt"
+
+	"github.com/devnazir/gosh-script/pkg/oops"
 )
 
 type ScopeResolver struct {
@@ -15,7 +17,7 @@ func NewScopeResolver(symbolTable *SymbolTable) *ScopeResolver {
 func (sr *ScopeResolver) ResolveScope(name string) *SymbolInfo {
 	info, exists := sr.symbolTable.Get(name)
 	if !exists {
-		panic(fmt.Sprintf("Variable %s is not defined", name))
+		panic(oops.SyntaxError(info, fmt.Sprintf("Undefined variable %s", name)))
 	}
 	return &info
 }

@@ -16,11 +16,15 @@ echo $booleanTrue
 echo $booleanFalse
 
 var array = [1, 2, 3, 4, 5]
+echo $array[1]
+
 var multiArray = [
   [1, 2, 3], 
   [4, 5, 6], 
   [7, 8, 9]
 ]
+
+echo $multiArray[1][1]
 
 var object = {
   name: "John",

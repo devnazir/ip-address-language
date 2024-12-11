@@ -4,41 +4,43 @@ import (
 	"fmt"
 
 	"github.com/devnazir/gosh-script/pkg/ast"
+	"github.com/devnazir/gosh-script/pkg/oops"
 )
 
 func (i *Interpreter) InterpretMemberExpr(expr ast.MemberExpression) interface{} {
 	computed := expr.Computed
-	object := i.EvaluateMemberExpr(expr.Object, true)
 
 	if computed {
+		object := i.EvaluateMemberExpr(expr.Object, computed)
 		property := i.EvaluateMemberExpr(expr.Property, computed)
 		indexable, ok := object.([]interface{})
 		if !ok {
-			panic("Not indexable")
+			panic(oops.RuntimeError(expr.Property, "Not indexable"))
 		}
 
 		index, ok := property.(int)
 		if !ok {
-			panic(fmt.Sprintf("Invalid index: %v", property))
+			panic(oops.SyntaxError(expr.Property, "Invalid index"))
 		}
 
 		if len(indexable) <= index {
-			panic(fmt.Sprintf("Index %v out of range", index))
+			panic(oops.RuntimeError(expr.Property, fmt.Sprintf("Index %v out of range", index)))
 		}
 
 		value := indexable[index]
 		return value
 	}
 
+	object := i.EvaluateMemberExpr(expr.Object, true)
 	indexable, ok := object.(map[string]interface{})
 	if !ok {
-		panic("Not indexable")
+		panic(oops.RuntimeError(expr.Property, "Not indexable"))
 	}
 
 	property := i.EvaluateMemberExpr(expr.Property, computed)
 	value, ok := indexable[property.(string)]
 	if !ok {
-		panic(fmt.Sprintf("Property %v not found", expr.Property.(ast.Identifier).Name))
+		panic(oops.RuntimeError(expr.Property, fmt.Sprintf("Property %v not found", property)))
 	}
 
 	return value
@@ -62,10 +64,14 @@ func (i *Interpreter) EvaluateMemberExpr(node ast.ASTNode, computed bool) interf
 	case ast.StringLiteralTree:
 		return node.(ast.StringLiteral).Value
 
+	case ast.CallExpressionTree:
+		info := i.scopeResolver.ResolveScope((node).(ast.CallExpression).Callee.(ast.Identifier).Name)
+		return info.Value
+
 	case ast.MemberExpressionTree:
 		return i.InterpretMemberExpr(node.(ast.MemberExpression))
 
 	default:
-		panic("Invalid member expression")
+		panic(oops.RuntimeError(node, "Invalid member expression"))
 	}
 }

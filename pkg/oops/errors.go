@@ -5,7 +5,6 @@ import (
 
 	lx "github.com/devnazir/gosh-script/internal/lexer"
 	"github.com/devnazir/gosh-script/pkg/ast"
-	"github.com/devnazir/gosh-script/pkg/semantics"
 )
 
 var (
@@ -68,9 +67,9 @@ var (
 		panic(fmt.Errorf("Invalid file extension: %s, expected .gsh or .gosh or .gs", filename))
 	}
 
-	SourceAliasCannotBeAssignedError = func(symbolInfo *semantics.SymbolInfo) error {
-		panic(CreateErrorMessage(symbolInfo, "Source alias cannot be assigned to a variable"))
-	}
+	// SourceAliasCannotBeAssignedError = func(symbolInfo *semantics.SymbolInfo) error {
+	// 	panic(CreateErrorMessage(symbolInfo, "Source alias cannot be assigned to a variable"))
+	// }
 
 	SourceAliasMustBeAlphanumericError = func(alias string) error {
 		panic(fmt.Errorf("Source alias must be alphanumeric, got: %s", alias))
