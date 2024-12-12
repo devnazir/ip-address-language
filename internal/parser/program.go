@@ -141,6 +141,37 @@ func (p *Parser) ParseTokenIdentifier() (ast.ASTNode, error) {
 		}
 		return memberExpression, nil
 
+	case lx.TokenColon:
+		p.next()
+
+		if p.TokenValueIs(lx.EqualsSign) {
+			p.next()
+			assignmentExpression := p.ParseAssignmentExpression(identifier.(ast.Identifier))
+
+			if ok := assignmentExpression.(ast.AssignmentExpression).Expression; ok == nil {
+				return nil, oops.SyntaxError(p.peek(), "Expected value")
+			}
+
+			return ast.VariableDeclaration{
+				BaseNode: ast.BaseNode{
+					Type:  ast.VariableDeclarationTree,
+					Start: identifier.(ast.Identifier).GetStart(),
+					End:   identifier.(ast.Identifier).GetEnd(),
+					Line:  identifier.GetLine(),
+				},
+				Declaration: ast.VariableDeclarator{
+					BaseNode: ast.BaseNode{
+						Type:  ast.VariableDeclaratorTree,
+						Start: identifier.(ast.Identifier).GetStart(),
+						End:   identifier.(ast.Identifier).GetEnd(),
+						Line:  identifier.GetLine(),
+					},
+					Id:   identifier.(ast.Identifier),
+					Init: assignmentExpression.(ast.AssignmentExpression).Expression,
+				},
+			}, nil
+		}
+
 	default:
 		return nil, oops.SyntaxError(p.peek(), "Unexpected token")
 	}

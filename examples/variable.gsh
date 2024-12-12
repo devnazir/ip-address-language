@@ -38,3 +38,6 @@ var object = {
     bool: false
   }
 } 
+
+withoutVar := 2 + 2 * 2
+echo $withoutVar
