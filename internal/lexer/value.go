@@ -62,22 +62,28 @@ const (
 	KeywordBreak    = "break"
 	KeywordContinue = "continue"
 	KeywordSleep    = "sleep"
-
-	Push = "push"
-	Len  = "len"
 )
 
 const (
-	boolType    = "bool"
-	intType     = "int"
-	float64Type = "float64"
-	stringType  = "string"
+	BoolType    = "bool"
+	IntType     = "int"
+	Float64Type = "float64"
+	StringType  = "string"
 
 	MultiplicationSign = "*"
 	AdditionSign       = "+"
 	SubtractionSign    = "-"
 	DivisionSign       = "/"
 	EqualsSign         = "="
+	NotEqualsSign      = "!="
+	GreaterThanSign    = ">"
+	LessThanSign       = "<"
+	GreaterOrEqualSign = ">="
+	LessOrEqualSign    = "<="
+	AndOperator        = "&&"
+	OrOperator         = "||"
+	EquivalenceSign    = "=="
+	ModulusSign        = "%"
 
 	SingleLineComment     = "//"
 	MultiLineCommentStart = "/*"
@@ -104,10 +110,10 @@ var Keywords = map[string]TokenType{
 	KeywordSleep:    TokenShellKeyword,
 
 	// Primitive types
-	boolType:    TokenPrimitiveType,
-	intType:     TokenPrimitiveType,
-	float64Type: TokenPrimitiveType,
-	stringType:  TokenPrimitiveType,
+	BoolType:    TokenPrimitiveType,
+	IntType:     TokenPrimitiveType,
+	Float64Type: TokenPrimitiveType,
+	StringType:  TokenPrimitiveType,
 
 	BoolTrue:  TokenBoolean,
 	BoolFalse: TokenBoolean,
@@ -125,7 +131,7 @@ var TokenSpecs = map[TokenType]string{
 	TokenFlag:         `^\-[a-zA-Z]`,
 	TokenNumber:       `^\b\d+(\.\d+)?\b`,
 	TokenIdentifier:   `^\b[a-zA-Z_][a-zA-Z0-9_]*\b`,
-	TokenOperator:     `^[+\-*/=]{1}[^a-zA-Z]\s*`,
+	TokenOperator:     `^([+\-*/=]|==|!=|>=?|<=?|&&|\|\|)[^\w]`,
 	TokenString:       `^("|')([^"\n])*("|')`,
 	TokenTickQuote:    "^`",
 	TokenLeftParen:    `^\(`,

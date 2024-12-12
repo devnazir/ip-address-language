@@ -56,7 +56,7 @@ func (i *Interpreter) EvaluateVariableInit(nodeVar ast.VariableDeclaration) (int
 		var result string
 
 		for _, part := range stringTemplateLiteral.Parts {
-			expr := i.InterpretBinaryExpr(part)
+			expr := i.InterpretBinaryExpr(part, true)
 			result += fmt.Sprintf("%v", expr)
 		}
 
@@ -79,7 +79,7 @@ func (i *Interpreter) EvaluateVariableInit(nodeVar ast.VariableDeclaration) (int
 				continue
 			}
 
-			result = append(result, i.InterpretBinaryExpr(element))
+			result = append(result, i.InterpretBinaryExpr(element, true))
 		}
 
 		return result, ast.ArrayExpressionTree
@@ -91,7 +91,7 @@ func (i *Interpreter) EvaluateVariableInit(nodeVar ast.VariableDeclaration) (int
 
 		for _, property := range objectExpression.Properties {
 			key := property.Key
-			value := i.InterpretBinaryExpr(property.Value)
+			value := i.InterpretBinaryExpr(property.Value, true)
 
 			result[key] = value
 		}
@@ -99,5 +99,5 @@ func (i *Interpreter) EvaluateVariableInit(nodeVar ast.VariableDeclaration) (int
 		return result, ast.ObjectExpressionTree
 	}
 
-	return i.InterpretBinaryExpr(nodeVar.Declaration.Init), ast.BinaryExpressionTree
+	return i.InterpretBinaryExpr(nodeVar.Declaration.Init, true), ast.BinaryExpressionTree
 }

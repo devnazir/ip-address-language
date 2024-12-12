@@ -83,6 +83,9 @@ func (i *Interpreter) InterpretNode(nodeItem ast.ASTNode, entryPoint string) err
 		arguments := (nodeItem).(ast.CallExpression).Arguments
 		i.InterpretBodyFunction(info.Value.(ast.FunctionDeclaration), arguments)
 
+	case ast.IFStatementTree:
+		i.InterpretIfStatement((nodeItem).(ast.IfStatement))
+
 	case ast.MemberExpressionTree:
 		i.InterpretMemberExpr(nodeItem.(ast.MemberExpression))
 	}
@@ -90,4 +93,9 @@ func (i *Interpreter) InterpretNode(nodeItem ast.ASTNode, entryPoint string) err
 	// utils.PrintJson(i.symbolTable)
 
 	return nil
+}
+
+func (i *Interpreter) resolveIdentifier(identifier ast.Identifier) interface{} {
+	info := i.scopeResolver.ResolveScope(identifier.Name)
+	return info.Value
 }

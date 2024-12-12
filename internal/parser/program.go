@@ -12,51 +12,70 @@ import (
 func (p *Parser) ParseProgram() *ast.Program {
 	filename := os.Args[1]
 	rootFullDir := filepath.Dir(filename)
+	lastPos := 0
 
 	program := &ast.Program{
 		BaseNode: ast.BaseNode{
 			Type:  ast.ProgramTree,
-			Start: 0,
-			End:   0,
+			Start: p.peek().Start,
+			End:   p.peek().End,
+			Line:  p.peek().Line,
 		},
-		Body:       []ast.ASTNode{},
 		EntryPoint: rootFullDir,
 	}
 
-	lastPos := 0
+	body := ast.BodyProgram{}
 
 	for p.pos < len(p.tokens) {
-		if p.peek().Type == lx.TokenEOF {
+		if p.TokenTypeIs(lx.TokenEOF) {
 			lastPos = p.peek().End
 			break
 		}
 
-		p.ParseBodyProgram(program)
+		result, err := p.ParseBodyProgram()
+		if err != nil {
+			panic(err)
+		}
+
+		body = append(body, result...)
 	}
 
+	program.Body = body
 	program.End = lastPos
 	return program
 }
 
-func (p *Parser) ParseBodyProgram(program *ast.Program) (ast.ASTNode, error) {
+func (p *Parser) ParseBodyProgram() (ast.BodyProgram, error) {
+	body := ast.BodyProgram{}
+
 	switch p.peek().Type {
 	case lx.TokenKeyword:
-		if p.peek().Value == lx.KeywordVar || p.peek().Value == lx.KeywordConst {
+		if p.TokenValueIs(lx.KeywordVar) || p.TokenValueIs(lx.KeywordConst) {
 			declaration, err := p.ParseVariableDeclaration()
 
 			if err != nil {
 				panic(err)
 			}
-			program.Body = append(program.Body, declaration)
+			body = append(body, declaration)
 		}
 
-		if p.peek().Value == lx.KeywordFunc {
+		if p.TokenValueIs(lx.KeywordFunc) {
 			fnDeclaration, err := p.ParseFunctionDeclaration()
 			if err != nil {
 				panic(err)
 			}
-			program.Body = append(program.Body, fnDeclaration)
+			body = append(body, fnDeclaration)
 			p.next()
+		}
+
+		if p.TokenValueIs(lx.KeywordIf) {
+			ifStatement, err := p.ParseIfStatement()
+
+			if err != nil {
+				panic(err)
+			}
+
+			body = append(body, ifStatement)
 		}
 
 	case lx.TokenShellKeyword:
@@ -64,20 +83,20 @@ func (p *Parser) ParseBodyProgram(program *ast.Program) (ast.ASTNode, error) {
 		if err != nil {
 			panic(err)
 		}
-		program.Body = append(program.Body, shellExpression)
+		body = append(body, shellExpression)
 
 	case lx.TokenIdentifier:
 		identifier, err := p.ParseTokenIdentifier()
 		if err != nil {
 			panic(err)
 		}
-		program.Body = append(program.Body, identifier)
+		body = append(body, identifier)
 
 	case lx.TokenSubshell:
-		program.Body = append(program.Body, p.ParseSubShell())
+		body = append(body, p.ParseSubShell())
 
 	case lx.TokenEOF:
-		return program, nil
+		return body, nil
 
 	case lx.TokenSemicolon, lx.TokenComment, lx.TokenWhitespace:
 		p.next()
@@ -90,7 +109,7 @@ func (p *Parser) ParseBodyProgram(program *ast.Program) (ast.ASTNode, error) {
 		panic(oops.SyntaxError(p.peek(), "Unknown token"))
 	}
 
-	return program, nil
+	return body, nil
 }
 
 func (p *Parser) ParseTokenIdentifier() (ast.ASTNode, error) {

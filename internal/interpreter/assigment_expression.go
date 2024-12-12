@@ -8,7 +8,7 @@ import (
 )
 
 func (i *Interpreter) InterpretAssigmentExpression(astExpr ast.AssignmentExpression) {
-	value := i.InterpretBinaryExpr(astExpr.Expression)
+	value := i.InterpretBinaryExpr(astExpr.Expression, true)
 	info := i.scopeResolver.ResolveScope(astExpr.Name)
 
 	if info.Kind == lx.KeywordSource {

@@ -45,3 +45,11 @@ func (p *Parser) Parse() *ast.Program {
 
 	return program
 }
+
+func (p *Parser) TokenTypeIs(t lx.TokenType) bool {
+	return p.peek().Type == t
+}
+
+func (p *Parser) TokenValueIs(v string) bool {
+	return p.peek().Value == v
+}

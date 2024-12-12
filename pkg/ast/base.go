@@ -9,6 +9,16 @@ type ASTNode interface {
 	GetLine() int
 }
 
+type BodyProgram []ASTNode;
+
+func (b BodyProgram) GetType() interface{} {
+	return b
+}
+
+func (b BodyProgram) GetLine() int {
+	return 0
+}
+
 type BaseNode struct {
 	Type    string
 	Start   int

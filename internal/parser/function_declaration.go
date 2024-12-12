@@ -122,21 +122,13 @@ func (p *Parser) ParseFunctionDeclaration() (ast.FunctionDeclaration, error) {
 
 	body := []ast.ASTNode{}
 	for p.peek().Type != lx.TokenRightCurly {
-		program, err := p.ParseBodyProgram(&ast.Program{
-			BaseNode: ast.BaseNode{
-				Type:  ast.ProgramTree,
-				Start: p.peek().Start,
-				End:   0,
-				Line:  p.peek().Line,
-			},
-			Body: node.Body,
-		})
+		program, err := p.ParseBodyProgram()
 
 		if err != nil {
 			return ast.FunctionDeclaration{}, err
 		}
 
-		body = append(body, program.(*ast.Program).Body[0])
+		body = append(body, program...)
 	}
 
 	node.Body = body
