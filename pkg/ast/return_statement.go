@@ -4,7 +4,7 @@ const ReturnStatementTree = "ReturnStatement"
 
 type ReturnStatement struct {
 	BaseNode
-	Argument []ASTNode
+	Arguments []ASTNode
 }
 
 func (r ReturnStatement) GetLine() int {

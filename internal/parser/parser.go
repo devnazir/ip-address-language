@@ -33,6 +33,14 @@ func (p *Parser) next() lx.Token {
 	return token
 }
 
+func (p *Parser) peekPrev() lx.Token {
+	if p.pos-1 < 0 {
+		return p.tokens[0]
+	}
+
+	return p.tokens[p.pos-1]
+}
+
 func (p *Parser) Parse() *ast.Program {
 	defer func() {
 		if r := recover(); r != nil {

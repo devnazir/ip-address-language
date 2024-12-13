@@ -77,6 +77,10 @@ func (i *Interpreter) processArgument(argument ast.ASTNode) string {
 }
 
 func (i *Interpreter) resolveValue(value interface{}) string {
+	if value == nil {
+		return ""
+	}
+
 	if reflect.TypeOf(value).Kind() == reflect.Int {
 		return strconv.Itoa(value.(int))
 	}

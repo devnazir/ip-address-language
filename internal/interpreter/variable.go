@@ -9,11 +9,11 @@ import (
 	"github.com/devnazir/gosh-script/pkg/utils"
 )
 
-func (i *Interpreter) InterpretVariableDeclaration(nodeVar ast.VariableDeclaration) {
+func (i *Interpreter) InterpretVariableDeclaration(nodeVar ast.VariableDeclaration) error {
 	name := nodeVar.Declaration.Id.(ast.Identifier).Name
 
 	if i.symbolTable.Exists(name) {
-		oops.DuplicateIdentifierError(nodeVar)
+		return oops.SyntaxError(nodeVar, fmt.Sprintf("Variable %s already declared", name))
 	}
 
 	value, _ := i.EvaluateVariableInit(nodeVar)
@@ -26,6 +26,7 @@ func (i *Interpreter) InterpretVariableDeclaration(nodeVar ast.VariableDeclarati
 	}
 
 	i.symbolTable.Insert(name, *symbolInfo)
+	return nil
 }
 
 func (i *Interpreter) EvaluateVariableInit(nodeVar ast.VariableDeclaration) (interface{}, string) {
@@ -97,6 +98,11 @@ func (i *Interpreter) EvaluateVariableInit(nodeVar ast.VariableDeclaration) (int
 		}
 
 		return result, ast.ObjectExpressionTree
+	}
+
+	if declarationType == ast.CallExpressionTree {
+		res, _, _ := i.InterpretNode(nodeVar.Declaration.Init, "")
+		return res, ast.CallExpressionTree
 	}
 
 	return i.InterpretBinaryExpr(nodeVar.Declaration.Init, true), ast.BinaryExpressionTree

@@ -1,7 +1,6 @@
 package interpreter
 
 import (
-	"fmt"
 	"strings"
 
 	lx "github.com/devnazir/gosh-script/internal/lexer"
@@ -12,15 +11,14 @@ import (
 	"github.com/devnazir/gosh-script/pkg/utils"
 )
 
-func (i *Interpreter) InterpretSourceDeclaration(sourceDeclaration ast.SourceDeclaration, entrypoint string) {
+func (i *Interpreter) InterpretSourceDeclaration(sourceDeclaration ast.SourceDeclaration, entrypoint string) error {
 	for _, sources := range sourceDeclaration.Sources {
 		file := sources.Value
 		fileDir, err := utils.FindDirByFilename(entrypoint, file)
 		alias := sources.Alias
 
 		if err != nil {
-			fmt.Println(err)
-			return
+			return err
 		}
 
 		lexer := lx.NewLexerFromFilename(fileDir + "/" + file)
@@ -30,9 +28,11 @@ func (i *Interpreter) InterpretSourceDeclaration(sourceDeclaration ast.SourceDec
 		ast := parser.Parse()
 		i.InterpretSourceAst(ast, alias)
 	}
+
+	return nil
 }
 
-func (i *Interpreter) InterpretSourceAst(p *ast.Program, alias string) {
+func (i *Interpreter) InterpretSourceAst(p *ast.Program, alias string) error {
 
 	if len(alias) > 0 && !utils.IsAlpha(alias[0]) {
 		oops.SourceAliasMustBeAlphanumericError(alias)
@@ -68,7 +68,7 @@ func (i *Interpreter) InterpretSourceAst(p *ast.Program, alias string) {
 
 			if name == "init" {
 				if len(params) > 0 {
-					oops.InitFunctionCannotHaveParametersError(nodeItem.(ast.FunctionDeclaration))
+					return oops.RuntimeError(nodeItem, "init function cannot have parameters")
 				}
 
 				i.InterpretBodyFunction(nodeItem.(ast.FunctionDeclaration), nil)
@@ -78,6 +78,8 @@ func (i *Interpreter) InterpretSourceAst(p *ast.Program, alias string) {
 			break
 		}
 	}
+
+	return nil
 }
 
 func isIdentifierExported(name string) bool {

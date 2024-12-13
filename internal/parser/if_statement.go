@@ -122,6 +122,7 @@ func (p *Parser) ParseIfStatement() (ast.IfStatement, error) {
 			p.next()
 
 			body := ast.BodyProgram{}
+
 			for p.peek().Type != lx.TokenRightCurly && p.peek().Value != lx.KeywordIf {
 				program, err := p.ParseBodyProgram()
 

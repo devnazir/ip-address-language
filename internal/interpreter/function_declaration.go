@@ -2,7 +2,6 @@ package interpreter
 
 import (
 	"fmt"
-	"runtime/debug"
 
 	"github.com/devnazir/gosh-script/pkg/ast"
 	"github.com/devnazir/gosh-script/pkg/oops"
@@ -25,15 +24,7 @@ func (i *Interpreter) processFnArgument(arg ast.ASTNode) string {
 	return ""
 }
 
-func (i *Interpreter) InterpretBodyFunction(p ast.FunctionDeclaration, args []ast.ASTNode) {
-
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Println(r)
-			debug.PrintStack()
-		}
-	}()
-
+func (i *Interpreter) InterpretBodyFunction(p ast.FunctionDeclaration, args []ast.ASTNode) (IntrerpretResult, ShouldReturn, error) {
 	i.scopeResolver.EnterScope()
 
 	idxOfRestParams, err := i.getRestParamIndex(&p)
@@ -64,10 +55,19 @@ func (i *Interpreter) InterpretBodyFunction(p ast.FunctionDeclaration, args []as
 	}
 
 	for _, nodeItem := range p.Body {
-		i.InterpretNode(nodeItem, "")
+		res, shouldReturn, err := i.InterpretNode(nodeItem, "")
+		if err != nil {
+			return nil, false, err
+		}
+
+		if shouldReturn {
+			return res, shouldReturn, nil
+		}
 	}
 
 	i.scopeResolver.ExitScope()
+
+	return nil, false, nil
 }
 
 func (i *Interpreter) getRestParamIndex(functionDecl *ast.FunctionDeclaration) (int, error) {

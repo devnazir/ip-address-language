@@ -137,5 +137,6 @@ func (p *Parser) ParseFunctionDeclaration() (ast.FunctionDeclaration, error) {
 		return ast.FunctionDeclaration{}, oops.SyntaxError(p.peek(), "Expected right curly brace")
 	}
 
+	p.next()
 	return node, nil
 }

@@ -105,7 +105,6 @@ func (p *Parser) EvaluateAssignmentExpression() ast.ASTNode {
 					panic(err)
 				}
 				output = append(output, fnDeclaration)
-				p.next()
 				continue
 			}
 
@@ -141,35 +140,15 @@ func (p *Parser) ParsePrimaryExpression() (ast.ASTNode, error) {
 	case lx.TokenString:
 		return p.ParseStringLiteral(nil), nil
 	case lx.TokenIdentifier, lx.TokenDollarSign:
-		identifier, err := p.ParseIdentifier()
-		if err != nil {
-			return nil, err
-		}
-		return identifier, nil
+		return p.ParseIdentifier(true)
 	case lx.TokenTickQuote:
-		templateString, err := p.ParseStringTemplateLiteral()
-		if err != nil {
-			return nil, err
-		}
-		return templateString, nil
+		return p.ParseStringTemplateLiteral()
 	case lx.TokenBoolean:
 		return p.ParseBooleanLiteral(), nil
 	case lx.TokenLeftBracket:
-		arrayExpression, err := p.ParseArrayExpression()
-
-		if err != nil {
-			return nil, err
-		}
-
-		return arrayExpression, nil
+		return p.ParseArrayExpression()
 	case lx.TokenLeftCurly:
-		objectExpression, err := p.ParseObjectExpression()
-
-		if err != nil {
-			return nil, err
-		}
-
-		return objectExpression, nil
+		return p.ParseObjectExpression()
 	default:
 		return nil, oops.SyntaxError(p.peek(), "Unexpected token"+p.peek().Value)
 	}

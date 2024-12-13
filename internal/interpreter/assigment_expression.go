@@ -7,12 +7,12 @@ import (
 	"github.com/devnazir/gosh-script/pkg/semantics"
 )
 
-func (i *Interpreter) InterpretAssigmentExpression(astExpr ast.AssignmentExpression) {
+func (i *Interpreter) InterpretAssigmentExpression(astExpr ast.AssignmentExpression) error {
 	value := i.InterpretBinaryExpr(astExpr.Expression, true)
 	info := i.scopeResolver.ResolveScope(astExpr.Name)
 
 	if info.Kind == lx.KeywordSource {
-		panic(oops.SyntaxError(astExpr, "Source alias cannot be reassigned"))
+		return oops.RuntimeError(astExpr, "Cannot assign to source")
 	}
 
 	i.symbolTable.Insert(astExpr.Name, semantics.SymbolInfo{
@@ -20,4 +20,6 @@ func (i *Interpreter) InterpretAssigmentExpression(astExpr ast.AssignmentExpress
 		Value: value,
 		Line:  astExpr.Line,
 	})
+
+	return nil
 }

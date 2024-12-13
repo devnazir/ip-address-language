@@ -7,6 +7,7 @@ import (
 	lx "github.com/devnazir/gosh-script/internal/lexer"
 	"github.com/devnazir/gosh-script/pkg/ast"
 	"github.com/devnazir/gosh-script/pkg/oops"
+	"github.com/devnazir/gosh-script/pkg/utils"
 )
 
 func (p *Parser) ParseProgram() *ast.Program {
@@ -50,33 +51,12 @@ func (p *Parser) ParseBodyProgram() (ast.BodyProgram, error) {
 
 	switch p.peek().Type {
 	case lx.TokenKeyword:
-		if p.TokenValueIs(lx.KeywordVar) || p.TokenValueIs(lx.KeywordConst) {
-			declaration, err := p.ParseVariableDeclaration()
-
-			if err != nil {
-				panic(err)
-			}
-			body = append(body, declaration)
+		keyword, err := p.ParseTokenKeyword()
+		if err != nil {
+			panic(err)
 		}
 
-		if p.TokenValueIs(lx.KeywordFunc) {
-			fnDeclaration, err := p.ParseFunctionDeclaration()
-			if err != nil {
-				panic(err)
-			}
-			body = append(body, fnDeclaration)
-			p.next()
-		}
-
-		if p.TokenValueIs(lx.KeywordIf) {
-			ifStatement, err := p.ParseIfStatement()
-
-			if err != nil {
-				panic(err)
-			}
-
-			body = append(body, ifStatement)
-		}
+		body = append(body, keyword)
 
 	case lx.TokenShellKeyword:
 		shellExpression, err := p.ParseShellExpression()
@@ -105,11 +85,32 @@ func (p *Parser) ParseBodyProgram() (ast.BodyProgram, error) {
 		oops.IllegalTokenError(p.peek())
 
 	default:
-		// utils.PrintJson(p.peek())
+		utils.PrintJson(p.peek())
 		panic(oops.SyntaxError(p.peek(), "Unknown token"))
 	}
 
 	return body, nil
+}
+
+func (p *Parser) ParseTokenKeyword() (ast.ASTNode, error) {
+	switch p.peek().Value {
+	case lx.KeywordVar, lx.KeywordConst:
+		return p.ParseVariableDeclaration()
+
+	case lx.KeywordFunc:
+		return p.ParseFunctionDeclaration()
+
+	case lx.KeywordIf:
+		return p.ParseIfStatement()
+
+	case lx.KeywordReturn:
+		return p.ParseReturnStatement(ParseReturnStatementParams{
+			isNextReturn: false,
+		})
+
+	default:
+		return nil, oops.SyntaxError(p.peek(), "Unexpected token")
+	}
 }
 
 func (p *Parser) ParseTokenIdentifier() (ast.ASTNode, error) {
@@ -173,6 +174,7 @@ func (p *Parser) ParseTokenIdentifier() (ast.ASTNode, error) {
 		}
 
 	default:
+		utils.PrintJson(p.peek())
 		return nil, oops.SyntaxError(p.peek(), "Unexpected token")
 	}
 
