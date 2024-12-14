@@ -48,7 +48,7 @@ var (
 	}
 
 	ExpectedEntrypointFileError = func() error {
-		panic(New("Expected filename as main entrypoint, e.g., gsh main.gsh"))
+		panic(New("Expected filename as main entrypoint, e.g., ipl main.n"))
 	}
 
 	ExpectedTokenError = func(currentToken lx.Token, expectedToken string) error {
