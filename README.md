@@ -134,7 +134,7 @@ when creating a string, you should wrap the ascii values with double quotes `34`
 // 41 = )
 ```
 
-Some example of syntax that you can use in NUMWTF:
+Some example of syntax that you can use in IP Address Programming Language:
 
 ### Variable Assignment
 
