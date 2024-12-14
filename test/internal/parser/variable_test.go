@@ -3,15 +3,15 @@ package parser_test
 import (
 	"testing"
 
-	"github.com/devnazir/gosh-script/internal/lexer"
-	"github.com/devnazir/gosh-script/internal/parser"
-	"github.com/devnazir/gosh-script/pkg/ast"
+	"github.com/devnazir/ip-address-language/internal/lexer"
+	"github.com/devnazir/ip-address-language/internal/parser"
+	"github.com/devnazir/ip-address-language/pkg/ast"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestParseVariableDeclaration(t *testing.T) {
 	t.Run("number variable declaration", func(t *testing.T) {
-		text := "var x = 42;"
+		text := "118.97.114 120 61 52.50"
 		tokens := lexer.NewLexer(text, "").Tokenize()
 		actualAst, _ := parser.NewParser(tokens).ParseVariableDeclaration()
 
@@ -19,21 +19,21 @@ func TestParseVariableDeclaration(t *testing.T) {
 			BaseNode: ast.BaseNode{
 				Type:  "VariableDeclaration",
 				Start: 0,
-				End:   11,
+				End:   23,
 				Line:  1,
 			},
 			Declaration: ast.VariableDeclarator{
 				BaseNode: ast.BaseNode{
 					Type:  "VariableDeclarator",
-					Start: 4,
-					End:   11,
+					Start: 11,
+					End:   23,
 					Line:  1,
 				},
 				Id: ast.Identifier{
 					BaseNode: ast.BaseNode{
 						Type:  "Identifier",
-						Start: 4,
-						End:   5,
+						Start: 11,
+						End:   14,
 						Line:  1,
 					},
 					Name:            "x",
@@ -42,8 +42,8 @@ func TestParseVariableDeclaration(t *testing.T) {
 				Init: ast.NumberLiteral{
 					BaseNode: ast.BaseNode{
 						Type:  "NumberLiteral",
-						Start: 8,
-						End:   10,
+						Start: 18,
+						End:   23,
 						Line:  1,
 					},
 					Value: 42,
@@ -58,7 +58,7 @@ func TestParseVariableDeclaration(t *testing.T) {
 	})
 
 	t.Run("string variable declaration", func(t *testing.T) {
-		text := "var x = \"hello\";"
+		text := "118.97.114 120 61 34 104.101.108.108.111 34"
 		tokens := lexer.NewLexer(text, "").Tokenize()
 		actualAst, _ := parser.NewParser(tokens).ParseVariableDeclaration()
 
@@ -66,21 +66,21 @@ func TestParseVariableDeclaration(t *testing.T) {
 			BaseNode: ast.BaseNode{
 				Type:  "VariableDeclaration",
 				Start: 0,
-				End:   16,
+				End:   43,
 				Line:  1,
 			},
 			Declaration: ast.VariableDeclarator{
 				BaseNode: ast.BaseNode{
 					Type:  "VariableDeclarator",
-					Start: 4,
-					End:   16,
+					Start: 11,
+					End:   43,
 					Line:  1,
 				},
 				Id: ast.Identifier{
 					BaseNode: ast.BaseNode{
 						Type:  "Identifier",
-						Start: 4,
-						End:   5,
+						Start: 11,
+						End:   14,
 						Line:  1,
 					},
 					Name:            "x",
@@ -89,12 +89,12 @@ func TestParseVariableDeclaration(t *testing.T) {
 				Init: ast.StringLiteral{
 					BaseNode: ast.BaseNode{
 						Type:  "StringLiteral",
-						Start: 8,
-						End:   15,
+						Start: 18,
+						End:   43,
 						Line:  1,
 					},
 					Value: "hello",
-					Raw:   "\"hello\"",
+					Raw:   "hello ",
 				},
 			},
 			Kind:           "var",
@@ -105,7 +105,7 @@ func TestParseVariableDeclaration(t *testing.T) {
 	})
 
 	t.Run("string template literal variable declaration", func(t *testing.T) {
-		text := "var x = `hello $name`;"
+		text := "118.97.114 120 61 96 104.101.108.108.111 36.110.97.109.101 96"
 		tokens := lexer.NewLexer(text, "").Tokenize()
 		actualAst, _ := parser.NewParser(tokens).ParseVariableDeclaration()
 
@@ -113,21 +113,21 @@ func TestParseVariableDeclaration(t *testing.T) {
 			BaseNode: ast.BaseNode{
 				Type:  "VariableDeclaration",
 				Start: 0,
-				End:   22,
+				End:   61,
 				Line:  1,
 			},
 			Declaration: ast.VariableDeclarator{
 				BaseNode: ast.BaseNode{
 					Type:  "VariableDeclarator",
-					Start: 4,
-					End:   22,
+					Start: 11,
+					End:   61,
 					Line:  1,
 				},
 				Id: ast.Identifier{
 					BaseNode: ast.BaseNode{
 						Type:  "Identifier",
-						Start: 4,
-						End:   5,
+						Start: 11,
+						End:   14,
 						Line:  1,
 					},
 					Name:            "x",
@@ -136,16 +136,16 @@ func TestParseVariableDeclaration(t *testing.T) {
 				Init: ast.StringTemplateLiteral{
 					BaseNode: ast.BaseNode{
 						Type:  "StringTemplateLiteral",
-						Start: 8,
-						End:   22,
+						Start: 18,
+						End:   61,
 						Line:  1,
 					},
 					Parts: []ast.ASTNode{
 						ast.StringLiteral{
 							BaseNode: ast.BaseNode{
 								Type:  "StringLiteral",
-								Start: 9,
-								End:   14,
+								Start: 21,
+								End:   40,
 								Line:  1,
 							},
 							Value: "hello ",
@@ -154,12 +154,12 @@ func TestParseVariableDeclaration(t *testing.T) {
 						ast.Identifier{
 							BaseNode: ast.BaseNode{
 								Type:  "Identifier",
-								Start: 15,
-								End:   20,
+								Start: 41,
+								End:   58,
 								Line:  1,
 							},
 							Name:            "name",
-							Raw:             "name",
+							Raw:             "name ",
 							IsRestParameter: false,
 						},
 					},
@@ -172,56 +172,8 @@ func TestParseVariableDeclaration(t *testing.T) {
 		assert.Equal(t, expectedAst, actualAst)
 	})
 
-	t.Run("single quote string variable declaration", func(t *testing.T) {
-		text := "var x = 'hello';"
-		tokens := lexer.NewLexer(text, "").Tokenize()
-		actualAst, _ := parser.NewParser(tokens).ParseVariableDeclaration()
-
-		expectedAst := ast.VariableDeclaration{
-			BaseNode: ast.BaseNode{
-				Type:  "VariableDeclaration",
-				Start: 0,
-				End:   16,
-				Line:  1,
-			},
-			Declaration: ast.VariableDeclarator{
-				BaseNode: ast.BaseNode{
-					Type:  "VariableDeclarator",
-					Start: 4,
-					End:   16,
-					Line:  1,
-				},
-				Id: ast.Identifier{
-					BaseNode: ast.BaseNode{
-						Type:  "Identifier",
-						Start: 4,
-						End:   5,
-						Line:  1,
-					},
-					Name:            "x",
-					IsRestParameter: false,
-				},
-				Init: ast.StringLiteral{
-					BaseNode: ast.BaseNode{
-						Type:  "StringLiteral",
-						Start: 8,
-						End:   15,
-						Line:  1,
-					},
-					Value: "'hello'",
-					Raw:   "'hello'",
-				},
-			},
-
-			Kind:           "var",
-			TypeAnnotation: "",
-		}
-
-		assert.Equal(t, expectedAst, actualAst)
-	})
-
 	t.Run("variable declaraion with subshell", func(t *testing.T) {
-		text := "var x = $(ls);"
+		text := "118.97.114 120 61 36.40.108.115.41"
 		tokens := lexer.NewLexer(text, "").Tokenize()
 		actualAst, _ := parser.NewParser(tokens).ParseVariableDeclaration()
 
@@ -229,21 +181,21 @@ func TestParseVariableDeclaration(t *testing.T) {
 			BaseNode: ast.BaseNode{
 				Type:  "VariableDeclaration",
 				Start: 0,
-				End:   14,
+				End:   34,
 				Line:  1,
 			},
 			Declaration: ast.VariableDeclarator{
 				BaseNode: ast.BaseNode{
 					Type:  "VariableDeclarator",
-					Start: 4,
-					End:   14,
+					Start: 11,
+					End:   34,
 					Line:  1,
 				},
 				Id: ast.Identifier{
 					BaseNode: ast.BaseNode{
 						Type:  "Identifier",
-						Start: 4,
-						End:   5,
+						Start: 11,
+						End:   14,
 						Line:  1,
 					},
 					Name:            "x",
@@ -252,8 +204,8 @@ func TestParseVariableDeclaration(t *testing.T) {
 				Init: ast.SubShell{
 					BaseNode: ast.BaseNode{
 						Type:  "SubShell",
-						Start: 8,
-						End:   13,
+						Start: 18,
+						End:   34,
 						Line:  1,
 					},
 					Arguments: "ls",
@@ -267,14 +219,14 @@ func TestParseVariableDeclaration(t *testing.T) {
 	})
 
 	t.Run("variable declaraion without value", func(t *testing.T) {
-		text := "var x;"
+		text := "118.97.114 120"
 		tokens := lexer.NewLexer(text, "").Tokenize()
 		_, err := parser.NewParser(tokens).ParseVariableDeclaration()
 		assert.NotNil(t, err)
 	})
 
 	t.Run("variable declaraion with type annotation", func(t *testing.T) {
-		text := "var x string;"
+		text := "118.97.114 120 115.116.114.105.110.103"
 		tokens := lexer.NewLexer(text, "").Tokenize()
 		actualAst, _ := parser.NewParser(tokens).ParseVariableDeclaration()
 
@@ -282,21 +234,21 @@ func TestParseVariableDeclaration(t *testing.T) {
 			BaseNode: ast.BaseNode{
 				Type:  "VariableDeclaration",
 				Start: 0,
-				End:   13,
+				End:   38,
 				Line:  1,
 			},
 			Declaration: ast.VariableDeclarator{
 				BaseNode: ast.BaseNode{
 					Type:  "VariableDeclarator",
-					Start: 4,
-					End:   13,
+					Start: 11,
+					End:   38,
 					Line:  1,
 				},
 				Id: ast.Identifier{
 					BaseNode: ast.BaseNode{
 						Type:  "Identifier",
-						Start: 4,
-						End:   5,
+						Start: 11,
+						End:   14,
 						Line:  1,
 					},
 					Name:            "x",
@@ -312,7 +264,7 @@ func TestParseVariableDeclaration(t *testing.T) {
 	})
 
 	t.Run("variable declaraion with type annotation and value", func(t *testing.T) {
-		text := "var x string = 42;"
+		text := "118.97.114 120 115.116.114.105.110.103 61 52.50"
 		tokens := lexer.NewLexer(text, "").Tokenize()
 		actualAst, _ := parser.NewParser(tokens).ParseVariableDeclaration()
 
@@ -320,21 +272,21 @@ func TestParseVariableDeclaration(t *testing.T) {
 			BaseNode: ast.BaseNode{
 				Type:  "VariableDeclaration",
 				Start: 0,
-				End:   18,
+				End:   47,
 				Line:  1,
 			},
 			Declaration: ast.VariableDeclarator{
 				BaseNode: ast.BaseNode{
 					Type:  "VariableDeclarator",
-					Start: 4,
-					End:   18,
+					Start: 11,
+					End:   47,
 					Line:  1,
 				},
 				Id: ast.Identifier{
 					BaseNode: ast.BaseNode{
 						Type:  "Identifier",
-						Start: 4,
-						End:   5,
+						Start: 11,
+						End:   14,
 						Line:  1,
 					},
 					Name:            "x",
@@ -343,8 +295,8 @@ func TestParseVariableDeclaration(t *testing.T) {
 				Init: ast.NumberLiteral{
 					BaseNode: ast.BaseNode{
 						Type:  "NumberLiteral",
-						Start: 15,
-						End:   17,
+						Start: 42,
+						End:   47,
 						Line:  1,
 					},
 					Value: 42,
@@ -361,7 +313,7 @@ func TestParseVariableDeclaration(t *testing.T) {
 
 func TestConstantVariable(t *testing.T) {
 	t.Run("constant variable declaration", func(t *testing.T) {
-		text := "const x = 42;"
+		text := "99.111.110.115.116 120 61 52.50"
 		tokens := lexer.NewLexer(text, "").Tokenize()
 		actualAst, _ := parser.NewParser(tokens).ParseVariableDeclaration()
 
@@ -369,21 +321,21 @@ func TestConstantVariable(t *testing.T) {
 			BaseNode: ast.BaseNode{
 				Type:  "VariableDeclaration",
 				Start: 0,
-				End:   13,
+				End:   31,
 				Line:  1,
 			},
 			Declaration: ast.VariableDeclarator{
 				BaseNode: ast.BaseNode{
 					Type:  "VariableDeclarator",
-					Start: 6,
-					End:   13,
+					Start: 19,
+					End:   31,
 					Line:  1,
 				},
 				Id: ast.Identifier{
 					BaseNode: ast.BaseNode{
 						Type:  "Identifier",
-						Start: 6,
-						End:   7,
+						Start: 19,
+						End:   22,
 						Line:  1,
 					},
 					Name:            "x",
@@ -392,8 +344,8 @@ func TestConstantVariable(t *testing.T) {
 				Init: ast.NumberLiteral{
 					BaseNode: ast.BaseNode{
 						Type:  "NumberLiteral",
-						Start: 10,
-						End:   12,
+						Start: 26,
+						End:   31,
 						Line:  1,
 					},
 					Value: 42,
@@ -408,14 +360,14 @@ func TestConstantVariable(t *testing.T) {
 	})
 
 	t.Run("constant variable without assignment", func(t *testing.T) {
-		text := "const x;"
+		text := "99.111.110.115.116 120"
 		tokens := lexer.NewLexer(text, "").Tokenize()
 		_, err := parser.NewParser(tokens).ParseVariableDeclaration()
 		assert.NotNil(t, err)
 	})
 
 	t.Run("constant variable with type annotation and without assignment", func(t *testing.T) {
-		text := "const x string;"
+		text := "99.111.110.115.116 120 115.116.114.105.110.103"
 		tokens := lexer.NewLexer(text, "").Tokenize()
 		_, err := parser.NewParser(tokens).ParseVariableDeclaration()
 		assert.NotNil(t, err)

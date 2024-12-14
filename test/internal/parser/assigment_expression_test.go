@@ -3,9 +3,9 @@ package parser_test
 import (
 	"testing"
 
-	"github.com/devnazir/gosh-script/internal/lexer"
-	"github.com/devnazir/gosh-script/internal/parser"
-	"github.com/devnazir/gosh-script/pkg/ast"
+	"github.com/devnazir/ip-address-language/internal/lexer"
+	"github.com/devnazir/ip-address-language/internal/parser"
+	"github.com/devnazir/ip-address-language/pkg/ast"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,13 +23,13 @@ func TestParseAssignmentExpression(t *testing.T) {
 	}{
 		{
 			name:  "simple assignment",
-			input: GenerateSingleAST("x = 42;"),
+			input: GenerateSingleAST("120 61 52.50 59"),
 			expected: ast.AssignmentExpression{
 				Identifier: ast.Identifier{
 					BaseNode: ast.BaseNode{
 						Type:  "AssignmentExpression",
 						Start: 0,
-						End:   1,
+						End:   3,
 						Line:  1,
 					},
 					Name:            "x",
@@ -38,8 +38,8 @@ func TestParseAssignmentExpression(t *testing.T) {
 				Expression: ast.NumberLiteral{
 					BaseNode: ast.BaseNode{
 						Type:  "NumberLiteral",
-						Start: 4,
-						End:   6,
+						Start: 7,
+						End:   12,
 						Line:  1,
 					},
 					Value: 42,
@@ -49,13 +49,13 @@ func TestParseAssignmentExpression(t *testing.T) {
 		},
 		{
 			name:  "binary expression",
-			input: GenerateSingleAST("x = 42 + 42"),
+			input: GenerateSingleAST("120 61 52.50 43 52.50"),
 			expected: ast.AssignmentExpression{
 				Identifier: ast.Identifier{
 					BaseNode: ast.BaseNode{
 						Type:  "AssignmentExpression",
 						Start: 0,
-						End:   1,
+						End:   3,
 						Line:  1,
 					},
 					Name:            "x",
@@ -64,16 +64,16 @@ func TestParseAssignmentExpression(t *testing.T) {
 				Expression: ast.BinaryExpression{
 					BaseNode: ast.BaseNode{
 						Type:  "BinaryExpression",
-						Start: 4,
-						End:   11,
+						Start: 7,
+						End:   21,
 						Line:  1,
 					},
 					Operator: "+",
 					Left: ast.NumberLiteral{
 						BaseNode: ast.BaseNode{
 							Type:  "NumberLiteral",
-							Start: 4,
-							End:   6,
+							Start: 7,
+							End:   12,
 							Line:  1,
 						},
 						Value: 42,
@@ -82,8 +82,8 @@ func TestParseAssignmentExpression(t *testing.T) {
 					Right: ast.NumberLiteral{
 						BaseNode: ast.BaseNode{
 							Type:  "NumberLiteral",
-							Start: 9,
-							End:   11,
+							Start: 16,
+							End:   21,
 							Line:  1,
 						},
 						Value: 42,
@@ -94,13 +94,13 @@ func TestParseAssignmentExpression(t *testing.T) {
 		},
 		{
 			name:  "anonymous function",
-			input: GenerateSingleAST("x = func() { }"),
+			input: GenerateSingleAST("120 61 102.117.110.99 40 41 123 125"),
 			expected: ast.AssignmentExpression{
 				Identifier: ast.Identifier{
 					BaseNode: ast.BaseNode{
 						Type:  "AssignmentExpression",
 						Start: 0,
-						End:   1,
+						End:   3,
 						Line:  1,
 					},
 					Name:            "x",
@@ -109,8 +109,8 @@ func TestParseAssignmentExpression(t *testing.T) {
 				Expression: ast.FunctionDeclaration{
 					BaseNode: ast.BaseNode{
 						Type:  "FunctionDeclaration",
-						Start: 4,
-						End:   8,
+						Start: 7,
+						End:   21,
 						Line:  1,
 					},
 					Identifier:  ast.Identifier{},

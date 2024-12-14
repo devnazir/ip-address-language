@@ -1,6 +1,6 @@
 package interpreter
 
-import "github.com/devnazir/gosh-script/pkg/ast"
+import "github.com/devnazir/ip-address-language/pkg/ast"
 
 func (i *Interpreter) InterpretCallExpression(callExpression ast.CallExpression) (IntrerpretResult, ShouldReturn, error) {
 	identName := (callExpression).Callee.(ast.Identifier).Name

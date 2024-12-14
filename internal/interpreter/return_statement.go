@@ -1,7 +1,7 @@
 package interpreter
 
 import (
-	"github.com/devnazir/gosh-script/pkg/ast"
+	"github.com/devnazir/ip-address-language/pkg/ast"
 )
 
 func (i *Interpreter) InterpretReturnStatement(node ast.ReturnStatement) (interface{}, error) {

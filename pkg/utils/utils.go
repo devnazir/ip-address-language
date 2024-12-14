@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 )
 
 func FindDirByFilename(root, filename string) (string, error) {
@@ -34,8 +36,8 @@ func IsComment(ch byte) bool {
 	return ch == '/' || ch == '*'
 }
 
-func IsAlphaNumeric(ch byte) bool {
-	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_'
+func IsValidSyntax(ch byte) bool {
+	return (ch >= '0' && ch <= '9') || ch == '.'
 }
 
 func IsNumeric(ch byte) bool {
@@ -44,4 +46,34 @@ func IsNumeric(ch byte) bool {
 
 func IsAlpha(ch byte) bool {
 	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
+}
+
+func TranslateTokenValue(char string) string {
+	charArr := strings.Split(char, ".")
+	word := ""
+
+	if char == "" {
+		return ""
+	}
+
+	if len(charArr) > 1 {
+		for _, c := range charArr {
+			num, err := strconv.Atoi(c)
+			if err != nil {
+				panic(err)
+			}
+			word += string(num)
+		}
+	}
+
+	if len(charArr) == 1 {
+		num, err := strconv.Atoi(char)
+		if err != nil {
+			panic(err)
+		}
+
+		word = string(num)
+	}
+
+	return strings.TrimSpace(word)
 }

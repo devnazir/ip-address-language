@@ -1,8 +1,8 @@
 package parser
 
 import (
-	"github.com/devnazir/gosh-script/pkg/ast"
-	"github.com/devnazir/gosh-script/pkg/utils"
+	"github.com/devnazir/ip-address-language/pkg/ast"
+	"github.com/devnazir/ip-address-language/pkg/utils"
 )
 
 func (p *Parser) ParseNumberLiteral() ast.NumberLiteral {

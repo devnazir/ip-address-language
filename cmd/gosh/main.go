@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"runtime/debug"
 
-	"github.com/devnazir/gosh-script/internal/interpreter"
-	lx "github.com/devnazir/gosh-script/internal/lexer"
-	"github.com/devnazir/gosh-script/internal/parser"
-	"github.com/devnazir/gosh-script/pkg/oops"
+	"github.com/devnazir/ip-address-language/internal/interpreter"
+	lx "github.com/devnazir/ip-address-language/internal/lexer"
+	"github.com/devnazir/ip-address-language/internal/parser"
+	"github.com/devnazir/ip-address-language/pkg/oops"
 )
 
 func main() {
@@ -30,7 +30,7 @@ func main() {
 	filename := os.Args[1]
 	ext := filepath.Ext(filename)
 
-	if ext != ".gsh" && ext != ".gosh" && ext != ".gs" {
+	if ext != ".n" && ext != ".nnn" {
 		oops.InvalidFileExtensionError(filename)
 	}
 
@@ -50,6 +50,10 @@ func main() {
 }
 
 func saveToFile(path string, data interface{}) {
+	if os.Getenv("APP_ENV") == "production" {
+		return
+	}
+
 	os.Mkdir("output", os.ModePerm)
 	dir, _ := os.Getwd()
 	fullPath := fmt.Sprintf("%s/output/%s", dir, path)

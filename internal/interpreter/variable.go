@@ -3,10 +3,10 @@ package interpreter
 import (
 	"fmt"
 
-	"github.com/devnazir/gosh-script/pkg/ast"
-	"github.com/devnazir/gosh-script/pkg/oops"
-	"github.com/devnazir/gosh-script/pkg/semantics"
-	"github.com/devnazir/gosh-script/pkg/utils"
+	"github.com/devnazir/ip-address-language/pkg/ast"
+	"github.com/devnazir/ip-address-language/pkg/oops"
+	"github.com/devnazir/ip-address-language/pkg/semantics"
+	"github.com/devnazir/ip-address-language/pkg/utils"
 )
 
 func (i *Interpreter) InterpretVariableDeclaration(nodeVar ast.VariableDeclaration) error {

@@ -3,9 +3,9 @@ package parser
 import (
 	"fmt"
 
-	lx "github.com/devnazir/gosh-script/internal/lexer"
-	"github.com/devnazir/gosh-script/pkg/ast"
-	"github.com/devnazir/gosh-script/pkg/oops"
+	lx "github.com/devnazir/ip-address-language/internal/lexer"
+	"github.com/devnazir/ip-address-language/pkg/ast"
+	"github.com/devnazir/ip-address-language/pkg/oops"
 )
 
 func (p *Parser) ParseVariableDeclaration() (ast.VariableDeclaration, error) {

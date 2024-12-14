@@ -4,10 +4,10 @@ import (
 	"os"
 	"path/filepath"
 
-	lx "github.com/devnazir/gosh-script/internal/lexer"
-	"github.com/devnazir/gosh-script/pkg/ast"
-	"github.com/devnazir/gosh-script/pkg/oops"
-	"github.com/devnazir/gosh-script/pkg/utils"
+	lx "github.com/devnazir/ip-address-language/internal/lexer"
+	"github.com/devnazir/ip-address-language/pkg/ast"
+	"github.com/devnazir/ip-address-language/pkg/oops"
+	"github.com/devnazir/ip-address-language/pkg/utils"
 )
 
 func (p *Parser) ParseProgram() *ast.Program {

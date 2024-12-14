@@ -3,8 +3,8 @@ package parser
 import (
 	"reflect"
 
-	lx "github.com/devnazir/gosh-script/internal/lexer"
-	"github.com/devnazir/gosh-script/pkg/ast"
+	lx "github.com/devnazir/ip-address-language/internal/lexer"
+	"github.com/devnazir/ip-address-language/pkg/ast"
 )
 
 func getPosition(node interface{}) (start, end int) {

@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"github.com/devnazir/gosh-script/pkg/ast"
+	"github.com/devnazir/ip-address-language/pkg/ast"
 )
 
 func (p *Parser) ParseIllegal() ast.Illegal {

@@ -1,7 +1,7 @@
 package parser
 
 import (
-	lx "github.com/devnazir/gosh-script/internal/lexer"
+	lx "github.com/devnazir/ip-address-language/internal/lexer"
 )
 
 type Parser struct {

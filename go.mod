@@ -1,4 +1,4 @@
-module github.com/devnazir/gosh-script
+module github.com/devnazir/ip-address-language
 
 go 1.23.2
 

@@ -3,8 +3,8 @@ package interpreter
 import (
 	"fmt"
 
-	"github.com/devnazir/gosh-script/pkg/ast"
-	"github.com/devnazir/gosh-script/pkg/semantics"
+	"github.com/devnazir/ip-address-language/pkg/ast"
+	"github.com/devnazir/ip-address-language/pkg/semantics"
 )
 
 func (i *Interpreter) InterpretShellExpression(params InterpretShellExpression) interface{} {

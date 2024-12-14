@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/devnazir/gosh-script/internal/lexer"
+	"github.com/devnazir/ip-address-language/internal/lexer"
 )
 
 var heavyTestData = `

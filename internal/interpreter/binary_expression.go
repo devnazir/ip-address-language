@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"strings"
 
-	lx "github.com/devnazir/gosh-script/internal/lexer"
-	"github.com/devnazir/gosh-script/pkg/ast"
-	"github.com/devnazir/gosh-script/pkg/oops"
-	"github.com/devnazir/gosh-script/pkg/utils"
+	lx "github.com/devnazir/ip-address-language/internal/lexer"
+	"github.com/devnazir/ip-address-language/pkg/ast"
+	"github.com/devnazir/ip-address-language/pkg/oops"
+	"github.com/devnazir/ip-address-language/pkg/utils"
 )
 
 func (i *Interpreter) InterpretBinaryExpr(b ast.ASTNode, returnAsRaw bool) interface{} {
 	switch b.GetType() {
 	case ast.StringLiteralTree:
 		if returnAsRaw {
-			return b.(ast.StringLiteral).Raw
+			return b.(ast.StringLiteral).Value
 		}
 
 		return b.(ast.StringLiteral).Value
@@ -166,6 +166,9 @@ func (i *Interpreter) ConcatenateString(b ast.ASTNode) string {
 	switch b.GetType() {
 	case ast.StringLiteralTree:
 		return b.(ast.StringLiteral).Value
+
+	case ast.IdentifierTree:
+		return strings.TrimSpace(i.resolveIdentifier(b.(ast.Identifier)).(string))
 	case ast.BinaryExpressionTree:
 		leftValue := i.ConcatenateString(b.(ast.BinaryExpression).Left)
 		rightValue := i.ConcatenateString(b.(ast.BinaryExpression).Right)

@@ -29,7 +29,6 @@ const (
 	TokenSemicolon     TokenType = "SEMICOLON"
 	TokenColon         TokenType = "COLON"
 	TokenEOF           TokenType = "EOF"
-	TokenString        TokenType = "STRING"
 	TokenReturn        TokenType = "RETURN"
 	TokenIllegal       TokenType = "ILLEGAL"
 	TokenComment       TokenType = "COMMENT"
@@ -44,6 +43,7 @@ const (
 	TokenArray         TokenType = "ARRAY"
 	TokenObject        TokenType = "OBJECT"
 	TokenTickQuote     TokenType = "TICK_QUOTE"
+	TokenDoubleQuote   TokenType = "DOUBLE_QUOTE"
 )
 
 // List of keywords
@@ -84,6 +84,20 @@ const (
 	OrOperator         = "||"
 	EquivalenceSign    = "=="
 	ModulusSign        = "%"
+	LeftParen          = "("
+	RightParen         = ")"
+	Comma              = ","
+	Semicolon          = ";"
+	Colon              = ":"
+	Dot                = "."
+	LeftCurly          = "{"
+	RightCurly         = "}"
+	LeftBracket        = "["
+	RightBracket       = "]"
+	TickQuote          = "`"
+	DoubleQuote        = "\""
+	Newline            = "\\n"
+	DollarSign         = "$"
 
 	SingleLineComment     = "//"
 	MultiLineCommentStart = "/*"
@@ -109,6 +123,35 @@ var Keywords = map[string]TokenType{
 	KeywordContinue: TokenKeyword,
 	KeywordSleep:    TokenShellKeyword,
 
+	LeftParen:          TokenLeftParen,
+	RightParen:         TokenRightParen,
+	Comma:              TokenComma,
+	Semicolon:          TokenSemicolon,
+	Colon:              TokenColon,
+	Dot:                TokenDot,
+	LeftCurly:          TokenLeftCurly,
+	RightCurly:         TokenRightCurly,
+	LeftBracket:        TokenLeftBracket,
+	RightBracket:       TokenRightBracket,
+	TickQuote:          TokenTickQuote,
+	DoubleQuote:        TokenDoubleQuote,
+	Newline:            TokenNewline,
+	ModulusSign:        TokenOperator,
+	MultiplicationSign: TokenOperator,
+	AdditionSign:       TokenOperator,
+	SubtractionSign:    TokenOperator,
+	DivisionSign:       TokenOperator,
+	EqualsSign:         TokenOperator,
+	NotEqualsSign:      TokenOperator,
+	GreaterThanSign:    TokenOperator,
+	LessThanSign:       TokenOperator,
+	GreaterOrEqualSign: TokenOperator,
+	LessOrEqualSign:    TokenOperator,
+	AndOperator:        TokenOperator,
+	OrOperator:         TokenOperator,
+	EquivalenceSign:    TokenOperator,
+	DollarSign:         TokenDollarSign,
+
 	// Primitive types
 	BoolType:    TokenPrimitiveType,
 	IntType:     TokenPrimitiveType,
@@ -125,26 +168,16 @@ var CommentSymbols = map[string]TokenType{
 	MultilineDocComment:   TokenComment,
 }
 
+const (
+	TokenFlagRegex       = `^\-[a-zA-Z]`
+	TokenSubshellRegex   = `^\$\((.*)\)`
+	TokenDollarSignRegex = `^\$\{?\w+\}?`
+)
+
 var TokenSpecs = map[TokenType]string{
-	TokenSubshell:     `^\$\((.*)\)`,
-	TokenDollarSign:   `^\$\{?\w+\}?`,
-	TokenFlag:         `^\-[a-zA-Z]`,
-	TokenNumber:       `^\b\d+(\.\d+)?\b`,
-	TokenIdentifier:   `^\b[a-zA-Z_][a-zA-Z0-9_]*\b`,
-	TokenOperator:     `^([+\-*/=]|==|!=|>=?|<=?|&&|\|\|)[^\w]`,
-	TokenString:       `^("|')([^"\n])*("|')`,
-	TokenTickQuote:    "^`",
-	TokenLeftParen:    `^\(`,
-	TokenRightParen:   `^\)`,
-	TokenLeftCurly:    `^\{`,
-	TokenRightCurly:   `^\}`,
-	TokenLeftBracket:  `^\[`,
-	TokenRightBracket: `^\]`,
-	TokenSemicolon:    `^\;`,
-	TokenColon:        `^:`,
-	TokenDot:          `^\.`,
-	TokenComma:        `^,`,
-	TokenNewline:      `^\\n`,
+	TokenSubshell:   TokenSubshellRegex,
+	TokenDollarSign: TokenDollarSignRegex,
+	TokenFlag:       TokenFlagRegex,
 }
 
 type Token struct {

@@ -1,9 +1,9 @@
 package parser
 
 import (
-	lx "github.com/devnazir/gosh-script/internal/lexer"
-	"github.com/devnazir/gosh-script/pkg/ast"
-	"github.com/devnazir/gosh-script/pkg/oops"
+	lx "github.com/devnazir/ip-address-language/internal/lexer"
+	"github.com/devnazir/ip-address-language/pkg/ast"
+	"github.com/devnazir/ip-address-language/pkg/oops"
 )
 
 func (p *Parser) generateAlias(sources *[]ast.Source) {
@@ -30,7 +30,7 @@ func (p *Parser) ParseSourceDeclaration() (ast.SourceDeclaration, error) {
 	sources := &[]ast.Source{}
 
 	switch p.peek().Type {
-	case lx.TokenString:
+	case lx.TokenDoubleQuote:
 		*sources = append(*sources, p.ParseSource(""))
 
 		if p.peek().Type == lx.TokenIdentifier {
@@ -43,7 +43,7 @@ func (p *Parser) ParseSourceDeclaration() (ast.SourceDeclaration, error) {
 
 		for !endLoop {
 			switch p.peek().Type {
-			case lx.TokenString:
+			case lx.TokenDoubleQuote:
 				*sources = append(*sources, p.ParseSource(""))
 
 			case lx.TokenIdentifier:

@@ -1,10 +1,10 @@
 package parser
 
 import (
-	lx "github.com/devnazir/gosh-script/internal/lexer"
-	"github.com/devnazir/gosh-script/pkg/ast"
-	"github.com/devnazir/gosh-script/pkg/oops"
-	"github.com/devnazir/gosh-script/pkg/utils"
+	lx "github.com/devnazir/ip-address-language/internal/lexer"
+	"github.com/devnazir/ip-address-language/pkg/ast"
+	"github.com/devnazir/ip-address-language/pkg/oops"
+	"github.com/devnazir/ip-address-language/pkg/utils"
 )
 
 type ParseStringLiteral struct {
@@ -12,27 +12,46 @@ type ParseStringLiteral struct {
 }
 
 func (p *Parser) ParseStringLiteral(params *ParseStringLiteral) ast.StringLiteral {
-	value := p.peek().Value
+	start := p.peek().Start
+	hasDoubleQuote := p.TokenTypeIs(lx.TokenDoubleQuote)
 
-	if params != nil {
-		if params.valueAsRaw {
-			value = p.peek().RawValue
-		}
+	if p.TokenTypeIs(lx.TokenDoubleQuote) {
+		// skip double quote
+		p.next()
 	}
 
-	v, _ := utils.RemoveDoubleQuotes(value)
+	value := ""
+	rawValue := ""
+
+	for p.peek().Type != lx.TokenDoubleQuote && hasDoubleQuote {
+		value += p.peek().Value
+		rawValue += p.peek().RawValue
+		p.next()
+	}
+
+	if !hasDoubleQuote {
+		value = p.peek().Value
+		rawValue = p.peek().RawValue
+	}
+
+	if params != nil && params.valueAsRaw {
+		value = rawValue
+	}
+
+	finalValue, _ := utils.RemoveDoubleQuotes(value)
 
 	ast := ast.StringLiteral{
 		BaseNode: ast.BaseNode{
 			Type:  ast.StringLiteralTree,
-			Start: p.peek().Start,
+			Start: start,
 			End:   p.peek().End,
 			Line:  p.peek().Line,
 		},
-		Value: v,
-		Raw:   p.peek().RawValue,
+		Value: finalValue,
+		Raw:   rawValue,
 	}
 	p.next()
+
 	return ast
 }
 

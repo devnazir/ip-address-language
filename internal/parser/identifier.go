@@ -1,9 +1,9 @@
 package parser
 
 import (
-	lx "github.com/devnazir/gosh-script/internal/lexer"
-	"github.com/devnazir/gosh-script/pkg/ast"
-	"github.com/devnazir/gosh-script/pkg/utils"
+	lx "github.com/devnazir/ip-address-language/internal/lexer"
+	"github.com/devnazir/ip-address-language/pkg/ast"
+	"github.com/devnazir/ip-address-language/pkg/utils"
 )
 
 func (p *Parser) ParseIdentifier(shouldCheckCallExpr ...interface{}) (ast.ASTNode, error) {

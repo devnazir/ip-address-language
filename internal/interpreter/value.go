@@ -1,8 +1,8 @@
 package interpreter
 
 import (
-	"github.com/devnazir/gosh-script/pkg/ast"
-	"github.com/devnazir/gosh-script/pkg/semantics"
+	"github.com/devnazir/ip-address-language/pkg/ast"
+	"github.com/devnazir/ip-address-language/pkg/semantics"
 )
 
 type Interpreter struct {
@@ -11,7 +11,7 @@ type Interpreter struct {
 }
 
 type IntrepretEchoStmt struct {
-	expression    ast.EchoStatement
+	expression ast.EchoStatement
 }
 
 type InterpretShellExpression struct {

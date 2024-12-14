@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/devnazir/gosh-script/pkg/ast"
-	"github.com/devnazir/gosh-script/pkg/oops"
-	"github.com/devnazir/gosh-script/pkg/utils"
+	"github.com/devnazir/ip-address-language/pkg/ast"
+	"github.com/devnazir/ip-address-language/pkg/oops"
+	"github.com/devnazir/ip-address-language/pkg/utils"
 )
 
 func (i *Interpreter) IntrepretEchoStmt(params IntrepretEchoStmt) string {

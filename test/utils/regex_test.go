@@ -3,7 +3,7 @@ package utils_test
 import (
 	"testing"
 
-	"github.com/devnazir/gosh-script/pkg/utils"
+	"github.com/devnazir/ip-address-language/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 

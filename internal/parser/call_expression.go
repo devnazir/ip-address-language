@@ -1,8 +1,8 @@
 package parser
 
 import (
-	lx "github.com/devnazir/gosh-script/internal/lexer"
-	"github.com/devnazir/gosh-script/pkg/ast"
+	lx "github.com/devnazir/ip-address-language/internal/lexer"
+	"github.com/devnazir/ip-address-language/pkg/ast"
 )
 
 func (p *Parser) parseCallExpression(ident ast.Identifier) ast.CallExpression {

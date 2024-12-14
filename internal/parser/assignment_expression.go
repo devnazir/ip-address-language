@@ -1,9 +1,9 @@
 package parser
 
 import (
-	lx "github.com/devnazir/gosh-script/internal/lexer"
-	"github.com/devnazir/gosh-script/pkg/ast"
-	"github.com/devnazir/gosh-script/pkg/oops"
+	lx "github.com/devnazir/ip-address-language/internal/lexer"
+	"github.com/devnazir/ip-address-language/pkg/ast"
+	"github.com/devnazir/ip-address-language/pkg/oops"
 )
 
 func (p *Parser) ParseAssignmentExpression(ident ast.Identifier) ast.ASTNode {
@@ -62,10 +62,10 @@ func (p *Parser) EvaluateAssignmentExpression() ast.ASTNode {
 		switch token.Type {
 		case
 			lx.TokenNumber,
-			lx.TokenString,
 			lx.TokenIdentifier,
 			lx.TokenDollarSign,
 			lx.TokenTickQuote,
+			lx.TokenDoubleQuote,
 			lx.TokenBoolean:
 
 			primaryExpression, err := p.ParsePrimaryExpression()
@@ -137,7 +137,7 @@ func (p *Parser) ParsePrimaryExpression() (ast.ASTNode, error) {
 	switch p.peek().Type {
 	case lx.TokenNumber:
 		return p.ParseNumberLiteral(), nil
-	case lx.TokenString:
+	case lx.TokenDoubleQuote:
 		return p.ParseStringLiteral(nil), nil
 	case lx.TokenIdentifier, lx.TokenDollarSign:
 		return p.ParseIdentifier(true)

@@ -1,10 +1,10 @@
 package parser
 
 import (
-	"github.com/devnazir/gosh-script/pkg/ast"
-	"github.com/devnazir/gosh-script/pkg/oops"
+	"github.com/devnazir/ip-address-language/pkg/ast"
+	"github.com/devnazir/ip-address-language/pkg/oops"
 
-	lx "github.com/devnazir/gosh-script/internal/lexer"
+	lx "github.com/devnazir/ip-address-language/internal/lexer"
 )
 
 func (p *Parser) ParseShellExpression() (ast.ASTNode, error) {

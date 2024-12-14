@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/devnazir/gosh-script/pkg/utils"
+	"github.com/devnazir/ip-address-language/pkg/utils"
 )
 
 func NewLexer(source, filename string) *Lexer {
@@ -71,6 +71,12 @@ func (l *Lexer) tokenizeWord(word string) TokenType {
 		return TokenBoolean
 	}
 
+	for typ, pattern := range TokenSpecs {
+		if re, _ := regexp.MatchString(pattern, word); re {
+			return typ
+		}
+	}
+
 	return TokenIdentifier
 }
 
@@ -96,7 +102,7 @@ func (l *Lexer) tokenizeComment(symbole string) TokenType {
 
 func (l *Lexer) getWord() string {
 	start := l.Pos
-	for l.Pos < len(l.Source) && utils.IsAlphaNumeric(l.Source[l.Pos]) {
+	for l.Pos < len(l.Source) && utils.IsValidSyntax(l.Source[l.Pos]) {
 		l.Pos++
 	}
 	return l.Source[start:l.Pos]
@@ -136,14 +142,15 @@ func (l *Lexer) Tokenize() *[]Token {
 		// Keyword or identifier
 		word := l.getWord()
 
-		if len(word) > 0 {
-			token.Type = l.tokenizeWord(word)
-			token.Value = strings.TrimSpace(word)
+		if len(strings.TrimSpace(word)) > 0 {
+			translatedWord := utils.TranslateTokenValue(word)
+			token.Type = l.tokenizeWord(translatedWord)
+			token.Value = strings.TrimSpace(translatedWord)
 			token.End = l.Pos
-			token.RawValue = l.Source[startPos:l.Pos]
+			token.RawValue = translatedWord
 
 			if l.Pos < len(l.Source) && l.Source[l.Pos] == ' ' {
-				token.RawValue = l.Source[startPos : l.Pos+1]
+				token.RawValue = translatedWord + " "
 			}
 
 			l.Tokens = append(l.Tokens, token)
@@ -160,35 +167,35 @@ func (l *Lexer) Tokenize() *[]Token {
 		}
 
 		// Match other patterns
-		matched := false
-		for typ, pattern := range TokenSpecs {
-			if match, ok := l.matchPattern(pattern); ok {
+		// matched := false
+		// for typ, pattern := range TokenSpecs {
+		// 	if match, ok := l.matchPattern(pattern); ok {
 
-				if typ == TokenComment || typ == TokenSemicolon {
-					l.updateLineCount(match)
-					matched = true
-					continue
-				}
+		// 		if typ == TokenComment || typ == TokenSemicolon {
+		// 			l.updateLineCount(match)
+		// 			matched = true
+		// 			continue
+		// 		}
 
-				token.Type = typ
-				token.Value = strings.TrimSpace(match)
-				token.RawValue = l.Source[startPos:l.Pos]
+		// 		token.Type = typ
+		// 		token.Value = strings.TrimSpace(match)
+		// 		token.RawValue = l.Source[startPos:l.Pos]
 
-				if l.Pos < len(l.Source) && l.Source[l.Pos] == ' ' {
-					token.RawValue = l.Source[startPos : l.Pos+1]
-				}
+		// 		if l.Pos < len(l.Source) && l.Source[l.Pos] == ' ' {
+		// 			token.RawValue = l.Source[startPos : l.Pos+1]
+		// 		}
 
-				token.End = l.Pos
+		// 		token.End = l.Pos
 
-				l.Tokens = append(l.Tokens, token)
-				matched = true
-				l.CurrentIndex++
-				break
-			}
-		}
+		// 		l.Tokens = append(l.Tokens, token)
+		// 		matched = true
+		// 		l.CurrentIndex++
+		// 		break
+		// 	}
+		// }
 
 		// Illegal token handling
-		if !matched && l.Pos < len(l.Source) {
+		if l.Pos < len(l.Source) {
 			token.Type = TokenIllegal
 			token.Value = string(l.Source[l.Pos])
 			token.End = l.Pos + 1

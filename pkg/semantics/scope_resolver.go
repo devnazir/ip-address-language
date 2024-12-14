@@ -3,7 +3,7 @@ package semantics
 import (
 	"fmt"
 
-	"github.com/devnazir/gosh-script/pkg/oops"
+	"github.com/devnazir/ip-address-language/pkg/oops"
 )
 
 type ScopeResolver struct {

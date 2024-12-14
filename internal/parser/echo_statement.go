@@ -1,8 +1,8 @@
 package parser
 
 import (
-	lx "github.com/devnazir/gosh-script/internal/lexer"
-	"github.com/devnazir/gosh-script/pkg/ast"
+	lx "github.com/devnazir/ip-address-language/internal/lexer"
+	"github.com/devnazir/ip-address-language/pkg/ast"
 )
 
 func (p *Parser) ParseEchoStatement() (ast.ShellExpression, error) {
@@ -19,7 +19,7 @@ func (p *Parser) ParseEchoStatement() (ast.ShellExpression, error) {
 		}
 
 		switch p.peek().Type {
-		case lx.TokenString, lx.TokenIdentifier:
+		case lx.TokenDoubleQuote:
 			arguments = append(arguments, p.ParseStringLiteral(&ParseStringLiteral{valueAsRaw: true}))
 		case lx.TokenDollarSign:
 			identifier, err := p.ParseIdentifier()

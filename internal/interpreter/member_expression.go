@@ -3,8 +3,8 @@ package interpreter
 import (
 	"fmt"
 
-	"github.com/devnazir/gosh-script/pkg/ast"
-	"github.com/devnazir/gosh-script/pkg/oops"
+	"github.com/devnazir/ip-address-language/pkg/ast"
+	"github.com/devnazir/ip-address-language/pkg/oops"
 )
 
 func (i *Interpreter) InterpretMemberExpr(expr ast.MemberExpression) interface{} {
