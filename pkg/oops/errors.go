@@ -64,7 +64,7 @@ var (
 	}
 
 	InvalidFileExtensionError = func(filename string) error {
-		panic(fmt.Errorf("Invalid file extension: %s, expected .gsh or .gosh or .gs", filename))
+		panic(fmt.Errorf("Invalid file extension: %s, expected .n or .nnn", filename))
 	}
 
 	// SourceAliasCannotBeAssignedError = func(symbolInfo *semantics.SymbolInfo) error {
