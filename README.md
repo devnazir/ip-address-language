@@ -7,13 +7,13 @@ In this language, all keywords and expressions are represented using ASCII value
 Install via curl:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/devnazir/ip-address-lang/main/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/devnazir/ip-address-language/refs/heads/master/install.sh)"
 ```
 
 Install via wget:
 
 ```bash
-bash -c "$(wget -O- https://raw.githubusercontent.com/devnazir/ip-address-lang/main/install.sh)"
+bash -c "$(wget -O- https://raw.githubusercontent.com/devnazir/ip-address-language/refs/heads/master/install.sh)"
 ```
 
 ## Usage
